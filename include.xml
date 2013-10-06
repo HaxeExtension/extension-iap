@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	
+	<ndll name="iap" if="ios" />
+	<dependency name="StoreKit.framework" if="ios" />
+	
+	<dependency name="iap" path="dependencies/android" if="android" />
+	<android extension="org.haxe.extension.iap.InAppPurchase" />
+	
+</project>

@@ -1,0 +1,11 @@
+{
+	"name": "iap",
+	"url": "http://www.openfl.org",
+	"license": "MIT",
+	"tags": [],
+	"description": "",
+	"version": "1.0.0",
+	"releasenote": "",
+	"contributors": [ "singmajesty" ],
+	"dependencies": {}
+}
