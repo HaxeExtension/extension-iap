@@ -20,7 +20,7 @@
 		<compilerflag value="-IiPhone/include"/>
 		<compilerflag value="-Iinclude"/>
 		
-		<file name="iphone/Purchases.mm"/>
+		<file name="iphone/InAppPurchase.mm"/>
 		
 	</files>
 	

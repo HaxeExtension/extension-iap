@@ -1,8 +1,8 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <UIKit/UIKit.h>
 #import <StoreKit/StoreKit.h> 
-#include "Purchases.h"
-#include "PurchaseEvent.h"
+#include "InAppPurchase.h"
+#include "InAppPurchaseEvent.h"
 
 
 extern "C" void sendPurchaseEvent(const char* type, const char* data);
