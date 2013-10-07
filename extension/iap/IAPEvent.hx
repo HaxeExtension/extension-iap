@@ -7,10 +7,10 @@ import flash.events.Event;
 class IAPEvent extends Event {
 	
 	
-	public static inline var PURCHASE_CANCELED = "purchaseCanceled";
-	public static inline var PURCHASE_FAILED = "purchaseFailed";
-	public static inline var PURCHASE_READY = "purchaseReady";
-	public static inline var PURCHASE_RESTORED = "purchaseRestored";
+	public static inline var PURCHASE_CANCEL = "purchaseCanceled";
+	public static inline var PURCHASE_FAILURE = "purchaseFailed";
+	public static inline var PURCHASE_INIT = "init";
+	public static inline var PURCHASE_RESTORE = "purchaseRestored";
 	public static inline var PURCHASE_SUCCESS = "purchaseSuccess";
 	
 	public var productID:String;

@@ -208,7 +208,7 @@ class IAP {
 			
 			case "started":
 				
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_READY, data));
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT, data));
 				
 			case "success":
 				
@@ -216,15 +216,15 @@ class IAP {
 			
 			case "failed":
 				
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_FAILED, data));
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_FAILURE, data));
 			
 			case "cancel":
 				
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_CANCELED, data));
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_CANCEL, data));
 			
 			case "restore":
 				
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_RESTORED, data));
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_RESTORE, data));
 			
 			default:
 			
@@ -435,14 +435,14 @@ private class IAPHandler {
 	
 	public function onCanceledPurchase (productID:String):Void {
 		
-		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_CANCELED, productID));
+		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_CANCEL, productID));
 		
 	}
 	
 	
 	public function onFailedPurchase (productID:String):Void {
 		
-		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_FAILED, productID));
+		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_FAILURE, productID));
 		
 	}
 	
@@ -468,14 +468,14 @@ private class IAPHandler {
 	
 	public function onRestorePurchases ():Void {
 		
-		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_RESTORED));
+		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_RESTORE));
 		
 	}
 	
 	
 	public function onStarted (msg:String):Void {
 		
-		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_READY));
+		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT));
 		
 	}
 	
