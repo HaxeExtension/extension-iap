@@ -1,10 +1,10 @@
-package org.haxe.extension.iap;
+package extension.iap;
 
 
 import flash.events.Event;
 
 
-class InAppPurchaseEvent extends Event {
+class IAPEvent extends Event {
 	
 	
 	public static inline var PURCHASE_CANCELED = "purchaseCanceled";

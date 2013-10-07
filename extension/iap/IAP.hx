@@ -1,4 +1,4 @@
-package org.haxe.extension.iap;
+package extension.iap;
 
 
 import flash.events.EventDispatcher;
@@ -12,8 +12,11 @@ import openfl.utils.JNI;
 #end
 
 
-class InAppPurchase {
+@:allow(extension.iap)
+class IAP {
 	
+	
+	public static var available (get, null):Bool;
 	
 	private static var dispatcher = new EventDispatcher ();
 	private static var initialized = false;
@@ -27,36 +30,16 @@ class InAppPurchase {
 	}
 	
 	
-	public static function buy (productID:String):Void {
+	public static function consume (productID:String):Void {
 		
 		#if ios
 		
-		purchases_buy (productID);
-		
-		#elseif android	
-		
-		if (funcBuy == null) {
+		if (hasPurchased (productID)) {
 			
-			funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;)V");
+			items.set (productID, items.get (productID) - 1);
+			save ();
 			
 		}
-		
-		funcBuy (productID);
-		
-		#end
-			
-	}
-	
-	
-	public static function canBuy ():Bool {
-		
-		#if ios
-		
-		return purchases_canbuy ();
-		
-		#else
-		
-		return false;
 		
 		#end
 		
@@ -104,7 +87,7 @@ class InAppPurchase {
 		
 		#if ios
 		
-		if (hasBought (productID)) {
+		if (hasPurchased (productID)) {
 			
 			return items.get (productID);
 			
@@ -132,7 +115,14 @@ class InAppPurchase {
 	}
 	
 	
-	public static function hasBought (productID:String):Bool {
+	public static function hasEventListener (type:String):Bool {
+		
+		return dispatcher.hasEventListener (type);
+		
+	}
+	
+	
+	public static function hasPurchased (productID:String):Bool {
 		
 		#if ios
 		
@@ -149,13 +139,6 @@ class InAppPurchase {
 		return false;
 		
 		#end
-		
-	}
-	
-	
-	public static function hasEventListener (type:String):Bool {
-		
-		return dispatcher.hasEventListener (type);
 		
 	}
 	
@@ -184,7 +167,7 @@ class InAppPurchase {
 			
 		}
 		
-		funcInit (publicKey, new InAppPurchaseHandler ());
+		funcInit (publicKey, new IAPHandler ());
 		
 		#end
 		
@@ -225,23 +208,23 @@ class InAppPurchase {
 			
 			case "started":
 				
-				dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_READY, data));
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_READY, data));
 				
 			case "success":
 				
-				dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_SUCCESS, data));
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_SUCCESS, data));
 			
 			case "failed":
 				
-				dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_FAILED, data));
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_FAILED, data));
 			
 			case "cancel":
 				
-				dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_CANCELED, data));
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_CANCELED, data));
 			
 			case "restore":
 				
-				dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_RESTORED, data));
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_RESTORED, data));
 			
 			default:
 			
@@ -253,9 +236,9 @@ class InAppPurchase {
 			
 			var productID = data;
 			
-			if (hasBought (productID)) {
+			if (hasPurchased (productID)) {
 				
-				items.set (productID, InAppPurchase.items.get (productID) + 1);
+				items.set (productID, items.get (productID) + 1);
 				
 			} else {
 				
@@ -272,6 +255,27 @@ class InAppPurchase {
 	}
 	
 	
+	public static function purchase (productID:String):Void {
+		
+		#if ios
+		
+		purchases_buy (productID);
+		
+		#elseif android	
+		
+		if (funcBuy == null) {
+			
+			funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;)V");
+			
+		}
+		
+		funcBuy (productID);
+		
+		#end
+			
+	}
+	
+	
 	private static function registerHandle ():Void {
 		
 		#if ios
@@ -283,7 +287,7 @@ class InAppPurchase {
 	}
 	
 	
-	public static function release ():Void {
+	private static function release ():Void {
 		
 		#if ios
 		
@@ -358,16 +362,26 @@ class InAppPurchase {
 	}
 	
 	
-	public static function use (productID:String):Void {
+	
+	
+	// Get & Set Methods
+	
+	
+	
+	
+	private static function get_available ():Bool {
 		
 		#if ios
 		
-		if (hasBought (productID)) {
-			
-			items.set (productID, items.get (productID) - 1);
-			save ();
-			
-		}
+		return purchases_canbuy ();
+		
+		#elseif android
+		
+		return true;
+		
+		#else
+		
+		return false;
 		
 		#end
 		
@@ -409,7 +423,7 @@ class InAppPurchase {
 #if (android && !display)
 
 
-@:access(org.haxe.extension.iap.InAppPurchase) class InAppPurchaseHandler {
+private class IAPHandler {
 	
 	
 	public function new () {
@@ -421,47 +435,47 @@ class InAppPurchase {
 	
 	public function onCanceledPurchase (productID:String):Void {
 		
-		InAppPurchase.dispatcher.dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_CANCELED, productID));
+		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_CANCELED, productID));
 		
 	}
 	
 	
 	public function onFailedPurchase (productID:String):Void {
 		
-		InAppPurchase.dispatcher.dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_FAILED, productID));
+		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_FAILED, productID));
 		
 	}
 	
 	
 	public function onPurchase (productID:String):Void {
 		
-		InAppPurchase.dispatcher.dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_SUCCESS, productID));
+		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_SUCCESS, productID));
 		
-		if (InAppPurchase.hasBought (productID)) {
+		if (IAP.hasPurchased (productID)) {
 			
-			InAppPurchase.items.set (productID, InAppPurchase.items.get (productID) + 1);
+			IAP.items.set (productID, IAP.items.get (productID) + 1);
 			
 		} else {
 			
-			InAppPurchase.items.set (productID, 1);
+			IAP.items.set (productID, 1);
 			
 		}
 		
-		InAppPurchase.save ();
+		IAP.save ();
 		
 	}
 	
 	
 	public function onRestorePurchases ():Void {
 		
-		InAppPurchase.dispatcher.dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_RESTORED));
+		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_RESTORED));
 		
 	}
 	
 	
 	public function onStarted (msg:String):Void {
 		
-		InAppPurchase.dispatcher.dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_READY));
+		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_READY));
 		
 	}
 	
