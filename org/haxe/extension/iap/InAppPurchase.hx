@@ -308,14 +308,14 @@ class InAppPurchase {
 		purchases_restore ();
 		
 		#elseif android
-		
-		if (funcRestore == null) {
-			
-			funcRestore = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "restore", "()V");
-			
-		}
-		
-		funcRestore ();
+		//
+		//if (funcRestore == null) {
+		//	
+		//	funcRestore = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "restore", "()V");
+		//	
+		//}
+		//
+		//funcRestore ();
 		
 		#end
 		
@@ -459,7 +459,7 @@ class InAppPurchase {
 	}
 	
 	
-	public function onStarted ():Void {
+	public function onStarted (msg:String):Void {
 		
 		InAppPurchase.dispatcher.dispatchEvent (new InAppPurchaseEvent (InAppPurchaseEvent.PURCHASE_READY));
 		

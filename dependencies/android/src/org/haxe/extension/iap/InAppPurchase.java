@@ -21,149 +21,101 @@ public class InAppPurchase extends Extension {
 	
 	
 	private static HaxeObject callback = null;
+	private static IabHelper inAppPurchaseHelper;
 	private static String publicKey = "";
 	
-	
-	public static void buy (String productID) {
-		
-		Log.i ("IAP", "Trying to buy: " + productID);
-		
-		if (BillingHelper.isBillingSupported ()) {
-			
-			BillingHelper.requestPurchase (Extension.mainContext, productID);
-			
-		} else {
-			
-			Log.i ("IAP", "Cannot buy item, billing not supported on this device");
-			
-		}
-		
-	}
-	
-	
-	public static String getPublicKey (){
-		
-		return publicKey;
-		
-	}
-	
-	
-	public static void initialize (String publicKey, final HaxeObject callback) {
+	public static void initialize (String publicKey, HaxeObject callback) {
 		
 		Log.i ("IAP", "Initializing billing service");
 		
 		InAppPurchase.callback = callback;
+		//very unlikely this can happen but if the initialize happens more than once the in app purchase helper needs to be dispose to avoid memory leaks.
+		if(InAppPurchase.inAppPurchaseHelper != null){
+		InAppPurchase.inAppPurchaseHelper.dispose();
+		}
+		InAppPurchase.inAppPurchaseHelper = new IabHelper(Extension.mainContext, publicKey); 
 		setPublicKey (publicKey);
 		
-		Extension.callbackHandler.post (new Runnable () {
-			
-			@Override public void run () {
-				
-				Extension.mainActivity.startService (new Intent (Extension.mainContext, BillingService.class));
-				
-				Handler transactionHandler = new Handler () {
-					
-					public void handleMessage (Message msg) {
-						
-						if (BillingHelper.latestPurchase != null) {
-							
-							Log.i ("IAP", "Transaction complete");
-							Log.i ("IAP", "Transaction status: " + BillingHelper.latestPurchase.purchaseState);
-							Log.i ("IAP", "Attempted to purchase: " + BillingHelper.latestPurchase.productId);
-							
-							if (BillingHelper.latestPurchase.isPurchased ()) {
-								
-								Log.i ("IAP", "Transaction success");
-								
-								Extension.callbackHandler.post (new Runnable () {
-									
-									@Override public void run () {
-										
-										callback.call ("onPurchase", new Object[] { BillingHelper.latestPurchase.productId });
-										
-									}
-									
-								});
-								
-							} else {
-								
-								Log.i ("IAP", "Transaction failed");
-								
-								Extension.callbackHandler.post (new Runnable () {
-									
-									@Override public void run () {
-										
-										callback.call ("onFailedPurchase", new Object[] { BillingHelper.latestPurchase.productId });
-										callback.call ("onCanceledPurchase", new Object[] { BillingHelper.latestPurchase.productId });
-										
-									}
-									
-								});
-								
-							}
-							
-						} else {
-							
-							Log.i ("IAP", "Transaction failed");
-							
-							Extension.callbackHandler.post (new Runnable () {
-								
-								@Override public void run () {
-									
-									callback.call ("onFailedPurchase", new Object[] { BillingSecurity.latestProductID });
-									callback.call ("onCanceledPurchase", new Object[] { BillingSecurity.latestProductID });
-									
-								}
-								
-							});
-							
+		InAppPurchase.inAppPurchaseHelper.startSetup(new IabHelper.OnIabSetupFinishedListener(){
+			public void onIabSetupFinished(IabResult result){
+				if (!result.isSuccess()){
+					return;
+				}          
+				else{
+					 Extension.callbackHandler.post(new Runnable(){
+						@Override public void run(){
+							InAppPurchase.callback.call("onStarted", new Object[] {"Success"});
 						}
-						
-					};
-					  
-				};
-				
-				BillingHelper.setCompletedHandler (transactionHandler);
-				
-				Extension.callbackHandler.post (new Runnable () {
-					 
-					@Override public void run () {
-						
-						callback.call ("onStarted", new Object[] {});
-						
-					}
-					
-				});
-				
+					});
+					return;
+				}
 			}
-			
-		});
-		
+		});	
 	}
 	
+	public static void buy (String productID) {
+		InAppPurchase.inAppPurchaseHelper.launchPurchaseFlow(Extension.mainActivity, productID, 1001, mPurchaseFinishedListener, "" );
+	}
 	
-	public static void restore () {
+	@Override 
+	public boolean onActivityResult (int requestCode, int resultCode, Intent data) {
 		
-		Log.i ("IAP", "Trying to restore purchases");
-	
-		if (BillingHelper.isBillingSupported ()) {
-			
-			BillingHelper.restoreTransactionInformation (BillingSecurity.generateNonce ());
-			
-		} else {
-			
-			Log.i ("IAP", "Cannot restore purchases, billing not supported on this device");
-			
+		if (inAppPurchaseHelper != null) {
+			return !inAppPurchaseHelper.handleActivityResult (requestCode, resultCode, data);
 		}
 		
+		return super.onActivityResult (requestCode, resultCode, data);
 	}
 	
+	@Override 
+	public void onDestroy () {
+		
+		if (InAppPurchase.inAppPurchaseHelper != null) {
+			InAppPurchase.inAppPurchaseHelper.dispose ();
+			InAppPurchase.inAppPurchaseHelper = null;
+		}
+		super.onDestroy ();
+	}
+	
+	
+	public static String getPublicKey (){
+		return publicKey;
+	}
 	
 	public static void setPublicKey (String s) {
-		
 		publicKey = s;
-		
 	}
+	
+	static IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener = new IabHelper.QueryInventoryFinishedListener() { public void onQueryInventoryFinished(IabResult result, Inventory inventory){
+		if (result.isFailure()){
+			// Handle failure
+		}
+		else{
+			//InAppPurchase.inAppPurchaseHelper.consumeAsync(inventory.getPurchase(NameOfItem), mConsumeFinishedListener);
+		}
+	}
+	};
+		
+	static IabHelper.OnConsumeFinishedListener mConsumeFinishedListener = new IabHelper.OnConsumeFinishedListener() { public void onConsumeFinished(Purchase purchase, IabResult result){
+		if (result.isSuccess()){	
+			
+		} 
+		else {	
+			
+		}
+	}
+	};
+	
+	static IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener(){
+		public void onIabPurchaseFinished(IabResult result, Purchase purchase){
+			if(result.isFailure()){ 
+				
+			}
+			else{
+				
+			}
+		}
+	};
 	
 	
 }
