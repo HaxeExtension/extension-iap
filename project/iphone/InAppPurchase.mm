@@ -197,18 +197,18 @@ extern "C"
 		[inAppPurchase release];
 	}
 	
-	char* getTitle(const char *inProductID)
-	{
-		return "TODO";
-	}
-    
-    char* getPrice(const char *inProductID)
-    {
-    	return "TODO";
-    }
-    
-    char* getDescription(const char *inProductID)
-    {
-    	return "TODO";
-    }
+	//char* getTitle(const char *inProductID)
+	//{
+	//	return "TODO";
+	//}
+    //
+    //char* getPrice(const char *inProductID)
+    //{
+    //	return "TODO";
+    //}
+    //
+    //char* getDescription(const char *inProductID)
+    //{
+    //	return "TODO";
+    //}
 }

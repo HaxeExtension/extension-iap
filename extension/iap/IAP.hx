@@ -53,34 +53,34 @@ class IAP {
 	}
 	
 	
-	public static function getDescription (productID:String):String {
-		
-		#if ios
-		
-		return purchases_desc (productID);
-		
-		#else
-		
-		return "None";
-		
-		#end
-		
-	}
+	//public static function getDescription (productID:String):String {
+	//	
+	//	#if ios
+	//	
+	//	return purchases_desc (productID);
+	//	
+	//	#else
+	//	
+	//	return "None";
+	//	
+	//	#end
+	//	
+	//}
 	
 	
-	public static function getPrice (productID:String):String {
-		
-		#if ios
-		
-		return purchases_price (productID);
-		
-		#else
-		
-		return "None";
-		
-		#end
-		
-	}
+	//public static function getPrice (productID:String):String {
+	//	
+	//	#if ios
+	//	
+	//	return purchases_price (productID);
+	//	
+	//	#else
+	//	
+	//	return "None";
+	//	
+	//	#end
+	//	
+	//}
 	
 	
 	public static function getQuantity (productID:String):Int {
@@ -100,19 +100,19 @@ class IAP {
 	}
 	
 	
-	public static function getTitle (productID:String):String {
-		
-		#if ios
-		
-		return purchases_title (productID);
-		
-		#else
-		
-		return "None";
-		
-		#end
-		
-	}
+	//public static function getTitle (productID:String):String {
+	//	
+	//	#if ios
+	//	
+	//	return purchases_title (productID);
+	//	
+	//	#else
+	//	
+	//	return "None";
+	//	
+	//	#end
+	//	
+	//}
 	
 	
 	public static function hasEventListener (type:String):Bool {

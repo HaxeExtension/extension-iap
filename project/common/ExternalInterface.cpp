@@ -57,37 +57,37 @@ static value iap_buy(value productID)
 DEFINE_PRIM(iap_buy, 1);
 
 
-static value iap_title(value productID)
-{
-	#ifdef IPHONE
-	return alloc_string(getTitle(val_string(productID)));
-	#else
-	return alloc_null();
-	#endif
-}
-DEFINE_PRIM(iap_title, 1);
+//static value iap_title(value productID)
+//{
+//	#ifdef IPHONE
+//	return alloc_string(getTitle(val_string(productID)));
+//	#else
+//	return alloc_null();
+//	#endif
+//}
+//DEFINE_PRIM(iap_title, 1);
 
 
-static value iap_desc(value productID)
-{
-	#ifdef IPHONE
-	return alloc_string(getDescription(val_string(productID)));
-	#else
-	return alloc_null();
-	#endif
-}
-DEFINE_PRIM(iap_desc, 1);
+//static value iap_desc(value productID)
+//{
+//	#ifdef IPHONE
+//	return alloc_string(getDescription(val_string(productID)));
+//	#else
+//	return alloc_null();
+//	#endif
+//}
+//DEFINE_PRIM(iap_desc, 1);
 
 
-static value iap_price(value productID)
-{
-	#ifdef IPHONE
-	return alloc_string(getPrice(val_string(productID)));
-	#else
-	return alloc_null();
-	#endif
-}
-DEFINE_PRIM(iap_price, 1);
+//static value iap_price(value productID)
+//{
+//	#ifdef IPHONE
+//	return alloc_string(getPrice(val_string(productID)));
+//	#else
+//	return alloc_null();
+//	#endif
+//}
+//DEFINE_PRIM(iap_price, 1);
 
 
 static value iap_canbuy() 
