@@ -12,8 +12,7 @@ import openfl.utils.JNI;
 #end
 
 
-@:allow(extension.iap)
-class IAP {
+@:allow(extension.iap) class IAP {
 	
 	
 	public static var available (get, null):Bool;
@@ -328,8 +327,8 @@ class IAP {
 	
 	private static function save ():Void {
 		
-		var so = SharedObject.getLocal("in-app-purchases");
-		Reflect.setField(so.data, "data", items);
+		var so = SharedObject.getLocal ("in-app-purchases");
+		Reflect.setField (so.data, "data", items);
 		
 		#if (cpp || neko)
 		
