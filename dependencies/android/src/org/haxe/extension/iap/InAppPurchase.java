@@ -158,7 +158,7 @@ public class InAppPurchase extends Extension {
 				
 			} else{
 				
-				
+				InAppPurchase.inAppPurchaseHelper.consumeAsync(purchase, mConsumeFinishedListener);
 					
 			}
 			
