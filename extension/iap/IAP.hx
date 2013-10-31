@@ -52,34 +52,7 @@ import openfl.utils.JNI;
 	}
 	
 	
-	//public static function getDescription (productID:String):String {
-	//	
-	//	#if ios
-	//	
-	//	return purchases_desc (productID);
-	//	
-	//	#else
-	//	
-	//	return "None";
-	//	
-	//	#end
-	//	
-	//}
 	
-	
-	//public static function getPrice (productID:String):String {
-	//	
-	//	#if ios
-	//	
-	//	return purchases_price (productID);
-	//	
-	//	#else
-	//	
-	//	return "None";
-	//	
-	//	#end
-	//	
-	//}
 	
 	
 	public static function getQuantity (productID:String):Int {
@@ -98,20 +71,7 @@ import openfl.utils.JNI;
 		
 	}
 	
-	
-	//public static function getTitle (productID:String):String {
-	//	
-	//	#if ios
-	//	
-	//	return purchases_title (productID);
-	//	
-	//	#else
-	//	
-	//	return "None";
-	//	
-	//	#end
-	//	
-	//}
+
 	
 	
 	public static function hasEventListener (type:String):Bool {
@@ -267,7 +227,7 @@ import openfl.utils.JNI;
 			funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;)V");
 			
 		}
-		
+		IAPHandler.lastPurchaseRequest = productID;
 		funcBuy (productID);
 		
 		#end
@@ -424,6 +384,7 @@ import openfl.utils.JNI;
 
 private class IAPHandler {
 	
+	public static var lastPurchaseRequest:String = "";
 	
 	public function new () {
 		
@@ -439,29 +400,25 @@ private class IAPHandler {
 	}
 	
 	
-	public function onFailedPurchase (productID:String):Void {
+	public function onFailedPurchase (dataProductID:Array<Dynamic>):Void
+	{
+		var productID:String = "";
+
+		productID = lastPurchaseRequest; //temporal fix
+
 		
 		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_FAILURE, productID));
 		
 	}
 	
 	
-	public function onPurchase (productID:String):Void {
-		
+	public function onPurchase (dataProductID:Array<Dynamic>):Void 
+	{
+		var productID:String = "";
+		productID = lastPurchaseRequest; //temporal fix
+
 		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_SUCCESS, productID));
-		
-		if (IAP.hasPurchased (productID)) {
-			
-			IAP.items.set (productID, IAP.items.get (productID) + 1);
-			
-		} else {
-			
-			IAP.items.set (productID, 1);
-			
-		}
-		
-		IAP.save ();
-		
+
 	}
 	
 	
@@ -472,7 +429,7 @@ private class IAPHandler {
 	}
 	
 	
-	public function onStarted (msg:String):Void {
+	public function onStarted (msg:Array<Dynamic>):Void {
 		
 		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT));
 		

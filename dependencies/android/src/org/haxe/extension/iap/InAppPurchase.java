@@ -150,16 +150,30 @@ public class InAppPurchase extends Extension {
 	
 	static IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener () {
 		
-		public void onIabPurchaseFinished (IabResult result, Purchase purchase) {
+		public void onIabPurchaseFinished (IabResult result, Purchase purchase)
+		{
 			
-			if (result.isFailure ()) {
+			if (result.isFailure ()) 
+			{
 				
-				 
-				
-			} else{
-				
+				Extension.callbackHandler.post (new Runnable ()
+				{
+					@Override public void run () 
+					{
+						InAppPurchase.callback.call ("onFailedPurchase", new Object[] { "Failure" });
+					}
+				});
+			} 
+			else
+			{
+				Extension.callbackHandler.post (new Runnable ()
+				{
+					@Override public void run ()
+					{
+						InAppPurchase.callback.call ("onPurchase", new Object[] { "success" });
+					}	
+				});
 				InAppPurchase.inAppPurchaseHelper.consumeAsync(purchase, mConsumeFinishedListener);
-					
 			}
 			
 		}
