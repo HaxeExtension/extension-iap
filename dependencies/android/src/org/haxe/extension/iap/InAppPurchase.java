@@ -14,7 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import org.haxe.extension.iap.util.*;
 import org.haxe.extension.Extension;
-import org.haxe.nme.HaxeObject;
+import org.haxe.lime.HaxeObject;
 
 
 public class InAppPurchase extends Extension {

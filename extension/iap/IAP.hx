@@ -121,7 +121,7 @@ import openfl.utils.JNI;
 		
 		if (funcInit == null) {
 			
-			funcInit = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "initialize", "(Ljava/lang/String;Lorg/haxe/nme/HaxeObject;)V");
+			funcInit = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "initialize", "(Ljava/lang/String;Lorg/haxe/lime/HaxeObject;)V");
 			load ();
 			
 		}
@@ -368,9 +368,9 @@ import openfl.utils.JNI;
 	private static var purchases_buy = Lib.load ("iap", "iap_buy", 1);
 	private static var purchases_canbuy = Lib.load ("iap", "iap_canbuy", 0);
 	private static var purchases_release = Lib.load ("iap", "iap_release", 0);
-	private static var purchases_title = Lib.load ("iap", "iap_title", 1);
-	private static var purchases_desc = Lib.load ("iap", "iap_desc", 1);
-	private static var purchases_price = Lib.load ("iap", "iap_price", 1);
+	//private static var purchases_title = Lib.load ("iap", "iap_title", 1);
+	//private static var purchases_desc = Lib.load ("iap", "iap_desc", 1);
+	//private static var purchases_price = Lib.load ("iap", "iap_price", 1);
 	private static var set_event_handle = Lib.load ("iap", "iap_set_event_handle", 1);
 	
 	#end
