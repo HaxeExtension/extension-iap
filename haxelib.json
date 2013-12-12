@@ -4,8 +4,8 @@
 	"license": "",
 	"tags": [],
 	"description": "",
-	"version": "1.0.0",
-	"releasenote": "",
+	"version": "1.0.1",
+	"releasenote": "OpenFL 1.2 fixes",
 	"contributors": [ "singmajesty" ],
 	"dependencies": {}
 }
