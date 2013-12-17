@@ -52,9 +52,6 @@ import openfl.utils.JNI;
 	}
 	
 	
-	
-	
-	
 	public static function getQuantity (productID:String):Int {
 		
 		#if ios
@@ -72,8 +69,6 @@ import openfl.utils.JNI;
 	}
 	
 
-	
-	
 	public static function hasEventListener (type:String):Bool {
 		
 		return dispatcher.hasEventListener (type);
@@ -243,11 +238,18 @@ import openfl.utils.JNI;
 	}
 	
 	
-	public static function requestProductData (productID:String):Void {
+	public static function requestProductData (inArg:Dynamic):Void {
 		
 		#if ios
 		
-		purchases_get_data (productID);
+		var productID:String;
+		
+		if (Std.is(inArg, String)) 
+			purchases_get_data (cast(inArg, String));
+		else if (Std.is(inArg, Array))
+			purchases_get_data (cast(inArg, Array<Dynamic>).join(","));
+		else
+			throw new flash.errors.Error("Invalid parameter type: " + Type.typeof(inArg) + ". Valid types are String and Array<String>.");
 		
 		#elseif android	
 		
