@@ -6,6 +6,7 @@
 
 
 extern "C" void sendPurchaseEvent(const char* type, const char* data);
+extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, const char* price);
 
 
 @interface InAppPurchase: NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver>
@@ -34,6 +35,7 @@ extern "C" void sendPurchaseEvent(const char* type, const char* data);
 
 - (void)restorePurchases 
 {
+	NSLog(@"starting restore");
 	[[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
 }
 
@@ -56,20 +58,53 @@ extern "C" void sendPurchaseEvent(const char* type, const char* data);
 	[productsRequest start];
 } 
 
+- (void)requestProductData:(NSString*)productIdentifiers
+{
+	if(productID) 
+	{
+        [productID release];
+		productID = nil;
+	}
+		
+	NSSet *productIdentifiersSet = [NSSet setWithArray:[productIdentifiers componentsSeparatedByString:@","] ];
+    productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:productIdentifiersSet];
+    productsRequest.delegate = self;
+    [productsRequest start];
+    
+    // we will release the request object in the delegate callback
+}
+
 #pragma mark -
 #pragma mark SKProductsRequestDelegate methods 
 
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse*)response
 {   	
 	int count = [response.products count];
-    
+    NSLog(@"productsRequest");
 	NSLog(@"Number of Products: %i", count);
     
 	if(count > 0) 
     {
-		myProduct = [response.products objectAtIndex:0];
-		SKPayment *payment = [SKPayment paymentWithProductIdentifier:productID];
-		[[SKPaymentQueue defaultQueue] addPayment:payment];
+		if (productID)
+		{
+			myProduct = [response.products objectAtIndex:0];
+			// A payment has been done
+			SKPayment *payment = [SKPayment paymentWithProductIdentifier:productID];
+			[[SKPaymentQueue defaultQueue] addPayment:payment];
+		}
+		else
+		{
+			// A products data request has been responded
+			
+			for(SKProduct *prod in response.products)
+			{
+				sendPurchaseProductDataEvent("productData", [prod.productIdentifier UTF8String], [prod.localizedTitle UTF8String], [prod.localizedDescription UTF8String], [[prod.price stringValue] UTF8String]);
+
+			}
+			
+			sendPurchaseEvent("productDataComplete", nil);
+						
+		}
 	} 
     
     else 
@@ -128,6 +163,8 @@ extern "C" void sendPurchaseEvent(const char* type, const char* data);
 
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray*)transactions
 {
+	
+	NSLog(@"updatedTransactions");
 	for(SKPaymentTransaction *transaction in transactions)
     {
         switch(transaction.transactionState)
@@ -148,6 +185,17 @@ extern "C" void sendPurchaseEvent(const char* type, const char* data);
                 break;
         }
     }
+}
+
+- (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue
+{
+	NSLog(@"Restore complete!");
+}
+
+- (void)paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error
+{
+	NSLog(@"Error restoring transactions");
+	
 }
 
 - (void)dealloc
@@ -192,23 +240,14 @@ extern "C"
 		[inAppPurchase purchaseProduct:productID];
 	}
     
+	void requestProductData(const char *inProductID)
+	{
+		NSString *productID = [[NSString alloc] initWithUTF8String:inProductID];
+		[inAppPurchase requestProductData:productID];
+	}
+	
 	void releaseInAppPurchase()
     {
 		[inAppPurchase release];
 	}
-	
-	//char* getTitle(const char *inProductID)
-	//{
-	//	return "TODO";
-	//}
-    //
-    //char* getPrice(const char *inProductID)
-    //{
-    //	return "TODO";
-    //}
-    //
-    //char* getDescription(const char *inProductID)
-    //{
-    //	return "TODO";
-    //}
 }

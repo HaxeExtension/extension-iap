@@ -9,6 +9,7 @@ namespace iap
         void restorePurchases();
         bool canPurchase();
         void purchaseProduct(const char* productID);
+		void requestProductData(const char *productID);
         void releaseInAppPurchase();
         
         //char* getTitle(const char *inProductID); //the title from the app store doesnt need to match the title used in the app itself.

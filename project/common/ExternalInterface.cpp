@@ -57,37 +57,14 @@ static value iap_buy(value productID)
 DEFINE_PRIM(iap_buy, 1);
 
 
-//static value iap_title(value productID)
-//{
-//	#ifdef IPHONE
-//	return alloc_string(getTitle(val_string(productID)));
-//	#else
-//	return alloc_null();
-//	#endif
-//}
-//DEFINE_PRIM(iap_title, 1);
-
-
-//static value iap_desc(value productID)
-//{
-//	#ifdef IPHONE
-//	return alloc_string(getDescription(val_string(productID)));
-//	#else
-//	return alloc_null();
-//	#endif
-//}
-//DEFINE_PRIM(iap_desc, 1);
-
-
-//static value iap_price(value productID)
-//{
-//	#ifdef IPHONE
-//	return alloc_string(getPrice(val_string(productID)));
-//	#else
-//	return alloc_null();
-//	#endif
-//}
-//DEFINE_PRIM(iap_price, 1);
+static value iap_get_data(value productID)
+{
+	#ifdef IPHONE
+	requestProductData(val_string(productID));
+	#endif
+	return alloc_null();
+}
+DEFINE_PRIM(iap_get_data, 1);
 
 
 static value iap_canbuy() 
@@ -128,6 +105,20 @@ extern "C" void sendPurchaseEvent(const char* type, const char* data)
 {
     value o = alloc_empty_object();
     alloc_field(o,val_id("type"),alloc_string(type));
-    alloc_field(o,val_id("data"),alloc_string(data));
+	
+    if (data != NULL) alloc_field(o,val_id("data"),alloc_string(data));
+	
+    val_call1(purchaseEventHandle->get(), o);
+}
+
+
+extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, const char* price)
+{
+    value o = alloc_empty_object();
+    alloc_field(o,val_id("type"),alloc_string(type));
+    alloc_field(o,val_id("productID"),alloc_string(productID));
+	alloc_field(o,val_id("localizedTitle"),alloc_string(localizedTitle));
+	alloc_field(o,val_id("localizedDescription"),alloc_string(localizedDescription));
+	alloc_field(o,val_id("price"),alloc_string(price));
     val_call1(purchaseEventHandle->get(), o);
 }

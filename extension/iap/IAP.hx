@@ -185,6 +185,14 @@ import openfl.utils.JNI;
 				
 				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_RESTORE, data));
 			
+			case "productData":
+				
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA, (Reflect.field (inEvent, "productID")), (Reflect.field (inEvent, "localizedTitle")), (Reflect.field (inEvent, "localizedDescription")), (Reflect.field (inEvent, "price"))));
+			
+			case "productDataComplete":
+				
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE));
+			
 			default:
 			
 		}
@@ -229,6 +237,19 @@ import openfl.utils.JNI;
 		}
 		IAPHandler.lastPurchaseRequest = productID;
 		funcBuy (productID);
+		
+		#end
+			
+	}
+	
+	
+	public static function requestProductData (productID:String):Void {
+		
+		#if ios
+		
+		purchases_get_data (productID);
+		
+		#elseif android	
 		
 		#end
 			
@@ -331,7 +352,6 @@ import openfl.utils.JNI;
 	private static function get_available ():Bool {
 		
 		#if ios
-		
 		return purchases_canbuy ();
 		
 		#elseif android
@@ -366,11 +386,9 @@ import openfl.utils.JNI;
 	private static var purchases_initialize = Lib.load ("iap", "iap_initialize", 0);
 	private static var purchases_restore = Lib.load ("iap", "iap_restore", 0);
 	private static var purchases_buy = Lib.load ("iap", "iap_buy", 1);
+	private static var purchases_get_data = Lib.load ("iap", "iap_get_data", 1);
 	private static var purchases_canbuy = Lib.load ("iap", "iap_canbuy", 0);
 	private static var purchases_release = Lib.load ("iap", "iap_release", 0);
-	//private static var purchases_title = Lib.load ("iap", "iap_title", 1);
-	//private static var purchases_desc = Lib.load ("iap", "iap_desc", 1);
-	//private static var purchases_price = Lib.load ("iap", "iap_price", 1);
 	private static var set_event_handle = Lib.load ("iap", "iap_set_event_handle", 1);
 	
 	#end
