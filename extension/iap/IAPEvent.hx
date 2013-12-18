@@ -1,5 +1,6 @@
 package extension.iap;
 
+import extension.iap.IAP;
 
 import flash.events.Event;
 
@@ -14,28 +15,23 @@ class IAPEvent extends Event {
 	public static inline var PURCHASE_SUCCESS = "purchaseSuccess";
 	public static inline var PURCHASE_PRODUCT_DATA = "productDataArrived";
 	public static inline var PURCHASE_PRODUCT_DATA_COMPLETE = "productDataComplete";
-	public static inline var PURCHASE_PRODUCT_DATA_COMPLETE_WITH_ERRORS = "productDataCompleteWithErrors";
 	
 	public var productID:String;
-	public var localizedTitle:String;
-	public var localizedDescription:String;
-	public var price:String;
+	public var productsData:Array<IAProduct>;
+	public var invalidProductIDs:Array<String>;
 	
 	public var message:String;
 	
 	
 	
-	public function new (type:String, productID:String = "", ?localizedTitle:String, ?localizedDescription:String, ?price:String, ?message:String) {
+	public function new (type:String, productID:String = "", ?productsData:Array<IAProduct>, ?invalidProductIDs:Array<String>, ?message:String) {
 		
 		super (type);
 		
 		this.productID = productID;
 		
-		if (localizedTitle != null) this.localizedTitle = localizedTitle;
-		if (localizedDescription != null) this.localizedDescription = localizedDescription;
-		if (price != null) this.price = price;
-		if (message != null) this.message = message;
-		
+		if (productsData != null) this.productsData = productsData;
+		if (invalidProductIDs != null) this.invalidProductIDs = invalidProductIDs;	
 	}
 	
 	

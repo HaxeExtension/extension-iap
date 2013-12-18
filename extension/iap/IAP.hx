@@ -11,16 +11,25 @@ import flash.Lib;
 import openfl.utils.JNI;
 #end
 
+typedef IAProduct = {
+    productID : Int,
+    ?localizedTitle:String,
+    ?localizedDescription:String,
+    ?price:String,
+    ?localizedPrice:String
+}
 
 @:allow(extension.iap) class IAP {
 	
 	
 	public static var available (get, null):Bool;
+	public static var manualTransactionMode (get, set):Bool;
 	
 	private static var dispatcher = new EventDispatcher ();
 	private static var initialized = false;
 	private static var items = new Map<String, Int> ();
 	
+	private static var tempProductsData:Array<IAProduct> = [];
 	
 	public static function addEventListener (type:String, listener:Dynamic, useCapture:Bool = false, priority:Int = 0, useWeakReference:Bool = false):Void {
 		
@@ -182,11 +191,13 @@ import openfl.utils.JNI;
 			
 			case "productData":
 				
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA, (Reflect.field (inEvent, "productID")), (Reflect.field (inEvent, "localizedTitle")), (Reflect.field (inEvent, "localizedDescription")), (Reflect.field (inEvent, "price"))));
+				tempProductsData.push( { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), price: Reflect.field (inEvent, "price") } );
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA, Reflect.field (inEvent, "productID")));
 			
 			case "productDataComplete":
 				
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE));
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE, null, tempProductsData));
+				tempProductsData.splice(0, tempProductsData.length);
 			
 			default:
 			
@@ -217,6 +228,14 @@ import openfl.utils.JNI;
 	}
 	
 	
+	public static function finishTransactionManually (transactionID:String):Void {
+		//TODO
+	}
+	
+	public static function displayProductView (productID:String):Void {
+		//TODO
+	}
+	
 	public static function purchase (productID:String):Void {
 		
 		#if ios
@@ -243,6 +262,8 @@ import openfl.utils.JNI;
 		#if ios
 		
 		var productID:String;
+		
+		tempProductsData.splice(0, tempProductsData.length);
 		
 		if (Std.is(inArg, String)) 
 			purchases_get_data (cast(inArg, String));
@@ -369,6 +390,15 @@ import openfl.utils.JNI;
 	}
 	
 	
+	//TODO:manualTransactionMode
+	public static function get_manualTransactionMode ():Bool {
+		//TODO
+		return false;
+	}
+	public static function set_manualTransactionMode (val:Bool):Bool {
+		//TODO
+		return val;
+	}
 	
 	
 	// Native Methods
