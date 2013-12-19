@@ -189,6 +189,25 @@ typedef IAProduct = {
 				
 				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_RESTORE, data));
 			
+			case "downloadStart":
+				
+				dispatchEvent (new IAPEvent (IAPEvent.DOWNLOAD_START,  Reflect.field (inEvent, "productID"), null, null,  Reflect.field (inEvent, "transactionID")));
+			
+			case "downloadProgress":
+				
+				var e:IAPEvent = new IAPEvent (IAPEvent.DOWNLOAD_PROGRESS,  Reflect.field (inEvent, "productID"), null, null,  Reflect.field (inEvent, "transactionID"));
+				e.downloadPath = Reflect.field (inEvent, "downloadPath");
+				e.downloadVersion = Reflect.field (inEvent, "downloadVersion");
+				e.downloadProgress = Reflect.field (inEvent, "downloadProgress");
+				dispatchEvent (e);
+			
+			case "downloadComplete":
+				
+				var e:IAPEvent = new IAPEvent (IAPEvent.DOWNLOAD_COMPLETE,  Reflect.field (inEvent, "productID"), null, null,  Reflect.field (inEvent, "transactionID"));
+				e.downloadPath = Reflect.field (inEvent, "downloadPath");
+				e.downloadVersion = Reflect.field (inEvent, "downloadVersion");
+				dispatchEvent (e);
+			
 			case "productData":
 				
 				tempProductsData.push( { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), price: Reflect.field (inEvent, "price") } );
@@ -230,6 +249,9 @@ typedef IAProduct = {
 	
 	public static function finishTransactionManually (transactionID:String):Void {
 		//TODO
+		#if ios
+			purchases_finish_transaction (transactionID);
+		#end
 	}
 	
 	public static function displayProductView (productID:String):Void {
@@ -419,6 +441,7 @@ typedef IAProduct = {
 	private static var purchases_restore = Lib.load ("iap", "iap_restore", 0);
 	private static var purchases_buy = Lib.load ("iap", "iap_buy", 1);
 	private static var purchases_get_data = Lib.load ("iap", "iap_get_data", 1);
+	private static var purchases_finish_transaction = Lib.load ("iap", "iap_finish_transaction", 1);
 	private static var purchases_canbuy = Lib.load ("iap", "iap_canbuy", 0);
 	private static var purchases_release = Lib.load ("iap", "iap_release", 0);
 	private static var set_event_handle = Lib.load ("iap", "iap_set_event_handle", 1);

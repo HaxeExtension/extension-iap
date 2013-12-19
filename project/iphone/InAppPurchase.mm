@@ -6,6 +6,7 @@
 
 
 extern "C" void sendPurchaseEvent(const char* type, const char* data);
+extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productID, const char* transactionID, const char* downloadPath, const char* downloadVersion, const char* downloadProgress);
 extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, const char* price);
 
 
@@ -20,6 +21,8 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 - (void)restorePurchases;
 - (BOOL)canMakePurchases;
 - (void)purchaseProduct:(NSString*)productIdentifiers;
+- (void)requestProductData:(NSString*)productIdentifiers;
+- (void)finishTransactionManually:(NSString *)transactionID;
 
 @end
 
@@ -116,6 +119,19 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     productsRequest = NULL;
 }
 
+- (void)finishTransactionManually:(NSString *)transactionID
+{
+	if ([[SKPaymentQueue defaultQueue] transactions]) {
+		NSArray *transactions = [[SKPaymentQueue defaultQueue] transactions];
+		
+		if ([transactions containsObject:transactionID]) {
+			[self finishTransaction:[transactions objectAtIndex:[transactions indexOfObject:transactionID]]  wasSuccessful:YES];
+		}
+		
+		[transactions release];
+	}
+}
+
 - (void)finishTransaction:(SKPaymentTransaction*)transaction wasSuccessful:(BOOL)wasSuccessful
 {
     [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
@@ -135,9 +151,16 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)completeTransaction:(SKPaymentTransaction*)transaction
 {
-	NSLog(@"Finish Transaction");
-    [self finishTransaction:transaction wasSuccessful:YES];
-} 
+	
+	if (transaction.downloads) {
+		sendPurchaseDownloadEvent("downloadStart", [transaction.payment.productIdentifier UTF8String], [transaction.transactionIdentifier UTF8String], nil, nil, nil);
+		[[SKPaymentQueue defaultQueue] startDownloads:transaction.downloads];
+		
+	} else {
+		NSLog(@"Finish Transaction");
+		[self finishTransaction:transaction wasSuccessful:YES];
+	}
+}
 
 - (void)restoreTransaction:(SKPaymentTransaction*)transaction
 {
@@ -181,6 +204,34 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
                 [self restoreTransaction:transaction];
                 break;
                 
+            default:
+                break;
+        }
+    }
+}
+
+- (void)paymentQueue:(SKPaymentQueue *)queue updatedDownloads:(NSArray*)downloads
+{
+    for (SKDownload *download in downloads)
+    {
+        switch (download.downloadState) {
+            case SKDownloadStateActive:
+                NSLog(@"Download progress = %f and Download time: %f", download.progress, download.timeRemaining);
+				
+				sendPurchaseDownloadEvent("downloadProgress", [download.contentIdentifier UTF8String], [download.transaction.transactionIdentifier UTF8String], [[download.contentURL absoluteString] UTF8String], [download.contentVersion UTF8String], [[NSString stringWithFormat:@"%f", download.progress] UTF8String]);
+				
+                break;
+            case SKDownloadStateFinished:
+                NSLog(@"Download complete: %@",download.contentURL);
+				
+				sendPurchaseDownloadEvent("downloadComplete", [download.contentIdentifier UTF8String], [download.transaction.transactionIdentifier UTF8String], [[download.contentURL absoluteString] UTF8String], [download.contentVersion UTF8String], nil);
+				
+				[self finishTransaction:download.transaction wasSuccessful:YES];
+                // Download is complete. Content file URL is at
+                // path referenced by download.contentURL. Move
+                // it somewhere safe, unpack it and give the user
+                // access to it
+                break;
             default:
                 break;
         }
@@ -244,6 +295,12 @@ extern "C"
 	{
 		NSString *productID = [[NSString alloc] initWithUTF8String:inProductID];
 		[inAppPurchase requestProductData:productID];
+	}
+	
+	void finishTransactionManually(const char *inTransactionID)
+	{
+		NSString *transactionID = [[NSString alloc] initWithUTF8String:inTransactionID];
+		[inAppPurchase finishTransactionManually:transactionID];
 	}
 	
 	void releaseInAppPurchase()

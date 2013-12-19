@@ -67,6 +67,16 @@ static value iap_get_data(value productID)
 DEFINE_PRIM(iap_get_data, 1);
 
 
+static value iap_finish_transaction(value transactionID)
+{
+	#ifdef IPHONE
+	finishTransactionManually(val_string(transactionID));
+	#endif
+	return alloc_null();
+}
+DEFINE_PRIM(iap_finish_transaction, 1);
+
+
 static value iap_canbuy() 
 {
 	#ifdef IPHONE
@@ -108,6 +118,19 @@ extern "C" void sendPurchaseEvent(const char* type, const char* data)
 	
     if (data != NULL) alloc_field(o,val_id("data"),alloc_string(data));
 	
+    val_call1(purchaseEventHandle->get(), o);
+}
+
+
+extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productID, const char* transactionID, const char* downloadPath, const char* downloadVersion, const char* downloadProgress)
+{
+    value o = alloc_empty_object();
+    alloc_field(o,val_id("type"),alloc_string(type));
+    alloc_field(o,val_id("productID"),alloc_string(productID));
+	alloc_field(o,val_id("transactionID"),alloc_string(transactionID));
+	if (downloadPath != NULL) alloc_field(o,val_id("downloadPath"),alloc_string(downloadPath));
+	if (downloadVersion != NULL) alloc_field(o,val_id("downloadVersion"),alloc_string(downloadVersion));
+	if (downloadProgress != NULL) alloc_field(o,val_id("downloadProgress"),alloc_string(downloadProgress));
     val_call1(purchaseEventHandle->get(), o);
 }
 
