@@ -88,6 +88,30 @@ static value iap_canbuy()
 DEFINE_PRIM (iap_canbuy, 0);
 
 
+static value iap_get_manualtransactionmode() 
+{
+	#ifdef IPHONE
+	//TODO
+	//return alloc_bool(getManualTransactionMode());
+	return alloc_bool(false);
+	#else
+	return alloc_bool(false);
+	#endif
+}
+DEFINE_PRIM (iap_get_manualtransactionmode, 0);
+
+
+static value iap_set_manualtransactionmode(value valBool)
+{
+	#ifdef IPHONEç
+	//TODO
+	//setManualTransactionMode(val_bool(valBool));
+	#endif
+	return alloc_null();
+}
+DEFINE_PRIM(iap_finish_transaction, 1);
+
+
 static value iap_release() 
 {
 	#ifdef IPHONE
