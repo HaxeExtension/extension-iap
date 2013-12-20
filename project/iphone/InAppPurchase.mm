@@ -15,6 +15,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     SKProduct* myProduct;
     SKProductsRequest* productsRequest;
 	NSString* productID;
+	bool manualTransactionMode;
 }
 
 - (void)initInAppPurchase;
@@ -24,6 +25,9 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 - (void)requestProductData:(NSString*)productIdentifiers;
 - (void)finishTransactionManually:(NSString *)transactionID;
 
+@property bool manualTransactionMode;
+
+
 @end
 
 @implementation InAppPurchase
@@ -32,6 +36,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)initInAppPurchase 
 {
+	manualTransactionMode = false;
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 	sendPurchaseEvent("started", "");
 }
@@ -121,11 +126,12 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)finishTransactionManually:(NSString *)transactionID
 {
-	if ([[SKPaymentQueue defaultQueue] transactions]) {
+	if (manualTransactionMode && [[SKPaymentQueue defaultQueue] transactions]) {
 		NSArray *transactions = [[SKPaymentQueue defaultQueue] transactions];
 		
 		if ([transactions containsObject:transactionID]) {
-			[self finishTransaction:[transactions objectAtIndex:[transactions indexOfObject:transactionID]]  wasSuccessful:YES];
+			//[self finishTransaction:[transactions objectAtIndex:[transactions indexOfObject:transactionID]]  wasSuccessful:YES];
+			[[SKPaymentQueue defaultQueue] finishTransaction:[transactions objectAtIndex:[transactions indexOfObject:transactionID]]];
 		}
 		
 		[transactions release];
@@ -134,7 +140,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)finishTransaction:(SKPaymentTransaction*)transaction wasSuccessful:(BOOL)wasSuccessful
 {
-    [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+    if (!manualTransactionMode) [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
     
     if(wasSuccessful)
     {
@@ -162,12 +168,14 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 	}
 }
 
+/*
 - (void)restoreTransaction:(SKPaymentTransaction*)transaction
 {
 	NSLog(@"Restoring Transaction");
 	sendPurchaseEvent("restore", [transaction.payment.productIdentifier UTF8String]);
     [self finishTransaction:transaction wasSuccessful:YES];
-} 
+}
+ */
 
 - (void)failedTransaction:(SKPaymentTransaction*)transaction
 {
@@ -193,6 +201,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
         switch(transaction.transactionState)
         {
             case SKPaymentTransactionStatePurchased:
+			case SKPaymentTransactionStateRestored:
                 [self completeTransaction:transaction];
                 break;
                 
@@ -200,10 +209,10 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
                 [self failedTransaction:transaction];
                 break;
                 
-            case SKPaymentTransactionStateRestored:
+            /*case SKPaymentTransactionStateRestored:
                 [self restoreTransaction:transaction];
                 break;
-                
+            */
             default:
                 break;
         }
@@ -241,11 +250,13 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 - (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue
 {
 	NSLog(@"Restore complete!");
+	sendPurchaseEvent("productsRestored", "");
 }
 
 - (void)paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error
 {
 	NSLog(@"Error restoring transactions");
+	sendPurchaseEvent("productsRestoredWithErrors", "");
 	
 }
 
@@ -301,6 +312,14 @@ extern "C"
 	{
 		NSString *transactionID = [[NSString alloc] initWithUTF8String:inTransactionID];
 		[inAppPurchase finishTransactionManually:transactionID];
+	}
+	
+	bool getManualTransactionMode()
+	{
+		return [inAppPurchase manualTransactionMode ];
+	}
+	void setManualTransactionMode(bool val) {
+		[inAppPurchase setManualTransactionMode:val];
 	}
 	
 	void releaseInAppPurchase()

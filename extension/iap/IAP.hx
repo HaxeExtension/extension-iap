@@ -185,9 +185,13 @@ typedef IAProduct = {
 				
 				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_CANCEL, data));
 			
-			case "restore":
+			case "productsRestored":
 				
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_RESTORE, data));
+				dispatchEvent (new IAPEvent (IAPEvent.PRODUCTS_RESTORED, data));
+			
+			case "productsRestoredWithErrors":
+				
+				dispatchEvent (new IAPEvent (IAPEvent.PRODUCTS_RESTORED_WITH_ERRORS, data));
 			
 			case "downloadStart":
 				
