@@ -11,6 +11,7 @@ class IAPEvent extends Event {
 	public static inline var PURCHASE_CANCEL = "purchaseCanceled";
 	public static inline var PURCHASE_FAILURE = "purchaseFailed";
 	public static inline var PURCHASE_INIT = "init";
+	public static inline var PURCHASE_RESTORE = "purchaseRestore";
 	public static inline var PRODUCTS_RESTORED = "purchasesRestored";
 	public static inline var PRODUCTS_RESTORED_WITH_ERRORS = "purchasesRestoredWithErrors";
 	public static inline var PURCHASE_SUCCESS = "purchaseSuccess";
