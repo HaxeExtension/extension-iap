@@ -4,8 +4,8 @@
 	"license": "",
 	"tags": [],
 	"description": "",
-	"version": "1.0.1",
-	"releasenote": "OpenFL 1.2 fixes",
+	"version": "1.0.2",
+	"releasenote": "iOS IAP improvements",
 	"contributors": [ "singmajesty" ],
 	"dependencies": {}
 }
