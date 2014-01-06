@@ -12,7 +12,7 @@ import openfl.utils.JNI;
 #end
 
 typedef IAProduct = {
-    productID : Int,
+    productID : String,
     ?localizedTitle:String,
     ?localizedDescription:String,
     ?price:String,

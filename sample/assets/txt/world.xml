@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<world>
+	<background img="img/BG.png"></background>
+	<UI statusBarBgURI="img/statusBarBG.png" ></UI>
+	<startingConditions gold="1500" level="1"></startingConditions>
+	<elements resComSkins="houseGreen_1,houseWhite_1,store_1">
+		<base img="img/base.png"></base>
+		<baseLarge img="img/baseLarge.png"></baseLarge>
+		<barracks_1 img="img/barracks_1.png"></barracks_1>
+		<mill_1 img="img/mill_1.png"></mill_1>
+		<court_1 img="img/court_1.png" buyPrice="10000" upgradePriceMultiplier="1.2"></court_1>
+		<fountain_1 img="img/fountain_1.png"></fountain_1>
+		<houseGreen_1 img="img/houseGreen_1.png" buyPrice="100" upgradePriceMultiplier="1.2"></houseGreen_1>
+		<houseWhite_1 img="img/houseWhite_1.png" buyPrice="100" upgradePriceMultiplier="1.2"></houseWhite_1>
+		<store_1 img="img/store_1.png" buyPrice="100" upgradePriceMultiplier="1.2"></store_1>
+	</elements>
+	<map>
+		<slot id="court" type="gov" x="412" y="194"></slot>
+		<slot id="mill" type="fixed" x="158" y="88" defSkin="mill_1"></slot>
+		<slot id="tower" type="fixed" x="246" y="208" defSkin="barracks_1"></slot>
+		<slot id="fountain" type="fixed" x="420" y="398" defSkin="fountain_1"></slot>
+		<slot id="resCom1" type="res_com" x="280" y="424"></slot>
+		<slot id="resCom2" type="res_com" x="520" y="460"></slot>
+		<slot id="resCom3" type="res_com" x="484" y="526"></slot>
+		<slot id="resCom4" type="res_com" x="574" y="532"></slot>
+	</map>
+	<storeItems order="Gold_x_1K,Gold_x_5K,Gold_x_10K,Level2_Unlock">
+		<Gold_x_1K id="Gold_x_1K" thumb="img/item_gold_1.png" description="Gold x1K" price="0.99" reward="1000"></Gold_x_1K>
+		<Gold_x_5K id="Gold_x_5K" thumb="img/item_gold_2.png" description="Gold x5K" price="1.99" reward="5000"></Gold_x_5K>
+		<Gold_x_10K id="Gold_x_10K" thumb="img/item_gold_3.png" description="Gold x10K" price="2.99" reward="10000"></Gold_x_10K>
+		<Level2_Unlock id="Level2_Unlock" thumb="img/item_unlockLvl2.png" description="Gold x1K" price="1.99"></Level2_Unlock>
+	</storeItems>
+</world>

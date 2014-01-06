@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<!-- NMML reference: https://gist.github.com/1763850 -->
+	
+	<!-- metadata, make sure 'package' is at least 3 segments (ie. com.mycompany.myproject) -->
+	<meta title="IAPTestOpenFL" package="IAPTestOpenFL" version="0.1" company="Emiliano Angelini - Emibap" />
+	
+	<!-- output -->
+	<app main="Main" file="Iaptest" path="bin" />
+	
+	<window background="#33ADFF" fps="60" />
+	<window width="1024" height="768" unless="mobile" />
+	<window orientation="portrait" vsync="false" antialiasing="0" if="cpp" />
+	
+	<!-- Flash target device size hack -->
+	<haxedef name="DEVICE_IPAD" />
+	<!--  <haxedef name="DEVICE_IPHONE4" />-->
+	<!--  <haxedef name="DEVICE_IPHONE5" />-->
+	<!--  <haxedef name="IS_DEBUG" />-->
+	
+	<!-- classpath, haxe libs -->
+	<source path="src" />
+	<haxelib name="openfl" />
+	<haxelib name="actuate" />
+	<haxelib name="iap" />
+	
+	<!-- assets -->
+	<icon path="assets/openfl.svg" />
+	<assets path="assets/img" rename="img" />
+	<assets path="assets/txt" rename="txt" />
+	
+	<!-- optimize output
+	<haxeflag name="-dce full" /> -->
+	
+</project>

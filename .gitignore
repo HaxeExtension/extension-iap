@@ -3,3 +3,6 @@ ndll/*/*.a
 project/obj/*
 
 *.hxproj
+
+sample/_material/*
+sample/bin
