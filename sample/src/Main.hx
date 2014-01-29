@@ -55,6 +55,7 @@ class Main extends Sprite
 		ScreenUtils.setScaleMatrix();
 		
 		model = GameModel.getInstance();
+		Store.getInstance();
 		
 		gameUserData = GameUserData.getInstance();
 		gameUserData.init(model);

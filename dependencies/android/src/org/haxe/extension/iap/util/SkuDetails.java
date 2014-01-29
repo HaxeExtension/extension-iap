@@ -50,9 +50,11 @@ public class SkuDetails {
     public String getPrice() { return mPrice; }
     public String getTitle() { return mTitle; }
     public String getDescription() { return mDescription; }
-
+	
+	
     @Override
     public String toString() {
-        return "SkuDetails:" + mJson;
+        //return "SkuDetails:" + mJson;
+        return mJson;
     }
 }

@@ -1,5 +1,11 @@
 package org.haxe.extension.iap;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.Context;
@@ -31,6 +37,10 @@ public class InAppPurchase extends Extension {
 		
 	}
 	
+	public static void queryInventory (boolean querySkuDetails, String[] moreSkusArr) {
+		List<String> moreSkus = Arrays.asList(moreSkusArr); 
+		InAppPurchase.inAppPurchaseHelper.queryInventoryAsync(querySkuDetails, moreSkus, mGotInventoryListener);
+	}
 	
 	public static String getPublicKey () {
 		
@@ -55,7 +65,7 @@ public class InAppPurchase extends Extension {
 		InAppPurchase.inAppPurchaseHelper = new IabHelper (Extension.mainContext, publicKey);
 		InAppPurchase.inAppPurchaseHelper.startSetup (new IabHelper.OnIabSetupFinishedListener () {
 			
-			public void onIabSetupFinished (IabResult result) {
+			public void onIabSetupFinished (final IabResult result) {
 				
 				if (result.isSuccess ()) {
 					
@@ -69,6 +79,16 @@ public class InAppPurchase extends Extension {
 						
 					});
 					
+				} else {
+					Extension.callbackHandler.post (new Runnable () {
+						
+						@Override public void run () {
+							
+							InAppPurchase.callback.call ("onStarted", new Object[] { "Failure" });
+							
+						}
+						
+					});
 				}
 				
 			}
@@ -110,22 +130,52 @@ public class InAppPurchase extends Extension {
 	}
 	
 	
-	static IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener = new IabHelper.QueryInventoryFinishedListener() { 
-		
-		public void onQueryInventoryFinished (IabResult result, Inventory inventory) {
-			
-			if (result.isFailure ()) {
-				
-				// Handle failure
-				
-			} else {
-				
-				//InAppPurchase.inAppPurchaseHelper.consumeAsync(inventory.getPurchase(NameOfItem), mConsumeFinishedListener);
-				
-			}
-			
-		}
-		
+	static IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
+	   
+		public void onQueryInventoryFinished(IabResult result, final Inventory inventory) {
+
+		  if (result.isFailure()) {
+			// handle error here
+			Extension.callbackHandler.post (new Runnable ()
+			{
+				@Override public void run ()
+				{
+					InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { "Failure" });
+				}	
+			});
+		  }
+		  else {
+			// does the user have the premium upgrade?
+			// mIsPremium = inventory.hasPurchase(SKU_PREMIUM);        
+			// update UI accordingly
+			Extension.callbackHandler.post (new Runnable ()
+			{
+				@Override public void run ()
+				{
+					String jsonResp = "{ \"purchases\": [], \"descriptions\":[ ";
+					Iterator it =  inventory.getProductDetails().entrySet().iterator();
+					
+					while (it.hasNext()) {
+						Map.Entry pairs = (Map.Entry)it.next();
+						//jsonResp += "{key:" + pairs.getKey() + ", value:" + pairs.getValue().toString() + "}";
+						jsonResp += "{\"key\":\"" + pairs.getKey() + "\", \"value\":" + pairs.getValue().toString() + "},";
+						//jsonResp += "{\"key\":" + pairs.getKey() + "}";
+						
+						it.remove(); // avoids a ConcurrentModificationException
+					}
+					
+					jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
+					
+					jsonResp += "]}";
+					
+					InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { jsonResp });
+					
+					
+				}	
+			});
+		  }
+	   }
+	   
 	};
 	
 	
@@ -150,7 +200,7 @@ public class InAppPurchase extends Extension {
 	
 	static IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener () {
 		
-		public void onIabPurchaseFinished (IabResult result, Purchase purchase)
+		public void onIabPurchaseFinished (IabResult result, final Purchase purchase)
 		{
 			
 			if (result.isFailure ()) 
@@ -160,7 +210,7 @@ public class InAppPurchase extends Extension {
 				{
 					@Override public void run () 
 					{
-						InAppPurchase.callback.call ("onFailedPurchase", new Object[] { "Failure" });
+						InAppPurchase.callback.call ("onFailedPurchase", new Object[] { purchase.getSku() });
 					}
 				});
 			} 
@@ -170,7 +220,7 @@ public class InAppPurchase extends Extension {
 				{
 					@Override public void run ()
 					{
-						InAppPurchase.callback.call ("onPurchase", new Object[] { "success" });
+						InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getSku() });
 					}	
 				});
 				InAppPurchase.inAppPurchaseHelper.consumeAsync(purchase, mConsumeFinishedListener);

@@ -64,40 +64,7 @@ class GameModel
 		elementDefinitions = new Map<String, ElementDefinition>();
 		populateelementDefinitions();
 		
-		getStoreData();
-	}
-	
-	
-	public function getStoreData() :Void {
-		trace("getStoreData");
-		
-		var orderArr:Array<String> = data.node.storeItems.att.order.split(",");
-		
-		Store.getInstance().addEventListener(IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE, productDataArrived);
-				
-		IAP.requestProductData(orderArr);
-	}
-	
-	private function productDataArrived(e:IAPEvent):Void 
-	{
-		trace("ProductDataArrived");
-		
-		var store:Store = Store.getInstance();
-	
-		var map:Map<String, StoreItemData> = new Map<String, StoreItemData>();
-
-		var storeElems:Xml = data.node.storeItems.x;
-		
-		var fastEl:Fast;
-		
-		for (elt in e.productsData) {
-			
-			fastEl = new Fast(getXmlEl(storeElems, elt.productID));
-			
-			map.set(elt.productID, {id:elt.productID, thumb:ScreenUtils.getBitmapData(fastEl.att.thumb), description:elt.localizedTitle + " " + elt.price, reward:(fastEl.has.reward)? Std.parseInt(fastEl.att.reward) : null} );
-		}
-		
-		Store.getInstance().setStoreData(map, data.node.storeItems.att.order.split(","));
+		//getStoreData();
 	}
 	
 	public function getXmlEl(node:Xml, name:String):Xml {

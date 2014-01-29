@@ -1,11 +1,13 @@
 package extension.iap;
 
 
+import flash.errors.Error;
 import flash.events.EventDispatcher;
 import flash.events.Event;
 import flash.net.SharedObjectFlushStatus;
 import flash.net.SharedObject;
 import flash.Lib;
+import haxe.Json;
 
 #if android
 import openfl.utils.JNI;
@@ -129,6 +131,8 @@ typedef IAProduct = {
 			load ();
 			
 		}
+		
+		trace("calling initialize");
 		
 		funcInit (publicKey, new IAPHandler ());
 		
@@ -282,6 +286,18 @@ typedef IAProduct = {
 			
 	}
 	
+	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
+		#if android
+			if (funcQueryInventory == null) {
+			
+			funcQueryInventory = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "queryInventory", "(Z[Ljava/lang/String;)V");
+			
+		}
+		
+		trace("calling queryInventory");
+		funcQueryInventory (queryItemDetails, moreItems);
+		#end
+	}
 	
 	public static function requestProductData (inArg:Dynamic):Void {
 		
@@ -405,7 +421,7 @@ typedef IAProduct = {
 		
 		#elseif android
 		
-		return true;
+		return IAPHandler.androidAvailable;
 		
 		#else
 		
@@ -415,8 +431,6 @@ typedef IAProduct = {
 		
 	}
 	
-	
-	//TODO:manualTransactionMode
 	public static function get_manualTransactionMode ():Bool {
 		#if ios
 		return purchases_get_manualtransactionmode ();
@@ -445,6 +459,7 @@ typedef IAProduct = {
 	private static var funcInit:Dynamic;
 	private static var funcBuy:Dynamic;
 	private static var funcRestore:Dynamic;
+	private static var funcQueryInventory:Dynamic;
 	private static var funcTest:Dynamic;
 	
 	#elseif ios
@@ -472,6 +487,8 @@ typedef IAProduct = {
 private class IAPHandler {
 	
 	public static var lastPurchaseRequest:String = "";
+	
+	public static var androidAvailable:Bool = true;
 	
 	public function new () {
 		
@@ -508,6 +525,51 @@ private class IAPHandler {
 
 	}
 	
+	public function onQueryInventoryComplete (response:Array<Dynamic>):Void {
+		
+		trace("queryInventoryComplete: " + response);
+				
+		trace(Type.getClass(response));
+		trace(Reflect.fields(response));
+		
+		var strRes:String = "";
+
+		if (Std.is(response, String)) {
+			trace("Es String!");
+			strRes = cast (response, String);
+		}
+		if (Std.is(response, Int)) trace("Es Int!");
+		if (Std.is(response, Float)) trace("Es Float!");
+		if (Std.is(response, Dynamic)) {
+			trace("Es Dynamic!");
+			
+		}
+		
+		
+		if (strRes == "Failure") {
+			androidAvailable = false;
+			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_FAILED));
+		} else {
+			trace("BeforeParse");
+			try {
+				
+				var dynResp:Dynamic = Json.parse(strRes);
+				trace("Parsed!: " + dynResp);
+			} catch (e:Error) {
+				trace(e);
+			}
+				
+				
+			
+			trace("No parse");
+			
+			
+			
+			androidAvailable = true;
+			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_COMPLETE));
+		}
+		
+	}
 	
 	public function onRestorePurchases ():Void {
 		
@@ -516,9 +578,19 @@ private class IAPHandler {
 	}
 	
 	
-	public function onStarted (msg:Array<Dynamic>):Void {
+	public function onStarted (response:Array<Dynamic>):Void {
+		trace("onStarted: " + response);
+				
+		trace(Type.getClass(response));
+		trace(Reflect.fields(response));
 		
-		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT));
+		if (cast(response, String) == "Success") {
+			androidAvailable = true;
+			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT));
+		} else {
+			androidAvailable = false;
+			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT_FAILED));
+		}
 		
 	}
 	

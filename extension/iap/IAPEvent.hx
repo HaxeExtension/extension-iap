@@ -11,12 +11,15 @@ class IAPEvent extends Event {
 	public static inline var PURCHASE_CANCEL = "purchaseCanceled";
 	public static inline var PURCHASE_FAILURE = "purchaseFailed";
 	public static inline var PURCHASE_INIT = "init";
+	public static inline var PURCHASE_INIT_FAILED = "initFailed";
 	public static inline var PURCHASE_RESTORE = "purchaseRestore";
 	public static inline var PRODUCTS_RESTORED = "purchasesRestored";
 	public static inline var PRODUCTS_RESTORED_WITH_ERRORS = "purchasesRestoredWithErrors";
 	public static inline var PURCHASE_SUCCESS = "purchaseSuccess";
 	public static inline var PURCHASE_PRODUCT_DATA = "productDataArrived";
 	public static inline var PURCHASE_PRODUCT_DATA_COMPLETE = "productDataComplete";
+	public static inline var PURCHASE_QUERY_INVENTORY_COMPLETE = "queryInventoryComplete";
+	public static inline var PURCHASE_QUERY_INVENTORY_FAILED = "queryInventoryFailed";
 	public static inline var DOWNLOAD_COMPLETE = "downloadComplete";
 	public static inline var DOWNLOAD_START = "downloadStart";
 	public static inline var DOWNLOAD_PROGRESS = "downloadProgress";

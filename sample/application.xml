@@ -3,14 +3,14 @@
 	<!-- NMML reference: https://gist.github.com/1763850 -->
 	
 	<!-- metadata, make sure 'package' is at least 3 segments (ie. com.mycompany.myproject) -->
-	<meta title="IAPTestOpenFL" package="IAPTestOpenFL" version="0.1" company="Emiliano Angelini - Emibap" />
+	<meta title="IAPTestOpenFL" package="com.emibap.IAPTestOpenFL" version="0.1" company="Emiliano Angelini - Emibap" />
 	
 	<!-- output -->
 	<app main="Main" file="Iaptest" path="bin" />
 	
 	<window background="#33ADFF" fps="60" />
 	<window width="1024" height="768" unless="mobile" />
-	<window orientation="portrait" vsync="false" antialiasing="0" if="cpp" />
+	<window orientation="auto" vsync="false" antialiasing="0" if="cpp" />
 	
 	<!-- Flash target device size hack -->
 	<haxedef name="DEVICE_IPAD" />
@@ -28,6 +28,11 @@
 	<icon path="assets/openfl.svg" />
 	<assets path="assets/img" rename="img" />
 	<assets path="assets/txt" rename="txt" />
+	
+	<!-- certificates -->
+	<certificate path="certificates/iab-test-release-key.keystore" alias="iabTestK" password="iabtest01" if="android" ></certificate>
+
+
 	
 	<!-- optimize output
 	<haxeflag name="-dce full" /> -->

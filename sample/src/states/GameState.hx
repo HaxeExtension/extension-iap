@@ -106,7 +106,10 @@ class GameState extends State
 		wel.skinId = elDef.id;
 		wel.empty = false;
 		
+		userData.gold -= elDef.buyPrice;
+		
 		userData.persistElement(wel);
+		
 		userData.save();
 	}
 	

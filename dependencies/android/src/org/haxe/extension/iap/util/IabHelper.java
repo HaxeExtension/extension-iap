@@ -37,7 +37,6 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Provides convenience methods for in-app billing. You can create one instance of this
  * class for your application and use it to process in-app billing operations.
