@@ -3,7 +3,6 @@ package org.haxe.extension.iap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -132,7 +131,7 @@ public class InAppPurchase extends Extension {
 	
 	static IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
 	   
-		public void onQueryInventoryFinished(IabResult result, final Inventory inventory) {
+		public void onQueryInventoryFinished(final IabResult result, final Inventory inventory) {
 
 		  if (result.isFailure()) {
 			// handle error here
@@ -140,7 +139,9 @@ public class InAppPurchase extends Extension {
 			{
 				@Override public void run ()
 				{
+					
 					InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { "Failure" });
+					
 				}	
 			});
 		  }
@@ -152,24 +153,8 @@ public class InAppPurchase extends Extension {
 			{
 				@Override public void run ()
 				{
-					String jsonResp = "{ \"purchases\": [], \"descriptions\":[ ";
-					Iterator it =  inventory.getProductDetails().entrySet().iterator();
 					
-					while (it.hasNext()) {
-						Map.Entry pairs = (Map.Entry)it.next();
-						//jsonResp += "{key:" + pairs.getKey() + ", value:" + pairs.getValue().toString() + "}";
-						jsonResp += "{\"key\":\"" + pairs.getKey() + "\", \"value\":" + pairs.getValue().toString() + "},";
-						//jsonResp += "{\"key\":" + pairs.getKey() + "}";
-						
-						it.remove(); // avoids a ConcurrentModificationException
-					}
-					
-					jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
-					
-					jsonResp += "]}";
-					
-					InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { jsonResp });
-					
+					InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { inventory.toJsonString() });
 					
 				}	
 			});

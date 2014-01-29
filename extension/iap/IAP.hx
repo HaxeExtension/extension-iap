@@ -1,6 +1,5 @@
 package extension.iap;
 
-
 import flash.errors.Error;
 import flash.events.EventDispatcher;
 import flash.events.Event;
@@ -18,7 +17,8 @@ typedef IAProduct = {
     ?localizedTitle:String,
     ?localizedDescription:String,
     ?price:String,
-    ?localizedPrice:String
+    ?localizedPrice:String,
+	?type:String		//android
 }
 
 @:allow(extension.iap) class IAP {
@@ -535,38 +535,50 @@ private class IAPHandler {
 		var strRes:String = "";
 
 		if (Std.is(response, String)) {
-			trace("Es String!");
+			trace("It's String!");
 			strRes = cast (response, String);
 		}
-		if (Std.is(response, Int)) trace("Es Int!");
-		if (Std.is(response, Float)) trace("Es Float!");
+		if (Std.is(response, Int)) trace("It's  Int!");
+		if (Std.is(response, Float)) trace("It's  Float!");
 		if (Std.is(response, Dynamic)) {
-			trace("Es Dynamic!");
-			
+			trace("It's  Dynamic!");
 		}
-		
 		
 		if (strRes == "Failure") {
 			androidAvailable = false;
 			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_FAILED));
 		} else {
 			trace("BeforeParse");
-			try {
+
+			var dynResp:Dynamic = Json.parse(strRes);
+			trace("Parsed!: " + dynResp);
+			var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_COMPLETE);
+			evt.productsData = new Array<IAProduct>();
+			
+			var dynDescriptions:Array<Dynamic> = Reflect.field(dynResp, "descriptions");
+			var prod:IAProduct;
+			
+			if (dynDescriptions != null) {
 				
-				var dynResp:Dynamic = Json.parse(strRes);
-				trace("Parsed!: " + dynResp);
-			} catch (e:Error) {
-				trace(e);
+				for (dynItm in dynDescriptions) {
+					prod = { productID: Reflect.field(dynItm, "productId") };
+					prod.type = Reflect.field(dynItm, "type");
+					prod.localizedPrice = prod.price = Reflect.field(dynItm, "price");
+					prod.localizedTitle = Reflect.field(dynItm, "title");
+					prod.localizedDescription = Reflect.field(dynItm, "description");
+					
+					evt.productsData.push(prod);
+				}
+				
 			}
-				
-				
-			
-			trace("No parse");
 			
 			
+			IAP.dispatcher.dispatchEvent (evt);
 			
 			androidAvailable = true;
-			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_COMPLETE));
+
+			
+			
 		}
 		
 	}

@@ -54,7 +54,10 @@ public class SkuDetails {
 	
     @Override
     public String toString() {
-        //return "SkuDetails:" + mJson;
-        return mJson;
+        return "SkuDetails:" + mJson;
     }
+	
+	public String toJsonString() {
+		return mJson;
+	}
 }

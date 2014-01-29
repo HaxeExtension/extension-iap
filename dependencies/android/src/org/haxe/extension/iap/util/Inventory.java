@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 
 /**
  * Represents a block of information about in-app items.
@@ -91,5 +92,23 @@ public class Inventory {
 	
 	public Map<String,SkuDetails> getProductDetails() {
 		return mSkuMap;
+	}
+	
+	public String toJsonString() {
+		String jsonResp = "{ \"purchases\": [], \"descriptions\":[ ";
+		
+		Iterator it =  mSkuMap.entrySet().iterator();
+					
+		while (it.hasNext()) {
+			Map.Entry pairs = (Map.Entry)it.next();
+			jsonResp += "{\"key\":\"" + pairs.getKey() + "\", \"value\":" + ((SkuDetails)pairs.getValue()).toJsonString() + "},";
+			it.remove(); // avoids a ConcurrentModificationException
+		}
+		
+		jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
+		
+		jsonResp += "]}";
+		
+		return jsonResp;
 	}
 }
