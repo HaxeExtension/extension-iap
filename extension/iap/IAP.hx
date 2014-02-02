@@ -118,7 +118,7 @@ typedef IAProduct = {
 			
 		}
 		
-		trace("calling initialize");
+		//trace("calling initialize");
 		
 		funcInit (publicKey, new IAPHandler ());
 		
@@ -306,7 +306,7 @@ typedef IAProduct = {
 			
 		}
 		
-		trace("calling queryInventory: queryItemDetails: " + queryItemDetails + " moreItems: " + moreItems);
+		//trace("calling queryInventory: queryItemDetails: " + queryItemDetails + " moreItems: " + moreItems);
 		funcQueryInventory (queryItemDetails, moreItems);
 		#end
 	}
@@ -518,7 +518,7 @@ private class IAPHandler {
 		} else {
 			trace("WARNING: Unexpected type for response parameter."); 
 		}
-		trace("beforeParse: " + strRes);
+		//trace("beforeParse: " + strRes);
 		return Json.parse(strRes);
 		
 	}
@@ -539,7 +539,7 @@ private class IAPHandler {
 
 		var dynResp:Dynamic = parseJsonResponse(response);
 		
-		trace("Parsed!: " + dynResp);
+		//trace("Parsed!: " + dynResp);
 		
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_FAILURE, productID);
 		evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
@@ -558,7 +558,7 @@ private class IAPHandler {
 
 		var dynResp:Dynamic = parseJsonResponse(response);
 		
-		trace("Parsed!: " + dynResp);
+		//trace("Parsed!: " + dynResp);
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_SUCCESS);
 		
 		evt.productID = Reflect.field(dynResp, "productId");
@@ -576,7 +576,7 @@ private class IAPHandler {
 
 		var dynResp:Dynamic = parseJsonResponse(response);
 		
-		trace("Parsed!: " + dynResp);
+		//trace("Parsed!: " + dynResp);
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_FAILURE);
 		if (Reflect.field(dynResp, "product") != null) evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
 		evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
@@ -606,31 +606,31 @@ private class IAPHandler {
 	
 	public function onQueryInventoryComplete (response:Array<Dynamic>):Void {
 		
-		trace("queryInventoryComplete: " + response);
+		//trace("queryInventoryComplete: " + response);
 				
-		trace(Type.getClass(response));
-		trace(Reflect.fields(response));
+		//trace(Type.getClass(response));
+		//trace(Reflect.fields(response));
 		
 		var strRes:String = "";
 
 		if (Std.is(response, String)) {
-			trace("It's String!");
+			//trace("It's String!");
 			strRes = cast (response, String);
 		}
-		if (Std.is(response, Int)) trace("It's  Int!");
-		if (Std.is(response, Float)) trace("It's  Float!");
-		if (Std.is(response, Dynamic)) {
-			trace("It's  Dynamic!");
-		}
+		//if (Std.is(response, Int)) trace("It's  Int!");
+		//if (Std.is(response, Float)) trace("It's  Float!");
+		//if (Std.is(response, Dynamic)) {
+			//trace("It's  Dynamic!");
+		//}
 		
 		if (strRes == "Failure") {
 			androidAvailable = false;
 			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_FAILED));
 		} else {
-			trace("BeforeParse");
+			//trace("BeforeParse");
 
 			var dynResp:Dynamic = Json.parse(strRes);
-			trace("Parsed!: " + dynResp);
+			//trace("Parsed!: " + dynResp);
 			var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_COMPLETE);
 			evt.productsData = new Array<IAProduct>();
 			
@@ -671,10 +671,10 @@ private class IAPHandler {
 	
 	
 	public function onStarted (response:Array<Dynamic>):Void {
-		trace("onStarted: " + response);
+		//trace("onStarted: " + response);
 				
-		trace(Type.getClass(response));
-		trace(Reflect.fields(response));
+		//trace(Type.getClass(response));
+		//trace(Reflect.fields(response));
 		
 		if (cast(response, String) == "Success") {
 			androidAvailable = true;
