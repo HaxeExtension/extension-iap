@@ -276,9 +276,9 @@ typedef IAProduct = {
 		
 		#if ios
 		
-		if (hasPurchased (productID)) {
+		if (hasPurchased (purchase.productID)) {
 			
-			items.set (productID, items.get (purchase.productID) - 1);
+			items.set (purchase.productID, items.get (purchase.productID) - 1);
 			save ();
 			
 		}

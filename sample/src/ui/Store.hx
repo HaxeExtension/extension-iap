@@ -80,7 +80,7 @@ class Store extends Sprite
 		itemsHolder.x = ScreenUtils.scaleFloat(36);
 		itemsHolder.y = ScreenUtils.scaleFloat(66);
 		
-		trace("IAP vailable: " + IAP.available);
+		trace("IAP available: " + IAP.available);
 		if (IAP.available) {
 			initializeIAP();
 		} else {
@@ -270,12 +270,16 @@ class Store extends Sprite
 	{
 		trace(e.type + " - productID: " + e.productID);
 		//var prod:StoreItemData = data.get(e.productID);
+		
 		//if (prod.reward != null) GameUserData.getInstance().gold += prod.reward;
 		
+		#if android
 		//test
 		trace("sending test consume for " + e.purchase);
 		IAP.consume(e.purchase);
-		
+		#else
+		onConsumeSuccess(e);
+		#end
 	}
 	
 	private function onPurchaseFail(e:IAPEvent):Void 
@@ -291,8 +295,11 @@ class Store extends Sprite
 	private function onConsumeSuccess(e:IAPEvent):Void 
 	{
 		trace(e.type + " - productID: " + e.productID);
-		//var prod:StoreItemData = data.get(e.productID);
-		//if (prod.reward != null) GameUserData.getInstance().gold += prod.reward;
+		
+		if (data.exists(e.productID)) {
+			var prod:StoreItemData = data.get(e.productID);
+			if (prod.reward != null) GameUserData.getInstance().gold += prod.reward;
+		}
 		
 	}
 	
