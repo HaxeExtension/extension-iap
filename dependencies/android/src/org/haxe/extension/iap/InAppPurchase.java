@@ -166,36 +166,6 @@ public class InAppPurchase extends Extension {
 			{
 				@Override public void run ()
 				{
-					/*
-					// Testing data injection
-					String purchaseJson = "{\"orderId\": \"testOrderId\", \"packageName\": \"testpackageName\", \"productId\": \"testproductId\", \"purchaseTime\": 1000, \"purchaseState\": 1, \"developerPayload\": \"testdeveloperPayload\", \"purchaseToken\": \"testpurchaseToken\" }";
-					
-					Purchase purchase = null;
-					
-					try {
-						purchase = new Purchase("inapp", purchaseJson, "firmaElEmi");
-					} 
-					catch (JSONException e) {
-						InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { "Failure" });
-					}
-					
-					if (purchase != null) {
-						IabResult result = new IabResult(IabHelper.BILLING_RESPONSE_RESULT_OK, "Mensaje del Emi");
-						
-						//test failedPurchase
-						//InAppPurchase.callback.call ("onFailedPurchase", new Object[] { ("{\"result\":" + result.toJsonString() + ", \"product\":" + purchase.getOriginalJson() + "}") });
-						
-						//test purchase
-						InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson() });
-						
-						//test failedConsume
-						//InAppPurchase.callback.call ("onFailedConsume", new Object[] { ("{\"result\":" + result.toJsonString() + ", \"product\":" + purchase.getOriginalJson() + "}") });
-						
-						//test consume
-						//InAppPurchase.callback.call ("onConsume", new Object[] { purchase.getOriginalJson() });
-					}
-					*/
-
 					
 					InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { inventory.toJsonString() });
 					
