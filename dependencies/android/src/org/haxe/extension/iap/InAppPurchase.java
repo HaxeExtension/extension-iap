@@ -22,6 +22,8 @@ import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 
 
+import org.json.JSONException;
+
 public class InAppPurchase extends Extension {
 	
 	
@@ -33,6 +35,18 @@ public class InAppPurchase extends Extension {
 	public static void buy (String productID) {
 		
 		InAppPurchase.inAppPurchaseHelper.launchPurchaseFlow (Extension.mainActivity, productID, 1001, mPurchaseFinishedListener, "");
+		
+	}
+	
+	public static void consume (String purchaseJson) {
+		
+		try {
+			Purchase purchase = new Purchase(null, purchaseJson, null);
+			InAppPurchase.inAppPurchaseHelper.consumeAsync(purchase, mConsumeFinishedListener);
+		} 
+		catch (JSONException e) {
+			InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { "Failure" });
+		}
 		
 	}
 	
@@ -142,17 +156,46 @@ public class InAppPurchase extends Extension {
 					
 					InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { "Failure" });
 					
+					
 				}	
 			});
 		  }
 		  else {
-			// does the user have the premium upgrade?
-			// mIsPremium = inventory.hasPurchase(SKU_PREMIUM);        
-			// update UI accordingly
+			
 			Extension.callbackHandler.post (new Runnable ()
 			{
 				@Override public void run ()
 				{
+					/*
+					// Testing data injection
+					String purchaseJson = "{\"orderId\": \"testOrderId\", \"packageName\": \"testpackageName\", \"productId\": \"testproductId\", \"purchaseTime\": 1000, \"purchaseState\": 1, \"developerPayload\": \"testdeveloperPayload\", \"purchaseToken\": \"testpurchaseToken\" }";
+					
+					Purchase purchase = null;
+					
+					try {
+						purchase = new Purchase("inapp", purchaseJson, "firmaElEmi");
+					} 
+					catch (JSONException e) {
+						InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { "Failure" });
+					}
+					
+					if (purchase != null) {
+						IabResult result = new IabResult(IabHelper.BILLING_RESPONSE_RESULT_OK, "Mensaje del Emi");
+						
+						//test failedPurchase
+						//InAppPurchase.callback.call ("onFailedPurchase", new Object[] { ("{\"result\":" + result.toJsonString() + ", \"product\":" + purchase.getOriginalJson() + "}") });
+						
+						//test purchase
+						InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson() });
+						
+						//test failedConsume
+						//InAppPurchase.callback.call ("onFailedConsume", new Object[] { ("{\"result\":" + result.toJsonString() + ", \"product\":" + purchase.getOriginalJson() + "}") });
+						
+						//test consume
+						//InAppPurchase.callback.call ("onConsume", new Object[] { purchase.getOriginalJson() });
+					}
+					*/
+
 					
 					InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { inventory.toJsonString() });
 					
@@ -164,28 +207,9 @@ public class InAppPurchase extends Extension {
 	};
 	
 	
-	static IabHelper.OnConsumeFinishedListener mConsumeFinishedListener = new IabHelper.OnConsumeFinishedListener () {
-		
-		public void onConsumeFinished (Purchase purchase, IabResult result) {
-			
-			if (result.isSuccess ()) {
-				
-					
-				
-			} else {
-				
-				
-				
-			}
-			
-		}
-		
-	};
-	
-	
 	static IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener () {
 		
-		public void onIabPurchaseFinished (IabResult result, final Purchase purchase)
+		public void onIabPurchaseFinished (final IabResult result, final Purchase purchase)
 		{
 			
 			if (result.isFailure ()) 
@@ -195,7 +219,7 @@ public class InAppPurchase extends Extension {
 				{
 					@Override public void run () 
 					{
-						InAppPurchase.callback.call ("onFailedPurchase", new Object[] { purchase.getSku() });
+						InAppPurchase.callback.call ("onFailedPurchase", new Object[] { ("{\"result\":" + result.toJsonString() + ", \"product\":" + purchase.getOriginalJson() + "}") });
 					}
 				});
 			} 
@@ -205,15 +229,47 @@ public class InAppPurchase extends Extension {
 				{
 					@Override public void run ()
 					{
-						InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getSku() });
+						InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson() });
 					}	
 				});
-				InAppPurchase.inAppPurchaseHelper.consumeAsync(purchase, mConsumeFinishedListener);
 			}
 			
 		}
 		
 	};
+	
+	
+	static IabHelper.OnConsumeFinishedListener mConsumeFinishedListener = new IabHelper.OnConsumeFinishedListener () {
+		
+		public void onConsumeFinished (final Purchase purchase, final IabResult result) {
+			
+			if (result.isFailure ()) 
+			{
+				
+				Extension.callbackHandler.post (new Runnable ()
+				{
+					@Override public void run () 
+					{
+						InAppPurchase.callback.call ("onFailedConsume", new Object[] { ("{\"result\":" + result.toJsonString() + ", \"product\":" + purchase.getOriginalJson() + "}") });
+					}
+				});
+			} 
+			else
+			{
+				Extension.callbackHandler.post (new Runnable ()
+				{
+					@Override public void run ()
+					{
+						InAppPurchase.callback.call ("onConsume", new Object[] { purchase.getOriginalJson() });
+					}	
+				});
+			}
+			
+		}
+		
+	};
+	
+	
 	
 	
 }

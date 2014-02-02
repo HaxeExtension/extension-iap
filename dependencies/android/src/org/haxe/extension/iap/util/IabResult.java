@@ -41,5 +41,7 @@ public class IabResult {
     public boolean isSuccess() { return mResponse == IabHelper.BILLING_RESPONSE_RESULT_OK; }
     public boolean isFailure() { return !isSuccess(); }
     public String toString() { return "IabResult: " + getMessage(); }
+	
+	public String toJsonString() { return ("{\"response\":" + mResponse + ", \"message\":\"" + mMessage + "\"}"); }
 }
 

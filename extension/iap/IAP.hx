@@ -13,7 +13,7 @@ import openfl.utils.JNI;
 #end
 
 typedef IAProduct = {
-    productID : String,
+    productID: String,
     ?localizedTitle:String,
     ?localizedDescription:String,
     ?price:String,
@@ -40,20 +40,6 @@ typedef IAProduct = {
 	}
 	
 	
-	public static function consume (productID:String):Void {
-		
-		#if ios
-		
-		if (hasPurchased (productID)) {
-			
-			items.set (productID, items.get (productID) - 1);
-			save ();
-			
-		}
-		
-		#end
-		
-	}
 	
 	
 	public static function dispatchEvent (event:Event):Bool {
@@ -286,6 +272,32 @@ typedef IAProduct = {
 			
 	}
 	
+	public static function consume (purchase:Purchase):Void {
+		
+		#if ios
+		
+		if (hasPurchased (productID)) {
+			
+			items.set (productID, items.get (purchase.productID) - 1);
+			save ();
+			
+		}
+		
+		#elseif android
+		
+		if (funcConsume == null) {
+			
+			funcConsume = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "consume", "(Ljava/lang/String;)V");
+			
+		}
+		IAPHandler.lastPurchaseRequest = purchase.productID;
+		funcConsume (purchase.originalJson);
+		
+		
+		#end
+		
+	}
+	
 	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
 		#if android
 			if (funcQueryInventory == null) {
@@ -294,7 +306,7 @@ typedef IAProduct = {
 			
 		}
 		
-		trace("calling queryInventory");
+		trace("calling queryInventory: queryItemDetails: " + queryItemDetails + " moreItems: " + moreItems);
 		funcQueryInventory (queryItemDetails, moreItems);
 		#end
 	}
@@ -458,6 +470,7 @@ typedef IAProduct = {
 	
 	private static var funcInit:Dynamic;
 	private static var funcBuy:Dynamic;
+	private static var funcConsume:Dynamic;
 	private static var funcRestore:Dynamic;
 	private static var funcQueryInventory:Dynamic;
 	private static var funcTest:Dynamic;
@@ -496,6 +509,20 @@ private class IAPHandler {
 		
 	}
 	
+	private function parseJsonResponse (response:Array<Dynamic>) :Dynamic {
+		var strRes:String = "";
+
+		if (Std.is(response, String)) {
+			//trace("It's String!");
+			strRes = cast (response, String);
+		} else {
+			trace("WARNING: Unexpected type for response parameter."); 
+		}
+		trace("beforeParse: " + strRes);
+		return Json.parse(strRes);
+		
+	}
+	
 	
 	public function onCanceledPurchase (productID:String):Void {
 		
@@ -504,24 +531,76 @@ private class IAPHandler {
 	}
 	
 	
-	public function onFailedPurchase (dataProductID:Array<Dynamic>):Void
+	public function onFailedConsume (response:Array<Dynamic>):Void
 	{
 		var productID:String = "";
 
 		productID = lastPurchaseRequest; //temporal fix
 
+		var dynResp:Dynamic = parseJsonResponse(response);
 		
-		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_FAILURE, productID));
+		trace("Parsed!: " + dynResp);
+		
+		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_FAILURE, productID);
+		evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
+		evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
+		
+		IAP.dispatcher.dispatchEvent (evt);
 		
 	}
 	
 	
-	public function onPurchase (dataProductID:Array<Dynamic>):Void 
+	public function onConsume (response:Array<Dynamic>):Void
 	{
 		var productID:String = "";
+
 		productID = lastPurchaseRequest; //temporal fix
 
-		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_SUCCESS, productID));
+		var dynResp:Dynamic = parseJsonResponse(response);
+		
+		trace("Parsed!: " + dynResp);
+		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_SUCCESS);
+		
+		evt.productID = Reflect.field(dynResp, "productId");
+		
+		IAP.dispatcher.dispatchEvent (evt);
+		
+	}
+	
+	
+	public function onFailedPurchase (response:Array<Dynamic>):Void
+	{
+		var productID:String = "";
+
+		productID = lastPurchaseRequest; //temporal fix
+
+		var dynResp:Dynamic = parseJsonResponse(response);
+		
+		trace("Parsed!: " + dynResp);
+		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_FAILURE);
+		if (Reflect.field(dynResp, "product") != null) evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
+		evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
+		
+		IAP.dispatcher.dispatchEvent (evt);
+		
+	}
+	
+	
+	public function onPurchase (response:Array<Dynamic>):Void 
+	{
+		//var productID:String = "";
+		//productID = lastPurchaseRequest; //temporal fix
+
+		
+		//var dynResp:Dynamic = parseJsonResponse(response);
+		
+		//trace("Parsed!: " + dynResp);
+		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_SUCCESS);
+		
+		evt.purchase = new Purchase(response);
+		evt.productID = evt.purchase.productID;
+		
+		IAP.dispatcher.dispatchEvent (evt);
 
 	}
 	
@@ -556,22 +635,23 @@ private class IAPHandler {
 			evt.productsData = new Array<IAProduct>();
 			
 			var dynDescriptions:Array<Dynamic> = Reflect.field(dynResp, "descriptions");
+			var dynItmValue:Dynamic;
 			var prod:IAProduct;
 			
 			if (dynDescriptions != null) {
 				
 				for (dynItm in dynDescriptions) {
-					prod = { productID: Reflect.field(dynItm, "productId") };
-					prod.type = Reflect.field(dynItm, "type");
-					prod.localizedPrice = prod.price = Reflect.field(dynItm, "price");
-					prod.localizedTitle = Reflect.field(dynItm, "title");
-					prod.localizedDescription = Reflect.field(dynItm, "description");
+					dynItmValue = Reflect.field(dynItm, "value");
+					prod = { productID: Reflect.field(dynItmValue, "productId") };
+					prod.type = Reflect.field(dynItmValue, "type");
+					prod.localizedPrice = prod.price = Reflect.field(dynItmValue, "price");
+					prod.localizedTitle = Reflect.field(dynItmValue, "title");
+					prod.localizedDescription = Reflect.field(dynItmValue, "description");
 					
 					evt.productsData.push(prod);
 				}
 				
 			}
-			
 			
 			IAP.dispatcher.dispatchEvent (evt);
 			

@@ -103,9 +103,9 @@ class Store extends Sprite
 		trace(itm.id);
 		
 		// Offer to buy
-		// Temp success
-		//onPurchaseSuccess(new IAPEvent("", itm.id));
+		
 		if (IAP.available) IAP.purchase(itm.id);
+		//if (IAP.available) IAP.purchase("android.test.purchased");
 		else {
 			testPurchase_NoIAP(itm.id);
 		}
@@ -124,13 +124,17 @@ class Store extends Sprite
 		IAP.addEventListener(IAPEvent.PURCHASE_INIT, onPurchaseInit);
 		IAP.addEventListener(IAPEvent.PURCHASE_INIT_FAILED, onPurchaseInitFailed);
 		
-		IAP.addEventListener(IAPEvent.PURCHASE_CANCEL, onPurchaseCancel);
+		IAP.addEventListener(IAPEvent.PURCHASE_SUCCESS, onPurchaseSuccess);
 		IAP.addEventListener(IAPEvent.PURCHASE_FAILURE, onPurchaseFail);
+		IAP.addEventListener(IAPEvent.PURCHASE_CANCEL, onPurchaseCancel);
+		
+		IAP.addEventListener(IAPEvent.PURCHASE_CONSUME_SUCCESS, onConsumeSuccess);
+		IAP.addEventListener(IAPEvent.PURCHASE_CONSUME_FAILURE, onConsumeFail);
+		
 		IAP.addEventListener(IAPEvent.PRODUCTS_RESTORED, onPurchasesRestored);
 		IAP.addEventListener(IAPEvent.PRODUCTS_RESTORED_WITH_ERRORS, onPurchasesRestoredWithErrors);
-		IAP.addEventListener(IAPEvent.PURCHASE_SUCCESS, onPurchaseSuccess);
 		IAP.addEventListener(IAPEvent.PURCHASE_PRODUCT_DATA, onSingleProductData);
-		IAP.addEventListener(IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE, storeDataArrived);
+		IAP.addEventListener(IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE, onStoreDataArrived);
 		IAP.addEventListener(IAPEvent.DOWNLOAD_START, onProductDownloadStart);
 		IAP.addEventListener(IAPEvent.DOWNLOAD_COMPLETE, onProductDownloadComplete);
 		IAP.addEventListener(IAPEvent.DOWNLOAD_PROGRESS, onProductDownloadProgress);
@@ -175,6 +179,15 @@ class Store extends Sprite
 		trace("Progress: " + e.downloadProgress);
 	}
 	
+	
+	private function onStoreDataArrived(e:IAPEvent):Void 
+	{
+		trace("onStoreDataArrived");
+		
+		setStoreData(e.productsData);
+	}
+	
+	
 	private function onQueryInventoryComplete(e:IAPEvent):Void 
 	{
 		trace(e.type);
@@ -194,6 +207,52 @@ class Store extends Sprite
 			
 			trace(".");
 		}
+		
+		if (e.productsData.length > 0) {
+			setStoreData(e.productsData);
+		} else {
+			trace("No productsData, calling model");
+			getStoreDataFromModel();
+			
+		}
+		
+	}
+	
+	
+	private function setStoreData(productsData:Array<IAProduct>):Void {
+		
+		var model:GameModel = GameModel.getInstance();
+		var order:Array<String> = model.data.node.storeItems.att.order.split(",");
+		
+		
+		var map:Map<String, StoreItemData> = new Map<String, StoreItemData>();
+
+		var storeElems:Xml = model.data.node.storeItems.x;
+		
+		var fastEl:Fast;
+		
+		for (elt in productsData) {
+			
+			fastEl = new Fast(model.getXmlEl(storeElems, elt.productID));
+			
+			map.set(elt.productID, {id:elt.productID, thumb:ScreenUtils.getBitmapData(fastEl.att.thumb), description:elt.localizedTitle + " " + elt.price, reward:(fastEl.has.reward)? Std.parseInt(fastEl.att.reward) : null} );
+		}
+		
+		
+		this.data = map;
+		var itmPill:StoreItemPill;
+		var datum:StoreItemData;
+		for (i in 0...order.length) {
+			datum = data.get(order[i]);
+			itmPill = new StoreItemPill(datum.id, datum.thumb, datum.description);
+			itemsHolder.addChild(itmPill);
+			
+			itmPill.x = i * (ScreenUtils.scaleFloat(5) + itmPill.width);
+			itemsHolder.addChild(itmPill);
+			
+			itmPill.addEventListener(MouseEvent.CLICK, onItemSelected);
+		}
+		
 	}
 	
 	private function onQueryInventoryFailed(e:IAPEvent):Void
@@ -210,8 +269,38 @@ class Store extends Sprite
 	private function onPurchaseSuccess(e:IAPEvent):Void 
 	{
 		trace(e.type + " - productID: " + e.productID);
-		var prod:StoreItemData = data.get(e.productID);
-		if (prod.reward != null) GameUserData.getInstance().gold += prod.reward;
+		//var prod:StoreItemData = data.get(e.productID);
+		//if (prod.reward != null) GameUserData.getInstance().gold += prod.reward;
+		
+		//test
+		trace("sending test consume for " + e.purchase);
+		IAP.consume(e.purchase);
+		
+	}
+	
+	private function onPurchaseFail(e:IAPEvent):Void 
+	{
+		trace(e.type + " - productID: " + e.productID + " - message: " + e.message);
+	}
+	
+	private function onPurchaseCancel(e:IAPEvent):Void 
+	{
+		trace(e.type + " - productID: " + e.productID);
+	}
+	
+	private function onConsumeSuccess(e:IAPEvent):Void 
+	{
+		trace(e.type + " - productID: " + e.productID);
+		//var prod:StoreItemData = data.get(e.productID);
+		//if (prod.reward != null) GameUserData.getInstance().gold += prod.reward;
+		
+	}
+	
+	private function onConsumeFail(e:IAPEvent):Void 
+	{
+		trace(e.type + " - productID: " + e.productID + " - message: " + e.message);
+		//var prod:StoreItemData = data.get(e.productID);
+		//if (prod.reward != null) GameUserData.getInstance().gold += prod.reward;
 		
 	}
 	
@@ -225,15 +314,6 @@ class Store extends Sprite
 		trace(e.type);
 	}
 	
-	private function onPurchaseFail(e:IAPEvent):Void 
-	{
-		trace(e.type + " - productID: " + e.productID);
-	}
-	
-	private function onPurchaseCancel(e:IAPEvent):Void 
-	{
-		trace(e.type + " - productID: " + e.productID);
-	}
 	
 	
 	
@@ -251,64 +331,27 @@ class Store extends Sprite
 		#end
 	}
 	
-	private function storeDataArrived(e:IAPEvent):Void 
-	{
-		trace("storeDataArrived");
-		
-		var model:GameModel = GameModel.getInstance();
-		
-		var map:Map<String, StoreItemData> = new Map<String, StoreItemData>();
-
-		var storeElems:Xml = model.data.node.storeItems.x;
-		
-		var fastEl:Fast;
-		
-		for (elt in e.productsData) {
-			
-			fastEl = new Fast(model.getXmlEl(storeElems, elt.productID));
-			
-			map.set(elt.productID, {id:elt.productID, thumb:ScreenUtils.getBitmapData(fastEl.att.thumb), description:elt.localizedTitle + " " + elt.price, reward:(fastEl.has.reward)? Std.parseInt(fastEl.att.reward) : null} );
-		}
-		
-		setStoreData(map, model.data.node.storeItems.att.order.split(","));
-	}
-	
 	private function getStoreDataFromModel():Void {
 		trace("getStoreDataFromModel");
 		
+		var productsArray:Array<IAProduct> = [];
+		
 		var model:GameModel = GameModel.getInstance();
 		
-		var map:Map<String, StoreItemData> = new Map<String, StoreItemData>();
+		//var map:Map<String, StoreItemData> = new Map<String, StoreItemData>();
 
-		var storeElems:Xml = model.data.node.storeItems.x;
+		//var storeElems:Xml = model.data.node.storeItems.x;
 		
 		var fastEl:Fast;
 		
 		for (fastEl in model.data.node.storeItems.elements) {
 			
 			//fastEl = new Fast(model.getXmlEl(storeElems, elt.productID));
-			
-			map.set(fastEl.att.id, {id:fastEl.att.id, thumb:ScreenUtils.getBitmapData(fastEl.att.thumb), description:fastEl.att.title + " " + fastEl.att.price, reward:(fastEl.has.reward)? Std.parseInt(fastEl.att.reward) : null} );
+			productsArray.push( { productID: fastEl.att.id, localizedTitle: fastEl.att.title, price: fastEl.att.price } );
+			//map.set(fastEl.att.id, {id:fastEl.att.id, thumb:ScreenUtils.getBitmapData(fastEl.att.thumb), description:fastEl.att.title + " " + fastEl.att.price, reward:(fastEl.has.reward)? Std.parseInt(fastEl.att.reward) : null} );
 		}
 		
-		setStoreData(map, model.data.node.storeItems.att.order.split(","));
-		
-	}
-	
-	private function setStoreData(data:Map<String, StoreItemData>, order:Array<String>):Void {
-		this.data = data;
-		var itmPill:StoreItemPill;
-		var datum:StoreItemData;
-		for (i in 0...order.length) {
-			datum = data.get(order[i]);
-			itmPill = new StoreItemPill(datum.id, datum.thumb, datum.description);
-			itemsHolder.addChild(itmPill);
-			
-			itmPill.x = i * (ScreenUtils.scaleFloat(5) + itmPill.width);
-			itemsHolder.addChild(itmPill);
-			
-			itmPill.addEventListener(MouseEvent.CLICK, onItemSelected);
-		}
+		setStoreData(productsArray);
 		
 	}
 	

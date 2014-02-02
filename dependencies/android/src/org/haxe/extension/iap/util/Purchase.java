@@ -34,9 +34,9 @@ public class Purchase {
     String mSignature;
 
     public Purchase(String itemType, String jsonPurchaseInfo, String signature) throws JSONException {
-        mItemType = itemType;
         mOriginalJson = jsonPurchaseInfo;
         JSONObject o = new JSONObject(mOriginalJson);
+        mItemType = (itemType != null)? itemType : o.optString("itemType");
         mOrderId = o.optString("orderId");
         mPackageName = o.optString("packageName");
         mSku = o.optString("productId");
@@ -44,7 +44,11 @@ public class Purchase {
         mPurchaseState = o.optInt("purchaseState");
         mDeveloperPayload = o.optString("developerPayload");
         mToken = o.optString("token", o.optString("purchaseToken"));
-        mSignature = signature;
+        mSignature = (signature != null)? signature : o.optString("signature");;
+		
+		// Add signature and itemType to mOriginalJson so it can be passed as a string later
+		mOriginalJson = mOriginalJson.substring(0, mOriginalJson.length() - 1) + ", \"signature\":\"" + mSignature + "\", \"itemType\":\"" + itemType + "\"}";
+
     }
 
     public String getItemType() { return mItemType; }
@@ -60,4 +64,5 @@ public class Purchase {
 
     @Override
     public String toString() { return "PurchaseInfo(type:" + mItemType + "):" + mOriginalJson; }
+	
 }

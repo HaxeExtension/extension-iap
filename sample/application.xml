@@ -30,6 +30,7 @@
 	<assets path="assets/txt" rename="txt" />
 	
 	<!-- certificates -->
+	<!--<certificate path="certificates/debug.keystore" alias="androiddebugkey" if="android" ></certificate>-->
 	<certificate path="certificates/iab-test-release-key.keystore" alias="iabTestK" password="iabtest01" if="android" ></certificate>
 
 

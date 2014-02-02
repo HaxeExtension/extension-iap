@@ -97,12 +97,12 @@ public class Inventory {
 	public String toJsonString() {
 		String jsonResp = "{ \"purchases\": [], \"descriptions\":[ ";
 		
-		Iterator it =  mSkuMap.entrySet().iterator();
+		Iterator skuMapIt =  mSkuMap.entrySet().iterator();
 					
-		while (it.hasNext()) {
-			Map.Entry pairs = (Map.Entry)it.next();
+		while (skuMapIt.hasNext()) {
+			Map.Entry pairs = (Map.Entry)skuMapIt.next();
 			jsonResp += "{\"key\":\"" + pairs.getKey() + "\", \"value\":" + ((SkuDetails)pairs.getValue()).toJsonString() + "},";
-			it.remove(); // avoids a ConcurrentModificationException
+			skuMapIt.remove(); // avoids a ConcurrentModificationException
 		}
 		
 		jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
