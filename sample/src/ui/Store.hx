@@ -80,12 +80,12 @@ class Store extends Sprite
 		itemsHolder.x = ScreenUtils.scaleFloat(36);
 		itemsHolder.y = ScreenUtils.scaleFloat(66);
 		
-		trace("IAP available: " + IAP.available);
-		if (IAP.available) {
+		//trace("IAP available: " + IAP.available);
+		//if (IAP.available) {
 			initializeIAP();
-		} else {
-			getStoreDataFromModel();
-		}
+		//} else {
+			//getStoreDataFromModel();
+		//}
 		
 		addChild(itemsHolder);
 		addChild(descTxt);
@@ -145,6 +145,8 @@ class Store extends Sprite
 		
 		IAP.initialize(licenseKey);
 		//trace("getManualTransactionMode: " + IAP.manualTransactionMode);
+		
+		trace("IAP: Available: " + IAP.available);
 	}
 	
 	private function onPurchaseInit(e:IAPEvent):Void 

@@ -184,14 +184,18 @@ public class InAppPurchase extends Extension {
 			
 			if (result.isFailure ()) 
 			{
-				
-				Extension.callbackHandler.post (new Runnable ()
+			Extension.callbackHandler.post (new Runnable ()
+			{
+				@Override public void run () 
 				{
-					@Override public void run () 
-					{
+					try {
 						InAppPurchase.callback.call ("onFailedPurchase", new Object[] { ("{\"result\":" + result.toJsonString() + ", \"product\":" + purchase.getOriginalJson() + "}") });
+					} catch (java.lang.NullPointerException e) {
+						
 					}
-				});
+				}
+			});
+				
 			} 
 			else
 			{

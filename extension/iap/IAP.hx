@@ -265,6 +265,9 @@ typedef IAProduct = {
 			funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;)V");
 			
 		}
+		
+		trace("calling purchase for " + productID);
+		
 		IAPHandler.lastPurchaseRequest = productID;
 		funcBuy (productID);
 		
@@ -429,6 +432,7 @@ typedef IAProduct = {
 	private static function get_available ():Bool {
 		
 		#if ios
+		trace("getAvailable?");
 		return purchases_canbuy ();
 		
 		#elseif android
