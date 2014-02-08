@@ -4,8 +4,8 @@
 	"license": "",
 	"tags": [],
 	"description": "",
-	"version": "1.0.2",
-	"releasenote": "iOS IAP improvements",
+	"version": "1.0.3",
+	"releasenote": "Improvements for Android, added sample, minor fixes for iOS",
 	"contributors": [ "singmajesty" ],
 	"dependencies": {}
 }
