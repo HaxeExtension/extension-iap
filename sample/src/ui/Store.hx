@@ -232,12 +232,15 @@ class Store extends Sprite
 		var storeElems:Xml = model.data.node.storeItems.x;
 		
 		var fastEl:Fast;
-		
+		var xmlEl:Xml;
 		for (elt in productsData) {
+			xmlEl = model.getXmlEl(storeElems, elt.productID);
 			
-			fastEl = new Fast(model.getXmlEl(storeElems, elt.productID));
+			if (xmlEl != null) {
+				fastEl = new Fast(xmlEl);
+				map.set(elt.productID, {id:elt.productID, thumb:ScreenUtils.getBitmapData(fastEl.att.thumb), description:elt.localizedTitle + " " + elt.price, reward:(fastEl.has.reward)? Std.parseInt(fastEl.att.reward) : null} );
+			}
 			
-			map.set(elt.productID, {id:elt.productID, thumb:ScreenUtils.getBitmapData(fastEl.att.thumb), description:elt.localizedTitle + " " + elt.price, reward:(fastEl.has.reward)? Std.parseInt(fastEl.att.reward) : null} );
 		}
 		
 		
@@ -277,7 +280,8 @@ class Store extends Sprite
 		
 		#if android
 		//test
-		trace("sending test consume for " + e.purchase);
+		
+		trace("sending test consume for " + e.purchase + " - payload: " + e.purchase.developerPayload);
 		IAP.consume(e.purchase);
 		#else
 		onConsumeSuccess(e);

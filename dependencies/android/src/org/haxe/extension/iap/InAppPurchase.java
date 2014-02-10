@@ -32,9 +32,9 @@ public class InAppPurchase extends Extension {
 	private static String publicKey = "";
 	
 	
-	public static void buy (String productID) {
+	public static void buy (String productID, String devPayload) {
 		
-		InAppPurchase.inAppPurchaseHelper.launchPurchaseFlow (Extension.mainActivity, productID, 1001, mPurchaseFinishedListener, "");
+		InAppPurchase.inAppPurchaseHelper.launchPurchaseFlow (Extension.mainActivity, productID, 1001, mPurchaseFinishedListener, devPayload);
 		
 	}
 	
@@ -45,7 +45,17 @@ public class InAppPurchase extends Extension {
 			InAppPurchase.inAppPurchaseHelper.consumeAsync(purchase, mConsumeFinishedListener);
 		} 
 		catch (JSONException e) {
-			InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { "Failure" });
+			// This is not a normal consume failure, just a Json parsing error
+			
+			Extension.callbackHandler.post (new Runnable ()
+			{
+				@Override public void run () 
+				{
+					String resultJson = "{\"response\": -999, \"message\":\"Json Parse Error \"}";
+					InAppPurchase.callback.call ("onFailedConsume", new Object[] { ("{\"result\":" + resultJson + ", \"product\":" + null  + "}") });
+				}
+			});
+			
 		}
 		
 	}

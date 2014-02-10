@@ -252,7 +252,7 @@ typedef IAProduct = {
 		//TODO
 	}
 	
-	public static function purchase (productID:String):Void {
+	public static function purchase (productID:String, devPayload:String = ""):Void {
 		
 		#if ios
 		
@@ -262,14 +262,14 @@ typedef IAProduct = {
 		
 		if (funcBuy == null) {
 			
-			funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;)V");
+			funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;Ljava/lang/String;)V");
 			
 		}
 		
-		trace("calling purchase for " + productID);
+		//trace("calling purchase for " + productID + " - payload: " + devPayload);
 		
 		IAPHandler.lastPurchaseRequest = productID;
-		funcBuy (productID);
+		funcBuy (productID, devPayload);
 		
 		#end
 			
@@ -432,7 +432,6 @@ typedef IAProduct = {
 	private static function get_available ():Bool {
 		
 		#if ios
-		trace("getAvailable?");
 		return purchases_canbuy ();
 		
 		#elseif android
@@ -612,9 +611,6 @@ private class IAPHandler {
 		
 		//trace("queryInventoryComplete: " + response);
 				
-		//trace(Type.getClass(response));
-		//trace(Reflect.fields(response));
-		
 		var strRes:String = "";
 
 		if (Std.is(response, String)) {
@@ -631,7 +627,6 @@ private class IAPHandler {
 			androidAvailable = false;
 			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_FAILED));
 		} else {
-			//trace("BeforeParse");
 
 			var dynResp:Dynamic = Json.parse(strRes);
 			//trace("Parsed!: " + dynResp);
