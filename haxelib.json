@@ -1,11 +1,11 @@
 {
 	"name": "iap",
 	"url": "http://www.openfl.org",
-	"license": "",
+	"license": "MIT",
 	"tags": [],
 	"description": "",
-	"version": "1.0.3",
-	"releasenote": "Improvements for Android, added sample, minor fixes for iOS",
+	"version": "1.0.4",
+	"releasenote": "Update license",
 	"contributors": [ "singmajesty" ],
 	"dependencies": {}
 }
