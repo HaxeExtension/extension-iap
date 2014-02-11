@@ -21,14 +21,13 @@ typedef IAProduct = {
 	?type:String		//android
 }
 
-typedef Product = IAProduct
-
-
 @:allow(extension.iap) class IAP {
 	
 	
 	public static var available (get, null):Bool;
 	public static var manualTransactionMode (get, set):Bool;
+	
+	public static var inventory:Inventory = null;
 	
 	private static var initialized = false;
 	private static var items = new Map<String, Int> ();
@@ -665,7 +664,10 @@ private class IAPHandler {
 			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_FAILED));
 		} else {
 
+			
 			var dynResp:Dynamic = Json.parse(strRes);
+			inventory = new Inventory(dynResp);
+			
 			//trace("Parsed!: " + dynResp);
 			var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_COMPLETE);
 			evt.productsData = new Array<IAProduct>();
