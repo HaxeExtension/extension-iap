@@ -21,78 +21,32 @@ typedef IAProduct = {
 	?type:String		//android
 }
 
+typedef Product = IAProduct
+
+
 @:allow(extension.iap) class IAP {
 	
 	
 	public static var available (get, null):Bool;
 	public static var manualTransactionMode (get, set):Bool;
 	
-	private static var dispatcher = new EventDispatcher ();
 	private static var initialized = false;
 	private static var items = new Map<String, Int> ();
 	
 	private static var tempProductsData:Array<IAProduct> = [];
 	
-	public static function addEventListener (type:String, listener:Dynamic, useCapture:Bool = false, priority:Int = 0, useWeakReference:Bool = false):Void {
-		
-		dispatcher.addEventListener (type, listener, useCapture, priority, useWeakReference);
-		
-	}
+	// Event dispatcher composition
+	private static var dispatcher = new EventDispatcher ();
 	
 	
-	
-	
-	public static function dispatchEvent (event:Event):Bool {
-		
-		return dispatcher.dispatchEvent (event);
-		
-	}
-	
-	
-	public static function getQuantity (productID:String):Int {
-		
-		#if ios
-		
-		if (hasPurchased (productID)) {
-			
-			return items.get (productID);
-			
-		}
-		
-		#end
-		
-		return 0;
-		
-	}
-	
-
-	public static function hasEventListener (type:String):Bool {
-		
-		return dispatcher.hasEventListener (type);
-		
-	}
-	
-	
-	public static function hasPurchased (productID:String):Bool {
-		
-		#if ios
-		
-		if (items == null) {
-			
-			return false;
-			
-		}
-		
-		return items.exists (productID) && items.get (productID) > 0;
-		
-		#else
-		
-		return false;
-		
-		#end
-		
-	}
-	
+	/**
+     * Initializes the extension. 
+	 * 
+     * @param publicKey (Android). Your application's public key, encoded in base64. 
+     *     This is used for verification of purchase signatures. You can find your app's base64-encoded 
+     *     public key in your application's page on Google Play Developer Console. Note that this
+     *     is NOT your "developer public key".
+     */
 	
 	public static function initialize (publicKey:String = ""):Void {
 		
@@ -122,11 +76,226 @@ typedef IAProduct = {
 		
 		funcInit (publicKey, new IAPHandler ());
 		
+		#else
+		
+		dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT_FAILED, null));
+		
+		#end
+		
+	}
+	
+	/**
+     * Sends a purchase intent for a given product.
+	 * 
+     * @param productID (iOS & Android). The unique Id for the desired product (Android Sku).
+	 * @param devPayload (Android). Extra data (developer payload), which will be returned with the purchase data
+     *     when the purchase completes. This extra data will be permanently bound to that purchase
+     *     and will always be returned when the purchase is queried.
+     */
+	
+	public static function purchase (productID:String, devPayload:String = ""):Void {
+		
+		#if ios
+		
+		purchases_buy (productID);
+		
+		#elseif android	
+		
+		if (funcBuy == null) {
+			
+			funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;Ljava/lang/String;)V");
+			
+		}
+		
+		//trace("calling purchase for " + productID + " - payload: " + devPayload);
+		
+		IAPHandler.lastPurchaseRequest = productID;
+		funcBuy (productID, devPayload);
+		
+		#end
+			
+	}
+	
+	
+	
+	// Android only methods
+	
+	/**
+     * Sends a consume intent for a given product.
+	 * 
+     * @param purchase. The previously purchased product.
+	 * 
+     */
+	
+	public static function consume (purchase:Purchase):Void {
+		
+		#if android
+		
+		if (funcConsume == null) {
+			
+			funcConsume = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "consume", "(Ljava/lang/String;)V");
+			
+		}
+		IAPHandler.lastPurchaseRequest = purchase.productID;
+		funcConsume (purchase.originalJson);
+		
+		
 		#end
 		
 	}
 	
 	
+	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
+		#if android
+			if (funcQueryInventory == null) {
+			
+			funcQueryInventory = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "queryInventory", "(Z[Ljava/lang/String;)V");
+			
+		}
+		
+		//trace("calling queryInventory: queryItemDetails: " + queryItemDetails + " moreItems: " + moreItems);
+		funcQueryInventory (queryItemDetails, moreItems);
+		#end
+	}
+	
+	
+	
+	// iOS only methods
+	
+	
+	/**
+     * Retrieves localized information about a list of products.
+	 * 
+     * @param inArg. A String with the product Id, or an Array of Strings with multiple product Ids.
+	 * 
+     */
+	
+	public static function requestProductData (inArg:Dynamic):Void {
+		
+		#if ios
+		
+		var productID:String;
+		
+		tempProductsData.splice(0, tempProductsData.length);
+		
+		if (Std.is(inArg, String)) 
+			purchases_get_data (cast(inArg, String));
+		else if (Std.is(inArg, Array))
+			purchases_get_data (cast(inArg, Array<Dynamic>).join(","));
+		else
+			throw new flash.errors.Error("Invalid parameter type: " + Type.typeof(inArg) + ". Valid types are String and Array<String>.");
+		
+		#elseif android	
+		
+		#end
+			
+	}
+	
+	/**
+     * Asks the payment queue to restore previously completed purchases.
+	 * 
+     */
+	
+	public static function restorePurchases ():Void {
+		
+		#if ios
+		
+		purchases_restore ();
+		
+		#elseif android
+		//
+		//if (funcRestore == null) {
+		//	
+		//	funcRestore = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "restore", "()V");
+		//	
+		//}
+		//
+		//funcRestore ();
+		
+		#end
+		
+	}
+	
+	
+	
+	
+	public static function finishTransactionManually (transactionID:String):Void {
+		#if ios
+			purchases_finish_transaction (transactionID);
+		#end
+	}
+	
+	
+	public static function release ():Void {
+		
+		#if ios
+		
+		purchases_release ();
+		
+		#end
+		
+	}
+	
+	//TODO
+	/*public static function displayProductView (productID:String):Void {
+		
+	}*/
+	
+	
+	// Deprecated
+	public static function getQuantity (productID:String):Int {
+		
+		#if ios
+		
+		if (hasPurchased (productID)) {
+			
+			return items.get (productID);
+			
+		}
+		
+		#end
+		
+		return 0;
+		
+	}
+	
+	
+	// Deprecated
+	public static function hasPurchased (productID:String):Bool {
+		
+		#if ios
+		
+		if (items == null) {
+			
+			return false;
+			
+		}
+		
+		return items.exists (productID) && items.get (productID) > 0;
+		
+		#else
+		
+		return false;
+		
+		#end
+		
+	}
+
+	
+	// Private Static Methods
+	
+	
+	private static function registerHandle ():Void {
+		
+		#if ios
+		
+		set_event_handle (notifyListeners);
+		
+		#end
+		
+	}
+
+	// Deprecated
 	private static function load ():Void {
 		
 		try {
@@ -149,6 +318,30 @@ typedef IAProduct = {
 		
 	}
 	
+	// Deprecated
+	private static function save ():Void {
+		
+		var so = SharedObject.getLocal ("in-app-purchases");
+		Reflect.setField (so.data, "data", items);
+		
+		#if (cpp || neko)
+		
+		var flushStatus:SharedObjectFlushStatus = null;
+		
+		try {
+			
+			flushStatus = so.flush ();
+			
+		} catch (e:Dynamic) {
+			
+			trace ("ERROR: Failed to save purchases: " + e);
+			
+		}
+		
+		#end
+		
+	}
+	
 	
 	private static function notifyListeners (inEvent:Dynamic):Void {
 		
@@ -162,7 +355,7 @@ typedef IAProduct = {
 			case "started":
 				
 				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT, data));
-				
+			
 			case "success":
 				
 				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_SUCCESS, data));
@@ -241,192 +434,7 @@ typedef IAProduct = {
 	}
 	
 	
-	public static function finishTransactionManually (transactionID:String):Void {
-		//TODO
-		#if ios
-			purchases_finish_transaction (transactionID);
-		#end
-	}
-	
-	public static function displayProductView (productID:String):Void {
-		//TODO
-	}
-	
-	public static function purchase (productID:String, devPayload:String = ""):Void {
-		
-		#if ios
-		
-		purchases_buy (productID);
-		
-		#elseif android	
-		
-		if (funcBuy == null) {
-			
-			funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;Ljava/lang/String;)V");
-			
-		}
-		
-		//trace("calling purchase for " + productID + " - payload: " + devPayload);
-		
-		IAPHandler.lastPurchaseRequest = productID;
-		funcBuy (productID, devPayload);
-		
-		#end
-			
-	}
-	
-	public static function consume (purchase:Purchase):Void {
-		
-		#if ios
-		
-		if (hasPurchased (purchase.productID)) {
-			
-			items.set (purchase.productID, items.get (purchase.productID) - 1);
-			save ();
-			
-		}
-		
-		#elseif android
-		
-		if (funcConsume == null) {
-			
-			funcConsume = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "consume", "(Ljava/lang/String;)V");
-			
-		}
-		IAPHandler.lastPurchaseRequest = purchase.productID;
-		funcConsume (purchase.originalJson);
-		
-		
-		#end
-		
-	}
-	
-	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
-		#if android
-			if (funcQueryInventory == null) {
-			
-			funcQueryInventory = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "queryInventory", "(Z[Ljava/lang/String;)V");
-			
-		}
-		
-		//trace("calling queryInventory: queryItemDetails: " + queryItemDetails + " moreItems: " + moreItems);
-		funcQueryInventory (queryItemDetails, moreItems);
-		#end
-	}
-	
-	public static function requestProductData (inArg:Dynamic):Void {
-		
-		#if ios
-		
-		var productID:String;
-		
-		tempProductsData.splice(0, tempProductsData.length);
-		
-		if (Std.is(inArg, String)) 
-			purchases_get_data (cast(inArg, String));
-		else if (Std.is(inArg, Array))
-			purchases_get_data (cast(inArg, Array<Dynamic>).join(","));
-		else
-			throw new flash.errors.Error("Invalid parameter type: " + Type.typeof(inArg) + ". Valid types are String and Array<String>.");
-		
-		#elseif android	
-		
-		#end
-			
-	}
-	
-	
-	private static function registerHandle ():Void {
-		
-		#if ios
-		
-		set_event_handle (notifyListeners);
-		
-		#end
-		
-	}
-	
-	
-	private static function release ():Void {
-		
-		#if ios
-		
-		purchases_release ();
-		
-		#end
-		
-	}
-	
-	
-	public static function removeEventListener (type:String, listener:Dynamic, capture:Bool = false):Void {
-		
-		dispatcher.removeEventListener (type, listener, capture);
-		
-	}
-	
-	
-	public static function restorePurchases ():Void {
-		
-		#if ios
-		
-		purchases_restore ();
-		
-		#elseif android
-		//
-		//if (funcRestore == null) {
-		//	
-		//	funcRestore = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "restore", "()V");
-		//	
-		//}
-		//
-		//funcRestore ();
-		
-		#end
-		
-	}
-	
-	
-	private static function save ():Void {
-		
-		var so = SharedObject.getLocal ("in-app-purchases");
-		Reflect.setField (so.data, "data", items);
-		
-		#if (cpp || neko)
-		
-		var flushStatus:SharedObjectFlushStatus = null;
-		
-		try {
-			
-			flushStatus = so.flush ();
-			
-		} catch (e:Dynamic) {
-			
-			trace ("ERROR: Failed to save purchases: " + e);
-			
-		}
-		
-		/*if (flushStatus != null) {
-			
-			switch (flushStatus) {
-				
-				case SharedObjectFlushStatus.PENDING: trace ("Requesting permission to save purchases");
-				case SharedObjectFlushStatus.FLUSHED: trace ("Saved purchases");
-				default:
-				
-			}
-			
-		}*/
-		
-		#end
-		
-	}
-	
-	
-	
-	
-	// Get & Set Methods
-	
-	
+	// Getter & Setter Methods
 	
 	
 	private static function get_available ():Bool {
@@ -446,14 +454,15 @@ typedef IAProduct = {
 		
 	}
 	
-	public static function get_manualTransactionMode ():Bool {
+	private static function get_manualTransactionMode ():Bool {
 		#if ios
 		return purchases_get_manualtransactionmode ();
 		#else
 		return false;
 		#end
 	}
-	public static function set_manualTransactionMode (val:Bool):Bool {
+	
+	private static function set_manualTransactionMode (val:Bool):Bool {
 		#if ios
 		purchases_set_manualtransactionmode (val);
 		#else
@@ -464,9 +473,37 @@ typedef IAProduct = {
 	}
 	
 	
+	
+	// Event Dispatcher composition methods
+	
+	public static function addEventListener (type:String, listener:Dynamic, useCapture:Bool = false, priority:Int = 0, useWeakReference:Bool = false):Void {
+		
+		dispatcher.addEventListener (type, listener, useCapture, priority, useWeakReference);
+		
+	}
+
+	public static function removeEventListener (type:String, listener:Dynamic, capture:Bool = false):Void {
+		
+		dispatcher.removeEventListener (type, listener, capture);
+		
+	}
+	
+	public static function dispatchEvent (event:Event):Bool {
+		
+		return dispatcher.dispatchEvent (event);
+		
+	}
+	
+	public static function hasEventListener (type:String):Bool {
+		
+		return dispatcher.hasEventListener (type);
+		
+	}
+	
+	
+	
+	
 	// Native Methods
-	
-	
 	
 	
 	#if android
