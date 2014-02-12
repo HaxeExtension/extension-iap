@@ -13,14 +13,14 @@ class Inventory
 	
 	public function new(dynObj:Dynamic) 
 	{
+		
+		//trace("Inventory. dynObj: " + dynObj);
+		
 		productDetailsMap = new Map();
 		purchaseMap = new Map();
 		
 		
 		var dynDescriptions:Array<Dynamic> = Reflect.field(dynObj, "descriptions");
-		var dynItmValue:Dynamic;
-		var prod:ProductDetails;
-		
 		if (dynDescriptions != null) {
 			
 			for (dynItm in dynDescriptions) {
@@ -29,6 +29,16 @@ class Inventory
 			
 		}
 		
+		var dynPurchases:Array<Dynamic> = Reflect.field(dynObj, "purchases");
+		if (dynPurchases != null) {
+			
+			for (dynItm in dynPurchases) {
+				purchaseMap.set(cast Reflect.field(dynItm, "key"), new Purchase(Reflect.field(dynItm, "value")));
+			}
+			
+		}
+		
+		//trace("Inventory. EndParse: ");
 	}
 	
 	/** Returns the listing details for an in-app product. */

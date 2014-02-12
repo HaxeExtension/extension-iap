@@ -186,6 +186,13 @@ class Store extends Sprite
 	{
 		trace("onStoreDataArrived");
 		
+		
+		if (IAP.inventory != null) {
+			trace("IAP.inventory: " + IAP.inventory);
+			trace("IAP.inventory.productDetailsMap: " + IAP.inventory.productDetailsMap);
+			trace("IAP.inventory.purchaseMap: " + IAP.inventory.purchaseMap);
+		}
+		
 		setStoreData(e.productsData);
 	}
 	
@@ -208,6 +215,18 @@ class Store extends Sprite
 			}
 			
 			trace(".");
+		}
+		
+		trace(".");
+		
+		if (IAP.inventory != null) {
+			trace("IAP.inventory: " + IAP.inventory);
+			trace("IAP.inventory.productDetailsMap: " + IAP.inventory.productDetailsMap);
+			trace("IAP.inventory.purchaseMap: " + IAP.inventory.purchaseMap);
+			
+			if (IAP.inventory.purchaseMap.exists("android.test.purchased")) {
+				IAP.consume(IAP.inventory.purchaseMap.get("android.test.purchased"));
+			}
 		}
 		
 		if (e.productsData.length > 0) {
@@ -242,7 +261,6 @@ class Store extends Sprite
 			}
 			
 		}
-		
 		
 		this.data = map;
 		var itmPill:StoreItemPill;
@@ -281,8 +299,8 @@ class Store extends Sprite
 		#if android
 		//test
 		
-		trace("sending test consume for " + e.purchase + " - payload: " + e.purchase.developerPayload);
-		IAP.consume(e.purchase);
+		//trace("sending test consume for " + e.purchase + " - payload: " + e.purchase.developerPayload);
+		//IAP.consume(e.purchase);
 		#else
 		onConsumeSuccess(e);
 		#end

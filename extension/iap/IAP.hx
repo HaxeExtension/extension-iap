@@ -664,9 +664,8 @@ private class IAPHandler {
 			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_FAILED));
 		} else {
 
-			
 			var dynResp:Dynamic = Json.parse(strRes);
-			inventory = new Inventory(dynResp);
+			IAP.inventory = new Inventory(dynResp);
 			
 			//trace("Parsed!: " + dynResp);
 			var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_COMPLETE);

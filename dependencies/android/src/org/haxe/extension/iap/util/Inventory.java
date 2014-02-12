@@ -95,17 +95,36 @@ public class Inventory {
 	}
 	
 	public String toJsonString() {
-		String jsonResp = "{ \"purchases\": [], \"descriptions\":[ ";
+		String jsonResp = "{ \"descriptions\":[ ";
 		
-		Iterator skuMapIt =  mSkuMap.entrySet().iterator();
-					
-		while (skuMapIt.hasNext()) {
-			Map.Entry pairs = (Map.Entry)skuMapIt.next();
-			jsonResp += "{\"key\":\"" + pairs.getKey() + "\", \"value\":" + ((SkuDetails)pairs.getValue()).toJsonString() + "},";
-			skuMapIt.remove(); // avoids a ConcurrentModificationException
+		if (!mSkuMap.isEmpty()) {
+			
+			Iterator skuMapIt =  mSkuMap.entrySet().iterator();
+						
+			while (skuMapIt.hasNext()) {
+				Map.Entry pairs = (Map.Entry)skuMapIt.next();
+				jsonResp += "{\"key\":\"" + pairs.getKey() + "\", \"value\":" + ((SkuDetails)pairs.getValue()).toJsonString() + "},";
+				skuMapIt.remove(); // avoids a ConcurrentModificationException
+			}
+			
+			jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
 		}
 		
-		jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
+		jsonResp += "], \"purchases\":[";
+		
+		if (!mPurchaseMap.isEmpty()) {
+		
+			Iterator purchasesMapIt = mPurchaseMap.entrySet().iterator();
+			
+			while (purchasesMapIt.hasNext()) {
+				Map.Entry pairs2 = (Map.Entry)purchasesMapIt.next();
+				jsonResp += "{\"key\":\"" + pairs2.getKey() + "\", \"value\":" + ((Purchase)pairs2.getValue()).getOriginalJson() + "},";
+				purchasesMapIt.remove(); // avoids a ConcurrentModificationException
+			}
+			
+			jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
+		}
+		
 		
 		jsonResp += "]}";
 		

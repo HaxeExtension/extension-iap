@@ -15,18 +15,19 @@ class Purchase
 	public var signature(default, null):String;
 	public var originalJson(default, null):String;
 	
-	public function new(baseObj:Array<Dynamic>) 
+	public function new(baseObj:Dynamic) 
 	{
 		var originalJson:String = "";
-		var dynObj:Dynamic;
+		var dynObj:Dynamic = null;
 		
 		if (Std.is(baseObj, String)) {
 			originalJson = cast (baseObj, String);
+			dynObj = Json.parse(originalJson);
 		} else {
-			trace("WARNING: Unexpected type for baseObj parameter."); 
+			dynObj = baseObj;
+			originalJson = Json.stringify(dynObj);
 		}
 		//trace("beforeParse: " + originalJson);
-		dynObj = Json.parse(originalJson);
 		//trace("parsed: " + dynObj);
 		
 		productID = Reflect.field(dynObj, "productId");
