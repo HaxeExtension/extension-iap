@@ -10,7 +10,6 @@ class IAPEvent extends Event {
 	
 	public static inline var PURCHASE_INIT = "init";
 	public static inline var PURCHASE_INIT_FAILED = "initFailed";
-	public static inline var PURCHASE_RESTORE = "purchaseRestore";
 	public static inline var PRODUCTS_RESTORED = "purchasesRestored";
 	public static inline var PRODUCTS_RESTORED_WITH_ERRORS = "purchasesRestoredWithErrors";
 	public static inline var PURCHASE_SUCCESS = "purchaseSuccess";
@@ -18,7 +17,6 @@ class IAPEvent extends Event {
 	public static inline var PURCHASE_CANCEL = "purchaseCanceled";
 	public static inline var PURCHASE_CONSUME_SUCCESS = "consumeSuccess";
 	public static inline var PURCHASE_CONSUME_FAILURE = "consumeFailed";
-	//public static inline var PURCHASE_PRODUCT_DATA = "productDataArrived"; // Deprecated and Removed
 	public static inline var PURCHASE_PRODUCT_DATA_COMPLETE = "productDataComplete";
 	public static inline var PURCHASE_QUERY_INVENTORY_COMPLETE = "queryInventoryComplete";
 	public static inline var PURCHASE_QUERY_INVENTORY_FAILED = "queryInventoryFailed";
