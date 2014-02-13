@@ -133,7 +133,6 @@ class Store extends Sprite
 		
 		IAP.addEventListener(IAPEvent.PRODUCTS_RESTORED, onPurchasesRestored);
 		IAP.addEventListener(IAPEvent.PRODUCTS_RESTORED_WITH_ERRORS, onPurchasesRestoredWithErrors);
-		IAP.addEventListener(IAPEvent.PURCHASE_PRODUCT_DATA, onSingleProductData);
 		IAP.addEventListener(IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE, onStoreDataArrived);
 		IAP.addEventListener(IAPEvent.DOWNLOAD_START, onProductDownloadStart);
 		IAP.addEventListener(IAPEvent.DOWNLOAD_COMPLETE, onProductDownloadComplete);
@@ -282,11 +281,6 @@ class Store extends Sprite
 	{
 		trace(e.type);
 		getStoreDataFromModel();
-	}
-	
-	private function onSingleProductData(e:IAPEvent):Void 
-	{
-		trace(e.type + " - product data: " + e.productID);
 	}
 	
 	private function onPurchaseSuccess(e:IAPEvent):Void 

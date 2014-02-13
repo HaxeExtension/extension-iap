@@ -45,6 +45,10 @@ typedef IAProduct = {
      *     This is used for verification of purchase signatures. You can find your app's base64-encoded 
      *     public key in your application's page on Google Play Developer Console. Note that this
      *     is NOT your "developer public key".
+	 * 
+	 * Related Events (IAPEvent): 
+	 * 		PURCHASE_INIT: Fired when the initialization was successful
+	 * 		PURCHASE_INIT_FAILED: Fired when the initialization failed
      */
 	
 	public static function initialize (publicKey:String = ""):Void {
@@ -90,6 +94,11 @@ typedef IAProduct = {
 	 * @param devPayload (Android). Extra data (developer payload), which will be returned with the purchase data
      *     when the purchase completes. This extra data will be permanently bound to that purchase
      *     and will always be returned when the purchase is queried.
+	 * 
+	 * Related Events (IAPEvent): 
+	 * 		PURCHASE_SUCCESS: Fired when the purchase attempt was successful
+	 * 		PURCHASE_FAILURE: Fired when the purchase attempt failed
+	 * 		PURCHASE_CANCEL: Fired when the purchase attempt was cancelled by the user
      */
 	
 	public static function purchase (productID:String, devPayload:String = ""):Void {
@@ -124,6 +133,9 @@ typedef IAProduct = {
 	 * 
      * @param purchase. The previously purchased product.
 	 * 
+	 * Related Events (IAPEvent): 
+	 * 		PURCHASE_CONSUME_SUCCESS: Fired when the consume attempt was successful
+	 * 		PURCHASE_CONSUME_FAILURE: Fired when the consume attempt failed
      */
 	
 	public static function consume (purchase:Purchase):Void {
@@ -143,6 +155,21 @@ typedef IAProduct = {
 		
 	}
 	
+	
+	/**
+     * Queries the inventory. This will query all owned items from the server, as well as
+     * information on additional products, if specified.
+     *
+     * @param queryItemDetails if true, product details (price, description, etc) will be queried as well
+     *     as purchase information.
+     * @param moreItems additional PRODUCT IDs to query information on, regardless of ownership. 
+     *     Ignored if null or if queryItemDetails is false.
+	 * 
+	 * Related Events (IAPEvent): 
+	 * 		PURCHASE_QUERY_INVENTORY_COMPLETE: Fired when the query inventory attempt was successful. 
+	 * 			The inventory static property will be populated with new data.
+	 * 		PURCHASE_QUERY_INVENTORY_FAILED: Fired when the query inventory attempt failed
+     */
 	
 	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
 		#if android
@@ -167,6 +194,9 @@ typedef IAProduct = {
 	 * 
      * @param inArg. A String with the product Id, or an Array of Strings with multiple product Ids.
 	 * 
+	 * Related Events (IAPEvent): 
+	 * 		PURCHASE_PRODUCT_DATA_COMPLETE: Fired when the products data has been retrieved. 
+	 * 			The event will come with a productsData array.
      */
 	
 	public static function requestProductData (inArg:Dynamic):Void {
@@ -193,6 +223,9 @@ typedef IAProduct = {
 	/**
      * Asks the payment queue to restore previously completed purchases.
 	 * 
+	 * Related Events (IAPEvent): 
+	 * 		PRODUCTS_RESTORED: Fired when the restore process has successfully finished.
+	 * 		PRODUCTS_RESTORED_WITH_ERRORS: Fired when the restore process finished with errors.
      */
 	
 	public static function restorePurchases ():Void {
@@ -200,16 +233,6 @@ typedef IAProduct = {
 		#if ios
 		
 		purchases_restore ();
-		
-		#elseif android
-		//
-		//if (funcRestore == null) {
-		//	
-		//	funcRestore = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "restore", "()V");
-		//	
-		//}
-		//
-		//funcRestore ();
 		
 		#end
 		
@@ -397,7 +420,7 @@ typedef IAProduct = {
 			case "productData":
 				
 				tempProductsData.push( { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), price: Reflect.field (inEvent, "price") } );
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA, Reflect.field (inEvent, "productID")));
+				//dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA, Reflect.field (inEvent, "productID")));
 			
 			case "productDataComplete":
 				
@@ -697,12 +720,6 @@ private class IAPHandler {
 			
 			
 		}
-		
-	}
-	
-	public function onRestorePurchases ():Void {
-		
-		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_RESTORE));
 		
 	}
 	
