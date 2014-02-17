@@ -203,6 +203,7 @@ typedef IAProduct = {
 	 * Related Events (IAPEvent): 
 	 * 		PURCHASE_PRODUCT_DATA_COMPLETE: Fired when the products data has been retrieved. 
 	 * 			The event will come with a productsData array.
+	 * 			This method also populates the productDetailsMap property of the inventory, so it can be accessed anytime after calling it.
      */
 	
 	public static function requestProductData (inArg:Dynamic):Void {
@@ -427,10 +428,8 @@ typedef IAProduct = {
 				var prod:IAProduct = { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), price: Reflect.field (inEvent, "price") };
 				tempProductsData.push(prod );
 				
-				inventory.productDetailsMap.set(prod.productID, prod);
+				inventory.productDetailsMap.set(prod.productID, new ProductDetails(prod));
 				
-				//dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA, Reflect.field (inEvent, "productID")));
-			
 			case "productDataComplete":
 				
 				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE, null, tempProductsData));
