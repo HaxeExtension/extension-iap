@@ -66,7 +66,7 @@ typedef IAProduct = {
 	public static var available (get, null):Bool;
 	public static var manualTransactionMode (get, set):Bool;
 	
-	public static var inventory(get, null):Inventory = null;
+	public static var inventory(default, null):Inventory = null;
 	
 	private static var initialized = false;
 	
