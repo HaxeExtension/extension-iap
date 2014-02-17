@@ -287,18 +287,28 @@ class Store extends Sprite
 	private function onPurchaseSuccess(e:IAPEvent):Void 
 	{
 		trace(e.type + " - productID: " + e.productID);
-		//var prod:StoreItemData = data.get(e.productID);
 		
-		//if (prod.reward != null) GameUserData.getInstance().gold += prod.reward;
+		if (data.exists(e.productID)) {
+			var prod:StoreItemData = data.get(e.productID);
+			// If the item has a reward it means that it's consumable
+			if (prod.reward != null) {
+				
+				#if android
+				//test
+				
+				//trace("sending test consume for " + e.purchase + " - payload: " + e.purchase.developerPayload);
+				IAP.consume(e.purchase);
+				
+				#else
+				
+				onConsumeSuccess(e);
+				
+				#end
+				
+			}
+			
+		}
 		
-		#if android
-		//test
-		
-		//trace("sending test consume for " + e.purchase + " - payload: " + e.purchase.developerPayload);
-		//IAP.consume(e.purchase);
-		#else
-		onConsumeSuccess(e);
-		#end
 	}
 	
 	private function onPurchaseFail(e:IAPEvent):Void 
@@ -313,11 +323,17 @@ class Store extends Sprite
 	
 	private function onConsumeSuccess(e:IAPEvent):Void 
 	{
-		trace(e.type + " - productID: " + e.productID);
+		trace(IAPEvent.PURCHASE_CONSUME_SUCCESS + " - productID: " + e.productID);
 		
 		if (data.exists(e.productID)) {
 			var prod:StoreItemData = data.get(e.productID);
-			if (prod.reward != null) GameUserData.getInstance().gold += prod.reward;
+			// If the item has a reward it means that it's consumable
+			if (prod.reward != null) {
+				GameUserData.getInstance().gold += prod.reward;
+				
+				// Locally erase the product from the inventory
+				IAP.inventory.erasePurchase(e.productID);
+			}
 		}
 		
 	}

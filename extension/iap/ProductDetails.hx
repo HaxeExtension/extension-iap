@@ -24,4 +24,17 @@ class ProductDetails
 		localizedDescription = cast Reflect.field(dynObj, "description");
 	}
 	
+	public function toString() :String {
+		var res:String = "ProductDetails: { ";
+		if (Reflect.fields(this).length > 0) {
+			for (fieldLabel in Reflect.fields(this)) {
+				res += fieldLabel + ": " + Reflect.field(this, fieldLabel) + ", ";
+			}
+			res = res.substring(0, res.length - 1);
+		}
+		
+		res += " }";
+		return res;
+	}
+	
 }

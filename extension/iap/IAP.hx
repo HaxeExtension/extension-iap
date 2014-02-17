@@ -43,7 +43,8 @@ import openfl.utils.JNI;
  * items previously purchased by the user using the {@link #restore} method.
  * 
  * Then you may want to buy items with the {@link #purchase} method. You don't need to call the
- * consume method for iOS.
+ * consume method for iOS, but for consumable items you may want to locally erase the purchase from
+ * the Inventory.
  *
  * You may want to check the IAPEvent, Purchase and ProductDetails classes to explore further.
  * 
@@ -158,6 +159,7 @@ typedef IAProduct = {
 		//trace("calling purchase for " + productID + " - payload: " + devPayload);
 		
 		IAPHandler.lastPurchaseRequest = productID;
+
 		funcBuy (productID, devPayload);
 		
 		#end
@@ -337,7 +339,7 @@ typedef IAProduct = {
 				var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_SUCCESS);
 				evt.purchase = new Purchase(inEvent);
 				evt.productID = evt.purchase.productID;
-				inventory.set(evt.purchase.productID, evt.purchase);
+				inventory.purchaseMap.set(evt.purchase.productID, evt.purchase);
 				
 				dispatchEvent (evt);
 			

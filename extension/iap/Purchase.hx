@@ -33,8 +33,8 @@ class Purchase
 			dynObj = baseObj;
 			originalJson = Json.stringify(dynObj);
 		}
-		//trace("beforeParse: " + originalJson);
-		//trace("parsed: " + dynObj);
+		trace("originalJson: " + originalJson);
+		trace("dynObj: " + dynObj);
 		
 		// Handle both Android and iOS Ids
 		productID = Reflect.hasField(dynObj, "productId")? Reflect.field(dynObj, "productId") : Reflect.field(dynObj, "productID");
@@ -54,4 +54,16 @@ class Purchase
 		this.originalJson = originalJson;
 	}
 	
+	public function toString() :String {
+		var res:String = "Purchase: { ";
+		if (Reflect.fields(this).length > 0) {
+			for (fieldLabel in Reflect.fields(this)) {
+				res += fieldLabel + ": " + Reflect.field(this, fieldLabel) + ", ";
+			}
+			res = res.substring(0, res.length - 1);
+		}
+		
+		res += " }";
+		return res;
+	}
 }
