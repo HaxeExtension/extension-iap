@@ -16,7 +16,8 @@ class ProductDetails
 	
 	public function new(dynObj:Dynamic) 
 	{
-		productID = cast Reflect.field(dynObj, "productId");
+		// Handle both Android and iOS Ids
+		productID = Reflect.hasField(dynObj, "productId")? Reflect.field(dynObj, "productId") : Reflect.field(dynObj, "productID");
 		type = cast Reflect.field(dynObj, "type");
 		localizedPrice = price = cast Reflect.field(dynObj, "price");
 		localizedTitle = cast Reflect.field(dynObj, "title");
