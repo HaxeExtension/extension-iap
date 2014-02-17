@@ -266,6 +266,7 @@ class Store extends Sprite
 		var datum:StoreItemData;
 		for (i in 0...order.length) {
 			datum = data.get(order[i]);
+			
 			itmPill = new StoreItemPill(datum.id, datum.thumb, datum.description);
 			itemsHolder.addChild(itmPill);
 			
@@ -348,7 +349,6 @@ class Store extends Sprite
 		trace("getStoreDataFromIAP");
 		
 		var orderArr:Array<String> = GameModel.getInstance().data.node.storeItems.att.order.split(",");
-		
 		#if ios
 		IAP.requestProductData (orderArr);
 		#elseif android

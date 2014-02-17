@@ -24,10 +24,11 @@
 		<slot id="resCom3" type="res_com" x="484" y="526"></slot>
 		<slot id="resCom4" type="res_com" x="574" y="532"></slot>
 	</map>
-	<storeItems order="gold_x_1k,gold_x_5k,gold_x_10k,unlock_level2">
+	<storeItems order="gold_x_1k,gold_x_5k,gold_x_10k,unlock_level2,testsubs">
 		<gold_x_1k id="gold_x_1k" thumb="img/item_gold_1.png" title="Gold x1K" price="0.99" reward="1000"></gold_x_1k>
 		<gold_x_5k id="gold_x_5k" thumb="img/item_gold_2.png" title="Gold x5K" price="1.99" reward="5000"></gold_x_5k>
 		<gold_x_10k id="gold_x_10k" thumb="img/item_gold_3.png" title="Gold x10K" price="2.99" reward="10000"></gold_x_10k>
 		<unlock_level2 id="unlock_level2" thumb="img/item_unlockLvl2.png" title="Unlock level 2" price="1.99"></unlock_level2>
+		<testsubs id="testsubs" thumb="img/item_unlockLvl2.png" title="testsubs" price="1.99"></testsubs>
 	</storeItems>
 </world>

@@ -5,6 +5,8 @@ class Purchase
 {
 
 	public var productID(default, null):String;
+	
+	// Android Properties
 	public var itemType(default, null):String;
 	public var orderId(default, null):String;
 	public var packageName(default, null):String;
@@ -14,6 +16,8 @@ class Purchase
 	public var purchaseToken(default, null):String;
 	public var signature(default, null):String;
 	public var originalJson(default, null):String;
+	
+	// iOS Properties
 	
 	public function new(baseObj:Dynamic) 
 	{

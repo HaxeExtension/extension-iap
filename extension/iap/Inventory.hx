@@ -11,7 +11,7 @@ class Inventory
 	public var productDetailsMap(default, null): Map<String, ProductDetails>;
 	public var purchaseMap(default, null): Map<String, Purchase>;
 	
-	public function new(dynObj:Dynamic) 
+	public function new(?dynObj:Dynamic) 
 	{
 		
 		//trace("Inventory. dynObj: " + dynObj);
@@ -19,25 +19,27 @@ class Inventory
 		productDetailsMap = new Map();
 		purchaseMap = new Map();
 		
-		
-		var dynDescriptions:Array<Dynamic> = Reflect.field(dynObj, "descriptions");
-		if (dynDescriptions != null) {
+		if (dynObj != null) {
 			
-			for (dynItm in dynDescriptions) {
-				productDetailsMap.set(cast Reflect.field(dynItm, "key"), new ProductDetails(Reflect.field(dynItm, "value")));
+			var dynDescriptions:Array<Dynamic> = Reflect.field(dynObj, "descriptions");
+			if (dynDescriptions != null) {
+				
+				for (dynItm in dynDescriptions) {
+					productDetailsMap.set(cast Reflect.field(dynItm, "key"), new ProductDetails(Reflect.field(dynItm, "value")));
+				}
+				
+			}
+			
+			var dynPurchases:Array<Dynamic> = Reflect.field(dynObj, "purchases");
+			if (dynPurchases != null) {
+				
+				for (dynItm in dynPurchases) {
+					purchaseMap.set(cast Reflect.field(dynItm, "key"), new Purchase(Reflect.field(dynItm, "value")));
+				}
+				
 			}
 			
 		}
-		
-		var dynPurchases:Array<Dynamic> = Reflect.field(dynObj, "purchases");
-		if (dynPurchases != null) {
-			
-			for (dynItm in dynPurchases) {
-				purchaseMap.set(cast Reflect.field(dynItm, "key"), new Purchase(Reflect.field(dynItm, "value")));
-			}
-			
-		}
-		
 		//trace("Inventory. EndParse: ");
 	}
 	

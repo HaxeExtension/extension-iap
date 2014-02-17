@@ -1,5 +1,6 @@
 package extension.iap;
 
+import extension.iap.IAP.IAProduct;
 import flash.errors.Error;
 import flash.events.EventDispatcher;
 import flash.events.Event;
@@ -27,7 +28,7 @@ typedef IAProduct = {
 	public static var available (get, null):Bool;
 	public static var manualTransactionMode (get, set):Bool;
 	
-	public static var inventory:Inventory = null;
+	public static var inventory(get, null):Inventory = null;
 	
 	private static var initialized = false;
 	private static var items = new Map<String, Int> ();
@@ -57,7 +58,10 @@ typedef IAProduct = {
 		
 		if (!initialized) {
 			
+			inventory = new Inventory(null);
+			
 			set_event_handle (notifyListeners);
+			
 			load ();
 			
 			initialized = true;
@@ -76,6 +80,8 @@ typedef IAProduct = {
 		}
 		
 		//trace("calling initialize");
+		
+		if (inventory == null) inventory = new Inventory(null);
 		
 		funcInit (publicKey, new IAPHandler ());
 		
@@ -418,8 +424,11 @@ typedef IAProduct = {
 				dispatchEvent (e);
 			
 			case "productData":
+				var prod:IAProduct = { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), price: Reflect.field (inEvent, "price") };
+				tempProductsData.push(prod );
 				
-				tempProductsData.push( { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), price: Reflect.field (inEvent, "price") } );
+				inventory.productDetailsMap.set(prod.productID, prod);
+				
 				//dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA, Reflect.field (inEvent, "productID")));
 			
 			case "productDataComplete":
