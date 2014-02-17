@@ -18,6 +18,8 @@ class Purchase
 	public var originalJson(default, null):String;
 	
 	// iOS Properties
+	public var transactionID(default, null):String;
+	public var transactionDate(default, null):Int;
 	
 	public function new(baseObj:Dynamic) 
 	{
@@ -34,7 +36,9 @@ class Purchase
 		//trace("beforeParse: " + originalJson);
 		//trace("parsed: " + dynObj);
 		
-		productID = Reflect.field(dynObj, "productId");
+		// Handle both Android and iOS Ids
+		productID = Reflect.hasField(dynObj, "productId")? Reflect.field(dynObj, "productId") : Reflect.field(dynObj, "productID");
+		
 		itemType = Reflect.field(dynObj, "itemType");
 		orderId = Reflect.field(dynObj, "orderId");
 		packageName = Reflect.field(dynObj, "packageName");
@@ -43,6 +47,9 @@ class Purchase
 		developerPayload = Reflect.field(dynObj, "developerPayload");
 		purchaseToken = Reflect.field(dynObj, "purchaseToken");
 		signature = Reflect.field(dynObj, "signature");
+		
+		transactionID = Reflect.field(dynObj, "transactionID");
+		transactionDate = Reflect.field(dynObj, "transactionDate");
 		
 		this.originalJson = originalJson;
 	}

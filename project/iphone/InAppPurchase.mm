@@ -6,6 +6,7 @@
 
 
 extern "C" void sendPurchaseEvent(const char* type, const char* data);
+extern "C" void sendPurchaseFinishEvent(const char* type, const char* productID, const char* transactionID, double transactionDate);
 extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productID, const char* transactionID, const char* downloadPath, const char* downloadVersion, const char* downloadProgress);
 extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, const char* price);
 
@@ -111,7 +112,6 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 			}
 			
 			sendPurchaseEvent("productDataComplete", nil);
-						
 		}
 	} 
     
@@ -145,7 +145,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     if(wasSuccessful)
     {
     	NSLog(@"Successful Purchase");
-		sendPurchaseEvent("success", [transaction.payment.productIdentifier UTF8String]);
+		sendPurchaseFinishEvent("success", [transaction.payment.productIdentifier UTF8String], [transaction.transactionIdentifier UTF8String], ([transaction.transactionDate timeIntervalSince1970] * 1000));
     }
     
     else

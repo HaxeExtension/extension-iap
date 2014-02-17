@@ -1,17 +1,55 @@
 package extension.iap;
 
-import extension.iap.IAP.IAProduct;
 import flash.errors.Error;
 import flash.events.EventDispatcher;
 import flash.events.Event;
-import flash.net.SharedObjectFlushStatus;
-import flash.net.SharedObject;
 import flash.Lib;
 import haxe.Json;
 
 #if android
 import openfl.utils.JNI;
 #end
+
+
+/**
+ * Provides convenience methods and properties for in-app purchases (Android & iOS).
+ * The methods and properties are static, so there's no need to instantiate an instance, 
+ * but an initialization is required prior to the first use.
+ * Every method is asynchronous (non-blocking). The callbacks always fire events indicating 
+ * the success or failure of every operation.
+ *
+ * The first step is to initialize the extension. You do so by calling the {@link #initialize} 
+ * method. The result comes with a PURCHASE_INIT or PURCHASE_INIT_FAILED IAPEvent. Also, the
+ * available property will tell if you can use the extension at any time.
+ * 
+ * Although we aim to provide a unified API for every target, there are some differences that
+ * required to leave platform exclusive methods and properties. So you'll find different workflows.
+ *
+ * Android workflow:
+ * ----------------
+ * 
+ * After initialization is complete, you will typically want to request an inventory of owned 
+ * items and subscriptions. See {@link #queryInventory} and related events. This method can also be
+ * used to retrieve a detailed list of products.
+ * 
+ * Then you may want to buy items with the {@link #purchase} method, and if the item is consumable, 
+ * the {@link #consume} method should be called after a successful purchase. 
+ *
+ * iOS workflow:
+ * ------------
+ * 
+ * After initialization is complete, you will typically want request details about the products 
+ * being sold {@link #requestProductData}, and also probably try to restore non consumable 
+ * items previously purchased by the user using the {@link #restore} method.
+ * 
+ * Then you may want to buy items with the {@link #purchase} method. You don't need to call the
+ * consume method for iOS.
+ *
+ * You may want to check the IAPEvent, Purchase and ProductDetails classes to explore further.
+ * 
+ */
+
+
 
 typedef IAProduct = {
     productID: String,
@@ -31,7 +69,6 @@ typedef IAProduct = {
 	public static var inventory(get, null):Inventory = null;
 	
 	private static var initialized = false;
-	private static var items = new Map<String, Int> ();
 	
 	private static var tempProductsData:Array<IAProduct> = [];
 	
@@ -62,8 +99,6 @@ typedef IAProduct = {
 			
 			set_event_handle (notifyListeners);
 			
-			load ();
-			
 			initialized = true;
 			
 		}
@@ -75,7 +110,6 @@ typedef IAProduct = {
 		if (funcInit == null) {
 			
 			funcInit = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "initialize", "(Ljava/lang/String;Lorg/haxe/lime/HaxeObject;)V");
-			load ();
 			
 		}
 		
@@ -271,46 +305,6 @@ typedef IAProduct = {
 	}*/
 	
 	
-	// Deprecated
-	public static function getQuantity (productID:String):Int {
-		
-		#if ios
-		
-		if (hasPurchased (productID)) {
-			
-			return items.get (productID);
-			
-		}
-		
-		#end
-		
-		return 0;
-		
-	}
-	
-	
-	// Deprecated
-	public static function hasPurchased (productID:String):Bool {
-		
-		#if ios
-		
-		if (items == null) {
-			
-			return false;
-			
-		}
-		
-		return items.exists (productID) && items.get (productID) > 0;
-		
-		#else
-		
-		return false;
-		
-		#end
-		
-	}
-
-	
 	// Private Static Methods
 	
 	
@@ -324,53 +318,6 @@ typedef IAProduct = {
 		
 	}
 
-	// Deprecated
-	private static function load ():Void {
-		
-		try {
-			
-			var data = SharedObject.getLocal ("in-app-purchases");
-			var saveData = Reflect.field (data.data, "data");
-			
-			if (saveData != null) {
-				
-				items = saveData;
-				//trace (items);
-				
-			}
-			
-		} catch (e:Dynamic) {
-			
-			trace ("ERROR: Could not load purchases: " + e);
-			
-		}
-		
-	}
-	
-	// Deprecated
-	private static function save ():Void {
-		
-		var so = SharedObject.getLocal ("in-app-purchases");
-		Reflect.setField (so.data, "data", items);
-		
-		#if (cpp || neko)
-		
-		var flushStatus:SharedObjectFlushStatus = null;
-		
-		try {
-			
-			flushStatus = so.flush ();
-			
-		} catch (e:Dynamic) {
-			
-			trace ("ERROR: Failed to save purchases: " + e);
-			
-		}
-		
-		#end
-		
-	}
-	
 	
 	private static function notifyListeners (inEvent:Dynamic):Void {
 		
@@ -387,7 +334,12 @@ typedef IAProduct = {
 			
 			case "success":
 				
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_SUCCESS, data));
+				var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_SUCCESS);
+				evt.purchase = new Purchase(inEvent);
+				evt.productID = evt.purchase.productID;
+				inventory.set(evt.purchase.productID, evt.purchase);
+				
+				dispatchEvent (evt);
 			
 			case "failed":
 				
@@ -436,26 +388,6 @@ typedef IAProduct = {
 				tempProductsData.splice(0, tempProductsData.length);
 			
 			default:
-			
-		}
-		
-		// Consumable
-		
-		if (type == "success") {
-			
-			var productID = data;
-			
-			if (hasPurchased (productID)) {
-				
-				items.set (productID, items.get (productID) + 1);
-				
-			} else {
-				
-				items.set (productID, 1);
-				
-			}
-			
-			save ();
 			
 		}
 		

@@ -166,3 +166,14 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 	alloc_field(o,val_id("price"),alloc_string(price));
     val_call1(purchaseEventHandle->get(), o);
 }
+
+
+extern "C" void sendPurchaseFinishEvent(const char* type, const char* productID, const char* transactionID, double transactionDate);
+{
+    value o = alloc_empty_object();
+    alloc_field(o,val_id("type"),alloc_string(type));
+    alloc_field(o,val_id("productID"),alloc_string(productID));
+	alloc_field(o,val_id("transactionID"),alloc_string(transactionID));
+	alloc_field(o,val_id("transactionDate"),alloc_int(static_cast<int>(transactionDate)));
+    val_call1(purchaseEventHandle->get(), o);
+}
