@@ -1,9 +1,5 @@
 package extension.iap;
 
-/**
- * ...
- * @author emibap - Emiliano Angelini
- */
 class ProductDetails
 {
 	

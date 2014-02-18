@@ -12,10 +12,6 @@ import flash.text.TextFormat;
 import flash.text.TextFormatAlign;
 import model.GameModel;
 
-/**
- * ...
- * @author Emiliano Angelini - Emibap
- */
 class BuyUpgradeDialog extends Sprite
 {
 

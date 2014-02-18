@@ -8,10 +8,6 @@ import flash.text.TextFormat;
 import openfl.Assets;
 import flash.display.BitmapData;
 
-/**
- * ...
- * @author Emibap
- */
 class ScreenUtils
 {
 	public static inline var SIZE_DPI_RELATION:Float = 1280.4;

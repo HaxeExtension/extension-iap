@@ -3,11 +3,6 @@ import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.Sprite;
 
-/**
- * ...
- * @author emibap - Emiliano Angelini
- */
- 
 class MapElement extends Sprite
 {
 	var bmp:Bitmap;

@@ -10,10 +10,6 @@ import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.text.TextFormatAlign;
 
-/**
- * ...
- * @author Emiliano Angelini - Emibap
- */
 class StoreItemPill extends Sprite
 {
 	public var id(default, null):String;

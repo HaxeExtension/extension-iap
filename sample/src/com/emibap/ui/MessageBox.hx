@@ -6,10 +6,6 @@ import flash.events.EventDispatcher;
 import flash.events.MouseEvent;
 import flash.text.TextField;
 
-/**
- * ...
- * @author emibap - Emiliano Angelini
- */
 class MessageBox
 {
 	private static var root:Sprite;

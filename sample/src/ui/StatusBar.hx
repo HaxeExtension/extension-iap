@@ -9,10 +9,6 @@ import model.GameModel;
 import model.GameUserData;
 import ui.BitmapButton;
 
-/**
- * ...
- * @author Emiliano Angelini - Emibap
- */
 class StatusBar extends Sprite
 {
 

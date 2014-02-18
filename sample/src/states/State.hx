@@ -6,10 +6,6 @@ import flash.display.Sprite;
 import flash.display.BitmapData;
 import com.emibap.core.ScreenUtils;
 
-/**
- * ...
- * @author emibap - Emiliano Angelini
- */
 class State extends Sprite 
 {
 

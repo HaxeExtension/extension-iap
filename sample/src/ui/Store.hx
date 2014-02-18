@@ -17,10 +17,6 @@ import ui.Store.StoreItemData;
 import ui.StoreItemPill;
 import model.GameModel;
 
-/**
- * ...
- * @author Emiliano Angelini - Emibap
- */
 
 typedef StoreItemData = {
 	id			:String,
@@ -29,12 +25,19 @@ typedef StoreItemData = {
 	?reward:Int
 }
  
+
+/**
+ * 
+ * This class is responsible of the interaction between the app and the IAP extension.
+ * It also shows the UI representations of the products and let the user select which
+ * one to purchase, and handles the inventory locally.
+ * 
+ */
  
 class Store extends Sprite
 {
-
+	// Singleton
 	private static var instance:Store;
-	
 	public static function getInstance() :Store {
 		if (instance == null) {
 			instance = new Store();
@@ -80,12 +83,7 @@ class Store extends Sprite
 		itemsHolder.x = ScreenUtils.scaleFloat(36);
 		itemsHolder.y = ScreenUtils.scaleFloat(66);
 		
-		//trace("IAP available: " + IAP.available);
-		//if (IAP.available) {
-			initializeIAP();
-		//} else {
-			//getStoreDataFromModel();
-		//}
+		initializeIAP();
 		
 		addChild(itemsHolder);
 		addChild(descTxt);
@@ -143,7 +141,6 @@ class Store extends Sprite
 		
 		
 		IAP.initialize(licenseKey);
-		//trace("getManualTransactionMode: " + IAP.manualTransactionMode);
 		
 		trace("IAP: Available: " + IAP.available);
 	}
@@ -180,7 +177,6 @@ class Store extends Sprite
 		trace("Progress: " + e.downloadProgress);
 	}
 	
-	
 	private function onStoreDataArrived(e:IAPEvent):Void 
 	{
 		trace("onStoreDataArrived");
@@ -194,7 +190,6 @@ class Store extends Sprite
 		
 		setStoreData(e.productsData);
 	}
-	
 	
 	private function onQueryInventoryComplete(e:IAPEvent):Void 
 	{
@@ -237,7 +232,6 @@ class Store extends Sprite
 		}
 		
 	}
-	
 	
 	private function setStoreData(productsData:Array<IAProduct>):Void {
 		
@@ -341,9 +335,6 @@ class Store extends Sprite
 	private function onConsumeFail(e:IAPEvent):Void 
 	{
 		trace(e.type + " - productID: " + e.productID + " - message: " + e.message);
-		//var prod:StoreItemData = data.get(e.productID);
-		//if (prod.reward != null) GameUserData.getInstance().gold += prod.reward;
-		
 	}
 	
 	private function onPurchasesRestored(e:IAPEvent):Void 
@@ -355,11 +346,6 @@ class Store extends Sprite
 	{
 		trace(e.type);
 	}
-	
-	
-	
-	
-	
 	
 	private function getStoreDataFromIAP() :Void {
 		trace("getStoreDataFromIAP");
@@ -379,17 +365,12 @@ class Store extends Sprite
 		
 		var model:GameModel = GameModel.getInstance();
 		
-		//var map:Map<String, StoreItemData> = new Map<String, StoreItemData>();
-
-		//var storeElems:Xml = model.data.node.storeItems.x;
-		
 		var fastEl:Fast;
 		
 		for (fastEl in model.data.node.storeItems.elements) {
 			
-			//fastEl = new Fast(model.getXmlEl(storeElems, elt.productID));
 			productsArray.push( { productID: fastEl.att.id, localizedTitle: fastEl.att.title, price: fastEl.att.price } );
-			//map.set(fastEl.att.id, {id:fastEl.att.id, thumb:ScreenUtils.getBitmapData(fastEl.att.thumb), description:fastEl.att.title + " " + fastEl.att.price, reward:(fastEl.has.reward)? Std.parseInt(fastEl.att.reward) : null} );
+			
 		}
 		
 		setStoreData(productsArray);

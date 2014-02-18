@@ -7,18 +7,12 @@ import haxe.xml.Fast;
 import openfl.Assets;
 import ui.Store;
 
-/**
- * ...
- * @author Emiliano Angelini - Emibap
- */
-
- typedef ElementDefinition = {
+typedef ElementDefinition = {
 	id:String,
 	bmd:BitmapData,
 	?buyPrice:Float,
 	?upgradePriceMultiplier:Float
-	
- }
+}
  
 class GameModel
 {
@@ -62,9 +56,8 @@ class GameModel
 		residentialCommercialSkins = this.data.node.elements.att.resComSkins.split(",");
 		
 		elementDefinitions = new Map<String, ElementDefinition>();
-		populateelementDefinitions();
+		populateElementDefinitions();
 		
-		//getStoreData();
 	}
 	
 	public function getXmlEl(node:Xml, name:String):Xml {
@@ -73,12 +66,11 @@ class GameModel
 			res = el;
 			break;
 		}
-        // iterate all elements with a nodeName "user"
+
 		return res;
-		
 	}
 	
-	function populateelementDefinitions():Void {
+	function populateElementDefinitions():Void {
 		var elD:ElementDefinition;
 		for ( elt in data.node.elements.elements ) {
 			elD = {id:elt.name , bmd: ScreenUtils.getBitmapData(elt.att.img) };

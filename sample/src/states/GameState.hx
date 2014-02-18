@@ -7,10 +7,6 @@ import ui.BuyUpgradeDialog;
 import ui.Store;
 import ui.StatusBar;
 
-/**
- * ...
- * @author emibap - Emiliano Angelini
- */
 class GameState extends State
 {
 

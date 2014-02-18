@@ -6,10 +6,6 @@ import flash.events.Event;
 import model.GameModel;
 import model.GameUserData;
 
-/**
- * ...
- * @author emibap - Emiliano Angelini
- */
 class TitleState extends State
 {
 

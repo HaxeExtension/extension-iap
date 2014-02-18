@@ -6,13 +6,6 @@ import flash.net.SharedObjectFlushStatus;
 
 import flash.errors.Error;
 
-//import utils.SoundMgr;
-
-/**
- * ...
- * @author emibap
- */
-
 class GameUserData extends EventDispatcher
 {
 	static public var _instance:GameUserData;

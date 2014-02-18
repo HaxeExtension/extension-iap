@@ -5,10 +5,6 @@ import flash.events.MouseEvent;
 import flash.text.TextField;
 import flash.text.TextFormat;
 
-/**
- * ...
- * @author emibap - Emiliano Angelini
- */
 class UIUtils
 {
 	
