@@ -118,7 +118,12 @@ public class Inventory {
 			
 			while (purchasesMapIt.hasNext()) {
 				Map.Entry pairs2 = (Map.Entry)purchasesMapIt.next();
-				jsonResp += "{\"key\":\"" + pairs2.getKey() + "\", \"value\":" + ((Purchase)pairs2.getValue()).getOriginalJson() + "},";
+				jsonResp += "{" + 
+                    "\"key\":\"" + pairs2.getKey() + "\", " + 
+                    "\"value\":" + ((Purchase)pairs2.getValue()).getOriginalJson() + "," + 
+                    "\"itemType\":\"" + ((Purchase)pairs2.getValue()).getItemType() + "\", " + 
+                    "\"signature\":\"" + ((Purchase)pairs2.getValue()).getSignature() + "\"},";
+
 				purchasesMapIt.remove(); // avoids a ConcurrentModificationException
 			}
 			

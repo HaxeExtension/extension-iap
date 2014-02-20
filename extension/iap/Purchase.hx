@@ -16,12 +16,13 @@ class Purchase
 	public var purchaseToken(default, null):String;
 	public var signature(default, null):String;
 	public var originalJson(default, null):String;
-	
+	public var json(default, null):String;
+
 	// iOS Properties
 	public var transactionID(default, null):String;
 	public var transactionDate(default, null):Int;
 	
-	public function new(baseObj:Dynamic) 
+	public function new(baseObj:Dynamic, itemType:String, signature:String) 
 	{
 		var originalJson:String = "";
 		var dynObj:Dynamic = null;
@@ -29,24 +30,25 @@ class Purchase
 		if (Std.is(baseObj, String)) {
 			originalJson = cast (baseObj, String);
 			dynObj = Json.parse(originalJson);
-		} else {
+		}
+		 else {
 			dynObj = baseObj;
 			originalJson = Json.stringify(dynObj);
 		}
-		trace("originalJson: " + originalJson);
-		trace("dynObj: " + dynObj);
 		
 		// Handle both Android and iOS Ids
 		productID = Reflect.hasField(dynObj, "productId")? Reflect.field(dynObj, "productId") : Reflect.field(dynObj, "productID");
 		
-		itemType = Reflect.field(dynObj, "itemType");
+		// itemType = Reflect.field(dynObj, "itemType");
 		orderId = Reflect.field(dynObj, "orderId");
 		packageName = Reflect.field(dynObj, "packageName");
 		purchaseTime = Reflect.field(dynObj, "purchaseTime");
 		purchaseState = Reflect.field(dynObj, "purchaseState");
 		developerPayload = Reflect.field(dynObj, "developerPayload");
 		purchaseToken = Reflect.field(dynObj, "purchaseToken");
-		signature = Reflect.field(dynObj, "signature");
+		
+		this.signature = signature;
+		this.itemType = itemType;
 		
 		transactionID = Reflect.field(dynObj, "transactionID");
 		transactionDate = Reflect.field(dynObj, "transactionDate");

@@ -13,9 +13,6 @@ class Inventory
 	
 	public function new(?dynObj:Dynamic) 
 	{
-		
-		//trace("Inventory. dynObj: " + dynObj);
-		
 		productDetailsMap = new Map();
 		purchaseMap = new Map();
 		
@@ -34,7 +31,8 @@ class Inventory
 			if (dynPurchases != null) {
 				
 				for (dynItm in dynPurchases) {
-					purchaseMap.set(cast Reflect.field(dynItm, "key"), new Purchase(Reflect.field(dynItm, "value")));
+					purchaseMap.set(cast Reflect.field(dynItm, "key"), 
+            new Purchase(Reflect.field(dynItm, "value"), Reflect.field(dynItm, "itemType"), Reflect.field(dynItm, "signature")));
 				}
 				
 			}

@@ -32,9 +32,11 @@ public class Purchase {
     String mToken;
     String mOriginalJson;
     String mSignature;
+    String json;
 
     public Purchase(String itemType, String jsonPurchaseInfo, String signature) throws JSONException {
         mOriginalJson = jsonPurchaseInfo;
+        json = new String(mOriginalJson);
         JSONObject o = new JSONObject(mOriginalJson);
         mItemType = (itemType != null)? itemType : o.optString("itemType");
         mOrderId = o.optString("orderId");
@@ -45,10 +47,6 @@ public class Purchase {
         mDeveloperPayload = o.optString("developerPayload");
         mToken = o.optString("token", o.optString("purchaseToken"));
         mSignature = (signature != null)? signature : o.optString("signature");;
-		
-		// Add signature and itemType to mOriginalJson so it can be passed as a string later
-		mOriginalJson = mOriginalJson.substring(0, mOriginalJson.length() - 1) + ", \"signature\":\"" + mSignature + "\", \"itemType\":\"" + itemType + "\"}";
-
     }
 
     public String getItemType() { return mItemType; }

@@ -38,10 +38,10 @@ public class InAppPurchase extends Extension {
 		
 	}
 	
-	public static void consume (String purchaseJson) {
+	public static void consume (String purchaseJson, String itemType, String signature) {
 		
 		try {
-			Purchase purchase = new Purchase(null, purchaseJson, null);
+			Purchase purchase = new Purchase(itemType, purchaseJson, signature);
 			InAppPurchase.inAppPurchaseHelper.consumeAsync(purchase, mConsumeFinishedListener);
 		} 
 		catch (JSONException e) {
@@ -210,7 +210,8 @@ public class InAppPurchase extends Extension {
 				{
 					@Override public void run ()
 					{
-						InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson() });
+						// InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson(), purchase.getSignature(), purchase.getItemType() });
+						InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson(), purchase.getItemType(), purchase.getSignature() });
 					}	
 				});
 			}

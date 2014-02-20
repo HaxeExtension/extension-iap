@@ -186,11 +186,11 @@ typedef IAProduct = {
 		
 		if (funcConsume == null) {
 			
-			funcConsume = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "consume", "(Ljava/lang/String;)V");
+			funcConsume = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "consume", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 			
 		}
 		IAPHandler.lastPurchaseRequest = purchase.productID;
-		funcConsume (purchase.originalJson);
+		funcConsume (purchase.originalJson, purchase.itemType, purchase.signature);
 		
 		
 		#end
@@ -590,18 +590,11 @@ private class IAPHandler {
 	}
 	
 	
-	public function onPurchase (response:Array<Dynamic>):Void 
+	public function onPurchase (response:String, itemType:String, signature:String):Void 
 	{
-		//var productID:String = "";
-		//productID = lastPurchaseRequest; //temporal fix
-
-		
-		//var dynResp:Dynamic = parseJsonResponse(response);
-		
-		//trace("Parsed!: " + dynResp);
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_SUCCESS);
 		
-		evt.purchase = new Purchase(response);
+		evt.purchase = new Purchase(response, itemType, signature);
 		evt.productID = evt.purchase.productID;
 		
 		IAP.dispatcher.dispatchEvent (evt);
