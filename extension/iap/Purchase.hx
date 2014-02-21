@@ -22,7 +22,7 @@ class Purchase
 	public var transactionID(default, null):String;
 	public var transactionDate(default, null):Int;
 	
-	public function new(baseObj:Dynamic, itemType:String, signature:String) 
+	public function new(baseObj:Dynamic, ?itemType:String, ?signature:String) 
 	{
 		var originalJson:String = "";
 		var dynObj:Dynamic = null;
