@@ -29,10 +29,7 @@ before_install:
 script:
 - haxelib run lime rebuild iap ios
 after_success:
-- travis-artifacts upload --path ndll/iPhone/libiap.iphoneos.a --target-path artifacts/$TRAVIS_COMMIT
-- travis-artifacts upload --path ndll/iPhone/libiap.iphoneos-v7.a --target-path artifacts/$TRAVIS_COMMIT
-- travis-artifacts upload --path ndll/iPhone/libiap.iphonesim.a --target-path artifacts/$TRAVIS_COMMIT
-- travis-artifacts upload --path ndll/iPhone/libiap-debug.iphoneos.a --target-path artifacts/$TRAVIS_COMMIT
-- travis-artifacts upload --path ndll/iPhone/libiap-debug.iphoneos-v7.a --target-path artifacts/$TRAVIS_COMMIT
-- travis-artifacts upload --path ndll/iPhone/libiap-debug.iphonesim.a --target-path artifacts/$TRAVIS_COMMIT
-- wget -qO- http://www.openfl.org/iap-post-hook.php?commit=$TRAVIS_COMMIT
+- export COMMIT_NAME=`git describe --tags`
+- zip -r iap-$COMMIT_NAME.zip iap/ -x *.git* -x *.DS_Store* -x *project/obj* -x *project/all_objs*
+- travis-artifacts upload --path iap-$COMMIT_NAME.zip --target-path artifacts
+- wget -qO- http://www.openfl.org/iap-post-hook.php?commit=$COMMIT_NAME
