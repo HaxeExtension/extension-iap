@@ -30,6 +30,7 @@ script:
 - haxelib run lime rebuild iap ios
 after_success:
 - export COMMIT_NAME=`git describe --tags`
+- cd ..
 - zip -r iap-$COMMIT_NAME.zip iap/ -x *.git* -x *.DS_Store* -x *project/obj* -x *project/all_objs*
 - travis-artifacts upload --path iap-$COMMIT_NAME.zip --target-path artifacts
 - wget -qO- http://www.openfl.org/iap-post-hook.php?commit=$COMMIT_NAME
