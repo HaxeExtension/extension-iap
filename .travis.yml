@@ -3,8 +3,8 @@ env:
  global:
   - ARTIFACTS_AWS_REGION=us-west-2
   - ARTIFACTS_S3_BUCKET=iap-artifacts
-  - secure: K/3qK4A/588lWpIq4nZPwULH2iuI3Ra13vOZGsv4l9A3uxGqgkKDq5GxhmbQdpfnqxh3SIWuzUTsxIdgS9OyZA8bNIDqCQjPoyfj3abl2vv5SLDy6vLhJ1BOFFYKXxje5QQ6Q9pnb+gApJ98bngM8ysjZMglsxvjeKfJOZ6GfuA=
-  - secure: ftN2E9WiAzisAQdOssVwWSJ0ayekBYnn/noo9GGwO1RtngWXIOp7abhTieEA05Aw5xLzwLpQpnx9X8XkLElLeWnQGUi+Z5McYIMF7jJP0vg7JtySZsLcNodm7B5rmWaaOeU5N9Xceuff1Z7mjn+NDGmXi4e94qUw+V8lkpfoAOo=
+  - secure: "K37FVGCJKbgwN5IapKGQfNMipm+kvozY41tGgCq+ZsrFA3fmeszNzqdehNYNYOH1ItXVoccop/euxjInR3u8YgeTyvQIj6TubQDVO1CoRt9rA3g7xfp7iWoQcC3Qcs3DloBjuXetA7QXP8+jeO24t43IwmFf8ZVHMVc7GI9nIt4="
+  - secure: "LYWd+u0bQirdFeTYeXfcuaEaKOqLliNqWmrzbFF42BzjRJ5px0o8RFC9zrQeahvT2+tPDbDIGvWWEwd0t3mAJBoSY066eUf3bT3wGhR8ahd1FspgT6SmDvpqYAPtlBkfWBPLNluqP+nVV7WjPuwiJ1VHG66R+oUnSvxNcw2yqdY="
 before_install:
 - wget -c http://nekovm.org/_media/neko-2.0.0-osx.tar.gz
 - sudo mkdir /usr/lib/neko
