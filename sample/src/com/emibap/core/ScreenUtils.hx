@@ -19,7 +19,7 @@ class ScreenUtils
 	public static var applicationWidth:Int;
 	public static var applicationHeight:Int;
 	// For DrawingsFactory
-	public static var drwBaseWidth:Int;
+	public static var drwBaseWidth:Float;
 	
 	private static var _buttonExceedHA:BitmapData;
 	
