@@ -14,6 +14,7 @@
 
 package org.haxe.extension.iap.util;
 
+
 // This code was converted from code at http://iharder.sourceforge.net/base64/
 // Lots of extraneous features were removed.
 /* The original code said:

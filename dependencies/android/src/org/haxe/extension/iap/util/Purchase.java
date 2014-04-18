@@ -15,6 +15,7 @@
 
 package org.haxe.extension.iap.util;
 
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,13 +33,11 @@ public class Purchase {
     String mToken;
     String mOriginalJson;
     String mSignature;
-    String json;
 
     public Purchase(String itemType, String jsonPurchaseInfo, String signature) throws JSONException {
+        mItemType = itemType;
         mOriginalJson = jsonPurchaseInfo;
-        json = new String(mOriginalJson);
         JSONObject o = new JSONObject(mOriginalJson);
-        mItemType = (itemType != null)? itemType : o.optString("itemType");
         mOrderId = o.optString("orderId");
         mPackageName = o.optString("packageName");
         mSku = o.optString("productId");
@@ -46,7 +45,7 @@ public class Purchase {
         mPurchaseState = o.optInt("purchaseState");
         mDeveloperPayload = o.optString("developerPayload");
         mToken = o.optString("token", o.optString("purchaseToken"));
-        mSignature = (signature != null)? signature : o.optString("signature");;
+        mSignature = signature;
     }
 
     public String getItemType() { return mItemType; }
@@ -62,5 +61,4 @@ public class Purchase {
 
     @Override
     public String toString() { return "PurchaseInfo(type:" + mItemType + "):" + mOriginalJson; }
-	
 }

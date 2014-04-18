@@ -63,7 +63,6 @@ typedef IAProduct = {
 
 @:allow(extension.iap) class IAP {
 	
-	
 	public static var available (get, null):Bool;
 	public static var manualTransactionMode (get, set):Bool;
 	
@@ -526,8 +525,8 @@ private class IAPHandler {
 		return Json.parse(strRes);
 		
 	}
-	
-	
+
+
 	public function onCanceledPurchase (productID:String):Void {
 		
 		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_CANCEL, productID));

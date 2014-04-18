@@ -14,6 +14,7 @@
 
 package org.haxe.extension.iap.util;
 
+
 /**
  * Exception thrown when encountering an invalid Base64 input character.
  *

@@ -15,6 +15,7 @@
 
 package org.haxe.extension.iap.util;
 
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,7 +34,7 @@ public class SkuDetails {
     public SkuDetails(String jsonSkuDetails) throws JSONException {
         this(IabHelper.ITEM_TYPE_INAPP, jsonSkuDetails);
     }
-    
+
     public SkuDetails(String itemType, String jsonSkuDetails) throws JSONException {
         mItemType = itemType;
         mJson = jsonSkuDetails;
@@ -50,14 +51,13 @@ public class SkuDetails {
     public String getPrice() { return mPrice; }
     public String getTitle() { return mTitle; }
     public String getDescription() { return mDescription; }
-	
-	
+
     @Override
     public String toString() {
         return "SkuDetails:" + mJson;
     }
-	
-	public String toJsonString() {
-		return mJson;
-	}
+
+    public String toJsonString() {
+        return mJson;
+    }
 }

@@ -21,8 +21,9 @@ import org.haxe.extension.iap.util.*;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 
-
 import org.json.JSONException;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 public class InAppPurchase extends Extension {
 	
@@ -30,34 +31,42 @@ public class InAppPurchase extends Extension {
 	private static HaxeObject callback = null;
 	private static IabHelper inAppPurchaseHelper;
 	private static String publicKey = "";
-	
-	
+
 	public static void buy (String productID, String devPayload) {
 		
 		InAppPurchase.inAppPurchaseHelper.launchPurchaseFlow (Extension.mainActivity, productID, 1001, mPurchaseFinishedListener, devPayload);
 		
 	}
 	
-	public static void consume (String purchaseJson, String itemType, String signature) {
-		
-		try {
-			Purchase purchase = new Purchase(itemType, purchaseJson, signature);
-			InAppPurchase.inAppPurchaseHelper.consumeAsync(purchase, mConsumeFinishedListener);
-		} 
-		catch (JSONException e) {
-			// This is not a normal consume failure, just a Json parsing error
-			
-			Extension.callbackHandler.post (new Runnable ()
+	public static void consume (final String purchaseJson, final String itemType, final String signature) 
+	{
+		Extension.callbackHandler.post (new Runnable () 
+		{
+			@Override public void run () 
 			{
-				@Override public void run () 
-				{
-					String resultJson = "{\"response\": -999, \"message\":\"Json Parse Error \"}";
-					InAppPurchase.callback.call ("onFailedConsume", new Object[] { ("{\"result\":" + resultJson + ", \"product\":" + null  + "}") });
-				}
-			});
-			
-		}
 		
+				try {
+					final Purchase purchase = new Purchase(itemType, purchaseJson, signature);
+					InAppPurchase.inAppPurchaseHelper.consumeAsync(purchase, mConsumeFinishedListener);
+				} 
+		
+				catch (JSONException e) 
+				{
+					// This is not a normal consume failure, just a Json parsing error
+					
+					Extension.callbackHandler.post (new Runnable ()
+					{
+						@Override public void run () 
+						{
+							String resultJson = "{\"response\": -999, \"message\":\"Json Parse Error \"}";
+							InAppPurchase.callback.call ("onFailedConsume", new Object[] { ("{\"result\":" + resultJson + ", \"product\":" + null  + "}") });
+						}
+					});
+
+				} // catch
+			} // run
+		});
+
 	}
 	
 	public static void queryInventory (boolean querySkuDetails, String[] moreSkusArr) {

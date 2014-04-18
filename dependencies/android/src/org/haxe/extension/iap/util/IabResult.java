@@ -15,6 +15,7 @@
 
 package org.haxe.extension.iap.util;
 
+
 /**
  * Represents the result of an in-app billing operation.
  * A result is composed of a response code (an integer) and possibly a
@@ -41,7 +42,7 @@ public class IabResult {
     public boolean isSuccess() { return mResponse == IabHelper.BILLING_RESPONSE_RESULT_OK; }
     public boolean isFailure() { return !isSuccess(); }
     public String toString() { return "IabResult: " + getMessage(); }
-	
-	public String toJsonString() { return ("{\"response\":" + mResponse + ", \"message\":\"" + mMessage + "\"}"); }
+    public String toJsonString() { return ("{\"response\":" + mResponse + ", \"message\":\"" + mMessage + "\"}"); }
+    
 }
 

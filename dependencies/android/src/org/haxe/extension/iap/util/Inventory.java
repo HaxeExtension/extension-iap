@@ -15,11 +15,14 @@
 
 package org.haxe.extension.iap.util;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
+import android.util.Log;
+
 
 /**
  * Represents a block of information about in-app items.
@@ -67,7 +70,7 @@ public class Inventory {
     List<String> getAllOwnedSkus() {
         return new ArrayList<String>(mPurchaseMap.keySet());
     }
-    
+
     /** Returns a list of all owned product IDs of a given type */
     List<String> getAllOwnedSkus(String itemType) {
         List<String> result = new ArrayList<String>();
@@ -89,50 +92,48 @@ public class Inventory {
     void addPurchase(Purchase p) {
         mPurchaseMap.put(p.getSku(), p);
     }
-	
-	public Map<String,SkuDetails> getProductDetails() {
-		return mSkuMap;
-	}
-	
-	public String toJsonString() {
-		String jsonResp = "{ \"descriptions\":[ ";
-		
-		if (!mSkuMap.isEmpty()) {
-			
-			Iterator skuMapIt =  mSkuMap.entrySet().iterator();
-						
-			while (skuMapIt.hasNext()) {
-				Map.Entry pairs = (Map.Entry)skuMapIt.next();
-				jsonResp += "{\"key\":\"" + pairs.getKey() + "\", \"value\":" + ((SkuDetails)pairs.getValue()).toJsonString() + "},";
-				skuMapIt.remove(); // avoids a ConcurrentModificationException
-			}
-			
-			jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
-		}
-		
-		jsonResp += "], \"purchases\":[";
-		
-		if (!mPurchaseMap.isEmpty()) {
-		
-			Iterator purchasesMapIt = mPurchaseMap.entrySet().iterator();
-			
-			while (purchasesMapIt.hasNext()) {
-				Map.Entry pairs2 = (Map.Entry)purchasesMapIt.next();
-				jsonResp += "{" + 
+
+    public String toJsonString() {
+            Log.d("inventory", "to json");
+        String jsonResp = "{ \"descriptions\":[ ";
+        
+        if (!mSkuMap.isEmpty()) {
+            
+            Iterator skuMapIt =  mSkuMap.entrySet().iterator();
+                        
+            while (skuMapIt.hasNext()) {
+                Map.Entry pairs = (Map.Entry)skuMapIt.next();
+                jsonResp += "{\"key\":\"" + pairs.getKey() + "\", \"value\":" + ((SkuDetails)pairs.getValue()).toJsonString() + "},";
+                skuMapIt.remove(); // avoids a ConcurrentModificationException
+            }
+            
+            jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
+        }
+        
+        jsonResp += "], \"purchases\":[";
+        
+        if (!mPurchaseMap.isEmpty()) {
+        
+            Iterator purchasesMapIt = mPurchaseMap.entrySet().iterator();
+            
+            while (purchasesMapIt.hasNext()) {
+                Map.Entry pairs2 = (Map.Entry)purchasesMapIt.next();
+                jsonResp += "{" + 
                     "\"key\":\"" + pairs2.getKey() + "\", " + 
                     "\"value\":" + ((Purchase)pairs2.getValue()).getOriginalJson() + "," + 
                     "\"itemType\":\"" + ((Purchase)pairs2.getValue()).getItemType() + "\", " + 
                     "\"signature\":\"" + ((Purchase)pairs2.getValue()).getSignature() + "\"},";
 
-				purchasesMapIt.remove(); // avoids a ConcurrentModificationException
-			}
-			
-			jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
-		}
-		
-		
-		jsonResp += "]}";
-		
-		return jsonResp;
-	}
+                purchasesMapIt.remove(); // avoids a ConcurrentModificationException
+            }
+            
+            jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
+        }
+        
+        
+        jsonResp += "]}";
+        
+        return jsonResp;
+    }
+
 }
