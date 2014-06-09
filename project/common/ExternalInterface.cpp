@@ -168,12 +168,13 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 }
 
 
-extern "C" void sendPurchaseFinishEvent(const char* type, const char* productID, const char* transactionID, double transactionDate)
+extern "C" void sendPurchaseFinishEvent(const char* type, const char* productID, const char* transactionID, double transactionDate, const char* receipt)
 {
     value o = alloc_empty_object();
     alloc_field(o,val_id("type"),alloc_string(type));
     alloc_field(o,val_id("productID"),alloc_string(productID));
 	alloc_field(o,val_id("transactionID"),alloc_string(transactionID));
 	alloc_field(o,val_id("transactionDate"),alloc_int(static_cast<int>(transactionDate)));
+    alloc_field(o,val_id("receipt"),alloc_string(receipt));
     val_call1(purchaseEventHandle->get(), o);
 }
