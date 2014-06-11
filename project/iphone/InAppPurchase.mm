@@ -6,7 +6,7 @@
 
 
 extern "C" void sendPurchaseEvent(const char* type, const char* data);
-extern "C" void sendPurchaseFinishEvent(const char* type, const char* productID, const char* transactionID, double transactionDate);
+extern "C" void sendPurchaseFinishEvent(const char* type, const char* productID, const char* transactionID, double transactionDate, const char* receipt);
 extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productID, const char* transactionID, const char* downloadPath, const char* downloadVersion, const char* downloadProgress);
 extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, const char* price);
 
@@ -96,9 +96,12 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     {
 		if (productID)
 		{
+            NSLog(@"attempting to add payment");
 			myProduct = [response.products objectAtIndex:0];
+            NSLog(myProduct.productIdentifier);
 			// A payment has been done
-			SKPayment *payment = [SKPayment paymentWithProductIdentifier:productID];
+			SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:myProduct];
+            payment.quantity = 1;
 			[[SKPaymentQueue defaultQueue] addPayment:payment];
 		}
 		else
@@ -145,12 +148,21 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     if(wasSuccessful)
     {
     	NSLog(@"Successful Purchase");
-		sendPurchaseFinishEvent("success", [transaction.payment.productIdentifier UTF8String], [transaction.transactionIdentifier UTF8String], ([transaction.transactionDate timeIntervalSince1970] * 1000));
+        NSString* receiptString = [[NSString alloc] initWithString:transaction.payment.productIdentifier];
+        
+        NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
+        NSData *receipt = [NSData dataWithContentsOfURL:receiptURL];
+        NSString *jsonObjectString = [receipt base64EncodedStringWithOptions:0];
+        sendPurchaseFinishEvent("success", [transaction.payment.productIdentifier UTF8String], [transaction.transactionIdentifier UTF8String], ([transaction.transactionDate timeIntervalSince1970] * 1000), [jsonObjectString UTF8String]);
     }
     
     else
     {
     	NSLog(@"Failed Purchase");
+        if (transaction.error.code != SKErrorPaymentCancelled)
+        {
+            NSLog(@"Transaction error: %@", transaction.error.localizedDescription);
+        }
         sendPurchaseEvent("failed", [transaction.payment.productIdentifier UTF8String]);
     }
 }
