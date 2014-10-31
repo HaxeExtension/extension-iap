@@ -17,7 +17,11 @@ class ProductDetails
 		type = cast Reflect.field(dynObj, "type");
 		localizedPrice = price = cast Reflect.field(dynObj, "price");
 		localizedTitle = cast Reflect.field(dynObj, "title");
-		localizedDescription = cast Reflect.field(dynObj, "description");
+		#if ios
+			localizedDescription = cast Reflect.field(dynObj, "localizedDescription");
+		#else
+			localizedDescription = cast Reflect.field(dynObj, "description");
+		#end
 	}
 	
 	public function toString() :String {
