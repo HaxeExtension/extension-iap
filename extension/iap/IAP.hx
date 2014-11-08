@@ -595,6 +595,7 @@ private class IAPHandler {
 		
 		evt.purchase = new Purchase(response, itemType, signature);
 		evt.productID = evt.purchase.productID;
+		IAP.inventory.purchaseMap.set(evt.purchase.productID, evt.purchase);
 		
 		IAP.dispatcher.dispatchEvent (evt);
 
