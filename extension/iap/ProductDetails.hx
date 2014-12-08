@@ -22,7 +22,11 @@ class ProductDetails
 		priceAmountMicros = cast Reflect.field(dynObj, "price_amount_micros");
 		priceCurrencyCode = cast Reflect.field(dynObj, "price_currency_code");
 		localizedTitle = cast Reflect.field(dynObj, "title");
-		localizedDescription = cast Reflect.field(dynObj, "description");
+		#if ios
+			localizedDescription = cast Reflect.field(dynObj, "localizedDescription");
+		#else
+			localizedDescription = cast Reflect.field(dynObj, "description");
+		#end
 	}
 	
 	public function toString() :String {
