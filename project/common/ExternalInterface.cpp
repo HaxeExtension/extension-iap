@@ -29,9 +29,7 @@ DEFINE_PRIM(iap_set_event_handle, 1);
 
 static value iap_initialize() 
 {
-	#ifdef IPHONE
 	initInAppPurchase();
-	#endif
 	return alloc_null();
 }
 DEFINE_PRIM (iap_initialize, 0);
@@ -39,9 +37,7 @@ DEFINE_PRIM (iap_initialize, 0);
 
 static value iap_restore() 
 {
-	#ifdef IPHONE
 	restorePurchases();
-	#endif
 	return alloc_null();
 }
 DEFINE_PRIM (iap_restore, 0);
@@ -49,9 +45,7 @@ DEFINE_PRIM (iap_restore, 0);
 
 static value iap_buy(value productID)
 {
-	#ifdef IPHONE
 	purchaseProduct(val_string(productID));
-	#endif
 	return alloc_null();
 }
 DEFINE_PRIM(iap_buy, 1);
@@ -59,9 +53,7 @@ DEFINE_PRIM(iap_buy, 1);
 
 static value iap_get_data(value productID)
 {
-	#ifdef IPHONE
 	requestProductData(val_string(productID));
-	#endif
 	return alloc_null();
 }
 DEFINE_PRIM(iap_get_data, 1);
@@ -69,9 +61,7 @@ DEFINE_PRIM(iap_get_data, 1);
 
 static value iap_finish_transaction(value transactionID)
 {
-	#ifdef IPHONE
 	finishTransactionManually(val_string(transactionID));
-	#endif
 	return alloc_null();
 }
 DEFINE_PRIM(iap_finish_transaction, 1);
@@ -79,31 +69,22 @@ DEFINE_PRIM(iap_finish_transaction, 1);
 
 static value iap_canbuy() 
 {
-	#ifdef IPHONE
+   	printf("init 222222 can buy --------------------------------------------------- xx\n");
 	return alloc_bool(canPurchase());
-	#else
-	return alloc_bool(false);
-	#endif
 }
 DEFINE_PRIM (iap_canbuy, 0);
 
 
 static value iap_get_manualtransactionmode() 
 {
-	#ifdef IPHONE
 	return alloc_bool(getManualTransactionMode());
-	#else
-	return alloc_bool(false);
-	#endif
 }
 DEFINE_PRIM (iap_get_manualtransactionmode, 0);
 
 
 static value iap_set_manualtransactionmode(value valBool)
 {
-	#ifdef IPHONE
 	setManualTransactionMode(val_bool(valBool));
-	#endif
 	return alloc_null();
 }
 DEFINE_PRIM(iap_set_manualtransactionmode, 1);
@@ -111,9 +92,7 @@ DEFINE_PRIM(iap_set_manualtransactionmode, 1);
 
 static value iap_release() 
 {
-	#ifdef IPHONE
 	releaseInAppPurchase();
-	#endif
 	return alloc_null();
 }
 DEFINE_PRIM (iap_release, 0);
@@ -156,14 +135,15 @@ extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productI
 }
 
 
-extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, const char* price)
+extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, float price, const char* localizedPrice)
 {
     value o = alloc_empty_object();
     alloc_field(o,val_id("type"),alloc_string(type));
     alloc_field(o,val_id("productID"),alloc_string(productID));
 	alloc_field(o,val_id("localizedTitle"),alloc_string(localizedTitle));
 	alloc_field(o,val_id("localizedDescription"),alloc_string(localizedDescription));
-	alloc_field(o,val_id("price"),alloc_string(price));
+  alloc_field(o,val_id("price"),alloc_float(price));
+	alloc_field(o,val_id("price"),alloc_string(localizedPrice));
     val_call1(purchaseEventHandle->get(), o);
 }
 

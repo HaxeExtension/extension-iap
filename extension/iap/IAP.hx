@@ -56,9 +56,11 @@ typedef IAProduct = {
     productID: String,
     ?localizedTitle:String,
     ?localizedDescription:String,
-    ?price:String,
+    ?price:Float,
     ?localizedPrice:String,
-	?type:String		//android
+    ?priceCurrencyCode:String,
+    ?priceAmountMicros:Float,
+		?type:String		//android
 }
 
 @:allow(extension.iap) class IAP {
@@ -326,7 +328,9 @@ typedef IAProduct = {
 		
 		var type = Std.string (Reflect.field (inEvent, "type"));
 		var data = Std.string (Reflect.field (inEvent, "data"));
-		
+
+		trace('--------------------------- iap event: ' + type);
+
 		switch (type) {
 			
 			case "started":
@@ -379,6 +383,7 @@ typedef IAProduct = {
 			
 			case "productData":
 				var prod:IAProduct = { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), price: Reflect.field (inEvent, "price") };
+				trace('   ios product: ' + prod);
 				tempProductsData.push(prod );
 				
 				inventory.productDetailsMap.set(prod.productID, new ProductDetails(prod));
@@ -403,7 +408,9 @@ typedef IAProduct = {
 	private static function get_available ():Bool {
 		
 		#if ios
-		return purchases_canbuy ();
+			return true;
+		// this can bye never seems to return true in testing; disabling for now -- marty
+//		return purchases_canbuy ();
 		
 		#elseif android
 		
@@ -592,7 +599,7 @@ private class IAPHandler {
 	public function onPurchase (response:String, itemType:String, signature:String):Void 
 	{
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_SUCCESS);
-		
+
 		evt.purchase = new Purchase(response, itemType, signature);
 		evt.productID = evt.purchase.productID;
 		
@@ -638,7 +645,10 @@ private class IAPHandler {
 					dynItmValue = Reflect.field(dynItm, "value");
 					prod = { productID: Reflect.field(dynItmValue, "productId") };
 					prod.type = Reflect.field(dynItmValue, "type");
-					prod.localizedPrice = prod.price = Reflect.field(dynItmValue, "price");
+					prod.localizedPrice = Reflect.field(dynItmValue, "localizedPrice");
+					prod.price = Reflect.field(dynItmValue, "price");
+					prod.priceAmountMicros = Reflect.field(dynItmValue, "priceAmountMicros");
+					prod.priceCurrencyCode = Reflect.field(dynItmValue, "priceCurrencyCode");
 					prod.localizedTitle = Reflect.field(dynItmValue, "title");
 					prod.localizedDescription = Reflect.field(dynItmValue, "description");
 					

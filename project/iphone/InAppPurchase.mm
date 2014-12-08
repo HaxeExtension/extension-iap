@@ -27,17 +27,17 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 - (void)finishTransactionManually:(NSString *)transactionID;
 
 @property bool manualTransactionMode;
-
-
 @end
 
 @implementation InAppPurchase
+@synthesize manualTransactionMode;
 
 #pragma Public methods 
 
 - (void)initInAppPurchase 
 {
 	manualTransactionMode = false;
+	NSLog(@"xxxxxxx purchase init");
 	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 	sendPurchaseEvent("started", "");
 }
@@ -71,7 +71,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 {
 	if(productID) 
 	{
-        [productID release];
+        //[productID release];
 		productID = nil;
 	}
 		
@@ -110,7 +110,14 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 			
 			for(SKProduct *prod in response.products)
 			{
-				sendPurchaseProductDataEvent("productData", [prod.productIdentifier UTF8String], [prod.localizedTitle UTF8String], [prod.localizedDescription UTF8String], [[prod.price stringValue] UTF8String]);
+				// localise the pricing
+				NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
+				[numberFormatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
+				[numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+				[numberFormatter setLocale:prod.priceLocale];
+				NSString *formattedPrice = [numberFormatter stringFromNumber:prod.price];
+
+				sendPurchaseProductDataEvent("productData", [prod.productIdentifier UTF8String], [prod.localizedTitle UTF8String], [prod.localizedDescription UTF8String], [formattedPrice UTF8String]);
 
 			}
 			
@@ -123,7 +130,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 		NSLog(@"No products are available");
 	}
     
-    [productsRequest release];
+    //[productsRequest release];
     productsRequest = NULL;
 }
 
@@ -137,7 +144,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 			[[SKPaymentQueue defaultQueue] finishTransaction:[transactions objectAtIndex:[transactions indexOfObject:transactionID]]];
 		}
 		
-		[transactions release];
+		//[transactions release];
 	}
 }
 
@@ -153,6 +160,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
         NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
         NSData *receipt = [NSData dataWithContentsOfURL:receiptURL];
         NSString *jsonObjectString = [receipt base64EncodedStringWithOptions:0];
+
         sendPurchaseFinishEvent("success", [transaction.payment.productIdentifier UTF8String], [transaction.transactionIdentifier UTF8String], ([transaction.transactionDate timeIntervalSince1970] * 1000), [jsonObjectString UTF8String]);
     }
     
@@ -274,16 +282,16 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)dealloc
 {
-	if(myProduct) 
-        [myProduct release];
+//	if(myProduct)
+//        [myProduct release];
     
-	if(productsRequest) 
-        [productsRequest release];
+//	if(productsRequest)
+//       [productsRequest release];
     
-	if(productID) 
-        [productID release];
+//	if(productID)
+//        [productID release];
     
-	[super dealloc];
+//	[super dealloc];
 }
 
 @end
@@ -294,6 +302,7 @@ extern "C"
     
 	void initInAppPurchase()
     {
+    	printf("init inapppurchase --------------------------------------------------- xx\n");
 		inAppPurchase = [[InAppPurchase alloc] init];
 		[inAppPurchase initInAppPurchase];
 	}
@@ -336,6 +345,6 @@ extern "C"
 	
 	void releaseInAppPurchase()
     {
-		[inAppPurchase release];
+		//[inAppPurchase release];
 	}
 }

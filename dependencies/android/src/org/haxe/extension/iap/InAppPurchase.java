@@ -220,6 +220,7 @@ public class InAppPurchase extends Extension {
 					@Override public void run ()
 					{
 						// InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson(), purchase.getSignature(), purchase.getItemType() });
+						Log.d("IAP-Marty", "got purchase response: " + purchase.getOriginalJson());
 						InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson(), purchase.getItemType(), purchase.getSignature() });
 					}	
 				});
