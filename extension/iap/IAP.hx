@@ -645,10 +645,10 @@ private class IAPHandler {
 					dynItmValue = Reflect.field(dynItm, "value");
 					prod = { productID: Reflect.field(dynItmValue, "productId") };
 					prod.type = Reflect.field(dynItmValue, "type");
-					prod.localizedPrice = Reflect.field(dynItmValue, "localizedPrice");
-					prod.price = Reflect.field(dynItmValue, "price");
-					prod.priceAmountMicros = Reflect.field(dynItmValue, "priceAmountMicros");
-					prod.priceCurrencyCode = Reflect.field(dynItmValue, "priceCurrencyCode");
+					prod.localizedPrice = Reflect.field(dynItmValue, "price");
+					prod.priceAmountMicros = Reflect.field(dynItmValue, "price_amount_micros");
+					prod.price = prod.priceAmountMicros / 1000 / 1000;
+					prod.priceCurrencyCode = Reflect.field(dynItmValue, "price_currency_code");
 					prod.localizedTitle = Reflect.field(dynItmValue, "title");
 					prod.localizedDescription = Reflect.field(dynItmValue, "description");
 					

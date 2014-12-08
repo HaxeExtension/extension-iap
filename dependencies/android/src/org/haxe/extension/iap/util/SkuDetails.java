@@ -18,6 +18,7 @@ package org.haxe.extension.iap.util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.util.Log;
 
 /**
  * Represents an in-app product's listing details.
@@ -27,7 +28,7 @@ public class SkuDetails {
     String mSku;
     String mType;
     String mPrice;
-    String mPriceAmountMicrons;
+    String mPriceAmountMicros;
     String mPriceCurrencyCode; 
     String mTitle;
     String mDescription;
@@ -38,13 +39,15 @@ public class SkuDetails {
     }
 
     public SkuDetails(String itemType, String jsonSkuDetails) throws JSONException {
+        Log.d("IAP", ">>>>>>>>>>>>>>>>>"  + jsonSkuDetails);
+
         mItemType = itemType;
         mJson = jsonSkuDetails;
         JSONObject o = new JSONObject(mJson);
         mSku = o.optString("productId");
         mType = o.optString("type");
         mPrice = o.optString("price");
-        mPriceAmountMicrons = o.optString("price_amount_microns");
+        mPriceAmountMicros = o.optString("price_amount_micros");
         mPriceCurrencyCode = o.optString("price_currency_code");
         mTitle = o.optString("title");
 
@@ -54,7 +57,7 @@ public class SkuDetails {
     public String getSku() { return mSku; }
     public String getType() { return mType; }
     public String getPrice() { return mPrice; }
-    public String getPriceAmountMicrons() { return mPriceAmountMicrons; }
+    public String getPriceAmountMicros() { return mPriceAmountMicros; }
     public String getPriceCurrencyCode() { return mPriceCurrencyCode; }
     public String getTitle() { return mTitle; }
     public String getDescription() { return mDescription; }

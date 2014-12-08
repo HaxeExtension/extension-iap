@@ -17,9 +17,9 @@ class ProductDetails
 		// Handle both Android and iOS Ids
 		productID = Reflect.hasField(dynObj, "productId")? Reflect.field(dynObj, "productId") : Reflect.field(dynObj, "productID");
 		type = cast Reflect.field(dynObj, "type");
-		price = cast Reflect.field(dynObj, "price");
-		localizedPrice = '' + price;
+		localizedPrice = cast Reflect.field(dynObj, "price");
 		priceAmountMicros = cast Reflect.field(dynObj, "price_amount_micros");
+		price = priceAmountMicros / 1000 / 1000;
 		priceCurrencyCode = cast Reflect.field(dynObj, "price_currency_code");
 		localizedTitle = cast Reflect.field(dynObj, "title");
 		#if ios
