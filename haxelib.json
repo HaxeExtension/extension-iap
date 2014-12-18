@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": [],
 	"description": "",
-	"version": "1.0.4",
-	"releasenote": "Update license",
+	"version": "1.0.5",
+	"releasenote": "Update binaries, minor fixes",
 	"contributors": [ "singmajesty" ],
 	"dependencies": {}
 }
