@@ -98,7 +98,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 		{
             NSLog(@"attempting to add payment");
 			myProduct = [response.products objectAtIndex:0];
-            NSLog(myProduct.productIdentifier);
+            NSLog(@"%@", myProduct.productIdentifier);
 			// A payment has been done
 			SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:myProduct];
             payment.quantity = 1;
@@ -282,16 +282,16 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)dealloc
 {
-//	if(myProduct)
-//        [myProduct release];
+	if(myProduct)
+        [myProduct release];
     
-//	if(productsRequest)
-//       [productsRequest release];
+	if(productsRequest)
+       [productsRequest release];
     
-//	if(productID)
-//        [productID release];
+	if(productID)
+        [productID release];
     
-//	[super dealloc];
+	[super dealloc];
 }
 
 @end
