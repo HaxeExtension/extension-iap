@@ -69,9 +69,17 @@ public class InAppPurchase extends Extension {
 
 	}
 	
-	public static void queryInventory (boolean querySkuDetails, String[] moreSkusArr) {
-		List<String> moreSkus = Arrays.asList(moreSkusArr); 
-		InAppPurchase.inAppPurchaseHelper.queryInventoryAsync(querySkuDetails, moreSkus, mGotInventoryListener);
+	public static void queryInventory (final boolean querySkuDetails, String[] moreSkusArr) {
+		final List<String> moreSkus = Arrays.asList(moreSkusArr); 
+		Extension.mainActivity.runOnUiThread(new Runnable() {
+			public void run() {
+				try {
+					InAppPurchase.inAppPurchaseHelper.queryInventoryAsync(querySkuDetails, moreSkus, mGotInventoryListener);
+				} catch(Exception e) {
+					Log.d("IAP", e.getMessage());
+				}
+			}
+		});
 	}
 	
 	public static String getPublicKey () {
