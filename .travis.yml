@@ -1,35 +1,49 @@
 language: objective-c
+
 env:
  global:
   - ARTIFACTS_AWS_REGION=us-west-2
   - ARTIFACTS_S3_BUCKET=iap-artifacts
   - secure: "K37FVGCJKbgwN5IapKGQfNMipm+kvozY41tGgCq+ZsrFA3fmeszNzqdehNYNYOH1ItXVoccop/euxjInR3u8YgeTyvQIj6TubQDVO1CoRt9rA3g7xfp7iWoQcC3Qcs3DloBjuXetA7QXP8+jeO24t43IwmFf8ZVHMVc7GI9nIt4="
   - secure: "LYWd+u0bQirdFeTYeXfcuaEaKOqLliNqWmrzbFF42BzjRJ5px0o8RFC9zrQeahvT2+tPDbDIGvWWEwd0t3mAJBoSY066eUf3bT3wGhR8ahd1FspgT6SmDvpqYAPtlBkfWBPLNluqP+nVV7WjPuwiJ1VHG66R+oUnSvxNcw2yqdY="
+
 before_install:
-- wget -c http://nekovm.org/_media/neko-2.0.0-osx.tar.gz
-- sudo mkdir /usr/lib/neko
-- sudo tar xvzf neko-2.0.0-osx.tar.gz -C /usr/lib/neko --strip-components=1
-- sudo ln -s /usr/lib/neko/neko /usr/bin/neko
-- sudo ln -s /usr/lib/neko/nekoc /usr/bin/nekoc
-- sudo ln -s /usr/lib/neko/nekotools /usr/bin/nekotools
-- sudo ln -s /usr/lib/neko/libneko.so /usr/lib/libneko.so
-- wget -c http://haxe.org/file/haxe-3.0.1-osx.tar.gz
-- sudo mkdir /usr/lib/haxe
-- sudo tar xvzf haxe-3.0.1-osx.tar.gz -C /usr/lib/haxe --strip-components=1
-- sudo ln -s /usr/lib/haxe/haxe /usr/bin/haxe
-- sudo ln -s /usr/lib/haxe/haxelib /usr/bin/haxelib
-- mkdir ~/haxelib
-- haxelib setup ~/haxelib
-- haxelib install hxcpp
-- git clone https://github.com/openfl/lime ~/lime
-- haxelib dev lime ~/lime
-- haxelib dev iap $(pwd)
-- gem install travis-artifacts --no-ri --no-rdoc
+  # Use Lime's 64 Mac Neko
+  - git clone https://github.com/openfl/lime ~/lime
+  - pushd ~/lime
+  - git submodule init
+  - git submodule update
+  - popd
+
+  # Use Lime's Mac 64bit Neko
+  - sudo ln -s ~/lime/templates/neko/bin/neko-mac64 /usr/bin/neko  
+  - sudo ln -s ~/lime/templates/neko/ndll/mac64/libneko.dylib /usr/lib/libneko.dylib
+  - sudo ln -s ~/lime/templates/neko/ndll/mac64/regexp.ndll /usr/lib/regexp.ndll
+  - sudo ln -s ~/lime/templates/neko/ndll/mac64/sqlite.ndll /usr/lib/sqlite.ndll
+  - sudo ln -s ~/lime/templates/neko/ndll/mac64/std.ndll /usr/lib/std.ndll
+  - sudo ln -s ~/lime/templates/neko/ndll/mac64/zlib.ndll /usr/lib/zlib.ndll
+
+  # Setup Haxe and continue
+  - wget -c http://haxe.org/file/haxe-3.1.3-osx.tar.gz
+  - sudo mkdir /usr/lib/haxe
+  - sudo tar xvzf haxe-3.1.3-osx.tar.gz -C /usr/lib/haxe --strip-components=1
+  - sudo ln -s /usr/lib/haxe/haxe /usr/bin/haxe
+  - sudo ln -s /usr/lib/haxe/haxelib /usr/bin/haxelib
+  - mkdir ~/haxelib
+  - haxelib setup ~/haxelib
+  - haxelib install format
+  - haxelib install hxcpp
+# - git clone https://github.com/openfl/lime ~/lime
+  - haxelib dev lime ~/lime
+  - haxelib dev iap $(pwd)
+  - gem install travis-artifacts --no-ri --no-rdoc
+
 script:
-- haxelib run lime rebuild iap ios
+  - haxelib run lime rebuild iap ios
+
 after_success:
-- export COMMIT_NAME=`git describe --tags`
-- cd ..
-- zip -r iap-$COMMIT_NAME.zip iap/ -x *.git* -x *.DS_Store* -x *project/obj* -x *project/all_objs*
-- travis-artifacts upload --path iap-$COMMIT_NAME.zip --target-path artifacts
-- wget -qO- http://www.openfl.org/iap-post-hook.php?commit=$COMMIT_NAME
+  - export COMMIT_NAME=`git describe --tags`
+  - cd ..
+  - zip -r iap-$COMMIT_NAME.zip iap/ -x *.git* -x *.DS_Store* -x *project/obj* -x *project/all_objs*
+  - travis-artifacts upload --path iap-$COMMIT_NAME.zip --target-path artifacts
+  - wget -qO- http://www.openfl.org/iap-post-hook.php?commit=$COMMIT_NAME
