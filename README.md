@@ -2,8 +2,7 @@
 [![Build Status](https://travis-ci.org/openfl/iap.png)](https://travis-ci.org/openfl/iap)
 IAP
 ===
-
-Provides access to in-app purchases (iOS) and in-app billing (android) for OpenFL projects, using a common API.
+Provides an access to in-app purchases (iOS) and in-app billing (Android) for OpenFL projects using a common API.
 
 
 Installation
@@ -16,6 +15,7 @@ You can easily install IAP using haxelib:
 To add it to a Lime or OpenFL project, add this to your project file:
 
     <haxelib name="iap" />
+
 
 Development Builds
 ==================
