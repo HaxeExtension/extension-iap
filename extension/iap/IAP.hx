@@ -393,6 +393,10 @@ typedef IAProduct = {
 				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE, null, tempProductsData));
 				tempProductsData.splice(0, tempProductsData.length);
 			
+			case "productDataFailed":
+				
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED, null));
+				
 			default:
 			
 		}
