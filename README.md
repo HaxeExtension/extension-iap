@@ -1,5 +1,5 @@
-[![Stories in Ready](https://badge.waffle.io/openfl/iap.png?label=ready)](https://waffle.io/openfl/iap)
-[![Build Status](https://travis-ci.org/openfl/iap.png)](https://travis-ci.org/openfl/iap)
+[![Build Status](https://img.shields.io/travis/openfl/iap.svg?style=flat)](https://travis-ci.org/openfl/iap) [![Haxelib Version](https://img.shields.io/github/tag/openfl/iap.svg?style=flat&label=release)](http://lib.haxe.org/p/iap)
+
 IAP
 ===
 Provides an access to in-app purchases (iOS) and in-app billing (Android) for OpenFL projects using a common API.
