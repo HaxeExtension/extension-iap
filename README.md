@@ -1,4 +1,4 @@
-[![Build Status](https://img.shields.io/travis/openfl/iap.svg?style=flat)](https://travis-ci.org/openfl/iap) [![Haxelib Version](https://img.shields.io/github/tag/openfl/iap.svg?style=flat&label=release)](http://lib.haxe.org/p/iap)
+[![Build Status](https://img.shields.io/travis/openfl/iap.svg?style=flat)](https://travis-ci.org/openfl/iap) [![Haxelib Version](https://img.shields.io/github/tag/openfl/iap.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/iap)
 
 IAP
 ===
