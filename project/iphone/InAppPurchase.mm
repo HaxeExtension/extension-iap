@@ -8,7 +8,7 @@
 extern "C" void sendPurchaseEvent(const char* type, const char* data);
 extern "C" void sendPurchaseFinishEvent(const char* type, const char* productID, const char* transactionID, double transactionDate, const char* receipt);
 extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productID, const char* transactionID, const char* downloadPath, const char* downloadVersion, const char* downloadProgress);
-extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, const char* price);
+extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, int priceAmountMicros, const char* localizedPrice, const char* priceCurrencyCode);
 
 
 @interface InAppPurchase: NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver>
@@ -57,7 +57,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 {
 	if(productsRequest != NULL)
 	{
-		NSLog(@"Can't start another purchase until previous one is complete.");
+		NSLog(@"Can't start a purchase while performing a previous transaction.");
 		return;
 	}
 	
@@ -69,9 +69,14 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)requestProductData:(NSString*)productIdentifiers
 {
+	if(productsRequest != NULL)
+	{
+		NSLog(@"Can't request product data while performing a previous transaction.");
+		return;
+	}
+
 	if(productID) 
 	{
-        //[productID release];
 		productID = nil;
 	}
 		
@@ -85,6 +90,21 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 #pragma mark -
 #pragma mark SKProductsRequestDelegate methods 
+
+- (void)request:(SKProductsRequest *)request didFailWithError:(NSError *)error
+{
+	NSLog(@"Error: %@",error);
+	if( productsRequest == request ) productsRequest = NULL;
+	
+	if(productID)
+	{
+		sendPurchaseEvent("failed", [productID UTF8String]);
+	}
+	else
+	{
+		sendPurchaseEvent("productDataFailed", [error.localizedDescription UTF8String]);
+	}
+}
 
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse*)response
 {   	
@@ -116,8 +136,13 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 				[numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
 				[numberFormatter setLocale:prod.priceLocale];
 				NSString *formattedPrice = [numberFormatter stringFromNumber:prod.price];
+				[numberFormatter release];
+				
+				NSString *priceCurrencyCode = [prod.priceLocale objectForKey:NSLocaleCurrencyCode];
 
-				sendPurchaseProductDataEvent("productData", [prod.productIdentifier UTF8String], [prod.localizedTitle UTF8String], [prod.localizedDescription UTF8String], [formattedPrice UTF8String]);
+				int priceAmountMicros = [[prod.price decimalNumberByMultiplyingBy:[NSDecimalNumber decimalNumberWithString:@"1000000"]] intValue];			
+
+				sendPurchaseProductDataEvent("productData", [prod.productIdentifier UTF8String], [prod.localizedTitle UTF8String], [prod.localizedDescription UTF8String], priceAmountMicros, [formattedPrice UTF8String], [priceCurrencyCode UTF8String]);
 
 			}
 			

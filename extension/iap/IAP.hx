@@ -382,16 +382,19 @@ typedef IAProduct = {
 				dispatchEvent (e);
 			
 			case "productData":
-				var prod:IAProduct = { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), price: Reflect.field (inEvent, "price") };
-				trace('   ios product: ' + prod);
-				tempProductsData.push(prod );
-				
+				var prod:IAProduct = { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), localizedPrice: Reflect.field (inEvent, "localizedPrice"), priceAmountMicros: Reflect.field (inEvent, "priceAmountMicros"), price: Reflect.field(inEvent, "priceAmountMicros")/1000/1000, priceCurrencyCode: Reflect.field (inEvent, "priceCurrencyCode")};
+				trace('iOS Product: ' + prod);
+				tempProductsData.push( prod );				
 				inventory.productDetailsMap.set(prod.productID, new ProductDetails(prod));
 				
 			case "productDataComplete":
 				
 				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE, null, tempProductsData));
 				tempProductsData.splice(0, tempProductsData.length);
+			
+			case "productDataFailed":
+				
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED, data));
 			
 			default:
 			
