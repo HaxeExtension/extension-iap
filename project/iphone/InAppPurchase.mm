@@ -57,7 +57,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 {
 	if(productsRequest != NULL)
 	{
-		NSLog(@"Can't start another purchase until previous one is complete.");
+		NSLog(@"Can't start a purchase while performing a previous transaction.");
 		return;
 	}
 	
@@ -69,9 +69,14 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)requestProductData:(NSString*)productIdentifiers
 {
+	if(productsRequest != NULL)
+	{
+		NSLog(@"Can't request product data while performing a previous transaction.");
+		return;
+	}
+
 	if(productID) 
 	{
-        //[productID release];
 		productID = nil;
 	}
 		
@@ -85,6 +90,21 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 #pragma mark -
 #pragma mark SKProductsRequestDelegate methods 
+
+- (void)request:(SKProductsRequest *)request didFailWithError:(NSError *)error
+{
+	NSLog(@"Error: %@",error);
+	if( productsRequest == request ) productsRequest = NULL;
+	
+	if(productID)
+	{
+		sendPurchaseEvent("failed", [productID UTF8String]);
+	}
+	else
+	{
+		sendPurchaseEvent("productDataFailed", [error.localizedDescription UTF8String]);
+	}
+}
 
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse*)response
 {   	
