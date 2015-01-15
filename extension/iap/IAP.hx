@@ -382,7 +382,7 @@ typedef IAProduct = {
 				dispatchEvent (e);
 			
 			case "productData":
-				var prod:IAProduct = { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), price: Reflect.field (inEvent, "price") };
+				var prod:IAProduct = { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), price: Reflect.field (inEvent, "price"), localizedPrice: Reflect.field (inEvent, "localizedPrice") };
 				trace('   ios product: ' + prod);
 				tempProductsData.push(prod );
 				

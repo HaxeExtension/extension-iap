@@ -143,7 +143,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 	alloc_field(o,val_id("localizedTitle"),alloc_string(localizedTitle));
 	alloc_field(o,val_id("localizedDescription"),alloc_string(localizedDescription));
   alloc_field(o,val_id("price"),alloc_float(price));
-	alloc_field(o,val_id("price"),alloc_string(localizedPrice));
+	alloc_field(o,val_id("localizedPrice"),alloc_string(localizedPrice));
     val_call1(purchaseEventHandle->get(), o);
 }
 
