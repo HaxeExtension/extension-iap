@@ -11,7 +11,7 @@ extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productI
 extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, float price, const char* localizedPrice);
 
 
-@interface InAppPurchase: NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver>
+@interface InAppPurchase: NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver, SKRequestDelegate>
 {
     SKProduct* myProduct;
     SKProductsRequest* productsRequest;
@@ -25,6 +25,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 - (void)purchaseProduct:(NSString*)productIdentifiers;
 - (void)requestProductData:(NSString*)productIdentifiers;
 - (void)finishTransactionManually:(NSString *)transactionID;
+- (void)request:(SKRequest *)request didFailWithError:(NSError *)error;
 
 @property bool manualTransactionMode;
 @end
@@ -146,6 +147,14 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 		
 		//[transactions release];
 	}
+}
+
+- (void)request:(SKRequest *)request didFailWithError:(NSError *)error
+{
+    NSLog(@"Error requesting products");
+    //[productsRequest release];
+    productsRequest = NULL;
+	sendPurchaseEvent("productDataFailed", nil);
 }
 
 - (void)finishTransaction:(SKPaymentTransaction*)transaction wasSuccessful:(BOOL)wasSuccessful
