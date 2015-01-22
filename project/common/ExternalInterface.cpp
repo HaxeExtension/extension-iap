@@ -135,15 +135,16 @@ extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productI
 }
 
 
-extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, float price, const char* localizedPrice)
+extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, int priceAmountMicros, const char* localizedPrice, const char* priceCurrencyCode)
 {
     value o = alloc_empty_object();
     alloc_field(o,val_id("type"),alloc_string(type));
     alloc_field(o,val_id("productID"),alloc_string(productID));
 	alloc_field(o,val_id("localizedTitle"),alloc_string(localizedTitle));
 	alloc_field(o,val_id("localizedDescription"),alloc_string(localizedDescription));
-  alloc_field(o,val_id("price"),alloc_float(price));
+	alloc_field(o,val_id("priceAmountMicros"),alloc_int(priceAmountMicros));
 	alloc_field(o,val_id("localizedPrice"),alloc_string(localizedPrice));
+	alloc_field(o,val_id("priceCurrencyCode"),alloc_string(priceCurrencyCode));
     val_call1(purchaseEventHandle->get(), o);
 }
 
