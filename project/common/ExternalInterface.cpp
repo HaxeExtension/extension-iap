@@ -70,7 +70,7 @@ DEFINE_PRIM(iap_finish_transaction, 1);
 
 static value iap_canbuy() 
 {
-   	printf("init 222222 can buy --------------------------------------------------- xx\n");
+	printf("init 222222 can buy --------------------------------------------------- xx\n");
 	return alloc_bool(canPurchase());
 }
 DEFINE_PRIM (iap_canbuy, 0);
@@ -114,47 +114,47 @@ extern "C" int iap_register_prims() { return 0; }
 
 extern "C" void sendPurchaseEvent(const char* type, const char* data)
 {
-    value o = alloc_empty_object();
-    alloc_field(o,val_id("type"),safe_alloc_string(type));
-    alloc_field(o,val_id("data"),safe_alloc_string(data));
-    val_call1(purchaseEventHandle->get(), o);
+	value o = alloc_empty_object();
+	alloc_field(o,val_id("type"),safe_alloc_string(type));
+	alloc_field(o,val_id("data"),safe_alloc_string(data));
+	val_call1(purchaseEventHandle->get(), o);
 }
 
 
 extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productID, const char* transactionID, const char* downloadPath, const char* downloadVersion, const char* downloadProgress)
 {
-    value o = alloc_empty_object();
-    alloc_field(o,val_id("type"),safe_alloc_string(type));
-    alloc_field(o,val_id("productID"),safe_alloc_string(productID));
+	value o = alloc_empty_object();
+	alloc_field(o,val_id("type"),safe_alloc_string(type));
+	alloc_field(o,val_id("productID"),safe_alloc_string(productID));
 	alloc_field(o,val_id("transactionID"),safe_alloc_string(transactionID));
 	alloc_field(o,val_id("downloadPath"),safe_alloc_string(downloadPath));
 	alloc_field(o,val_id("downloadVersion"),safe_alloc_string(downloadVersion));
 	alloc_field(o,val_id("downloadProgress"),safe_alloc_string(downloadProgress));
-    val_call1(purchaseEventHandle->get(), o);
+	val_call1(purchaseEventHandle->get(), o);
 }
 
 
 extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, int priceAmountMicros, const char* localizedPrice, const char* priceCurrencyCode)
 {
-    value o = alloc_empty_object();
-    alloc_field(o,val_id("type"),safe_alloc_string(type));
-    alloc_field(o,val_id("productID"),safe_alloc_string(productID));
+	value o = alloc_empty_object();
+	alloc_field(o,val_id("type"),safe_alloc_string(type));
+	alloc_field(o,val_id("productID"),safe_alloc_string(productID));
 	alloc_field(o,val_id("localizedTitle"),safe_alloc_string(localizedTitle));
 	alloc_field(o,val_id("localizedDescription"),safe_alloc_string(localizedDescription));
 	alloc_field(o,val_id("priceAmountMicros"),alloc_int(priceAmountMicros));
 	alloc_field(o,val_id("localizedPrice"),safe_alloc_string(localizedPrice));
 	alloc_field(o,val_id("priceCurrencyCode"),safe_alloc_string(priceCurrencyCode));
-    val_call1(purchaseEventHandle->get(), o);
+	val_call1(purchaseEventHandle->get(), o);
 }
 
 
 extern "C" void sendPurchaseFinishEvent(const char* type, const char* productID, const char* transactionID, double transactionDate, const char* receipt)
 {
-    value o = alloc_empty_object();
-    alloc_field(o,val_id("type"),safe_alloc_string(type));
-    alloc_field(o,val_id("productID"),safe_alloc_string(productID));
+	value o = alloc_empty_object();
+	alloc_field(o,val_id("type"),safe_alloc_string(type));
+	alloc_field(o,val_id("productID"),safe_alloc_string(productID));
 	alloc_field(o,val_id("transactionID"),safe_alloc_string(transactionID));
 	alloc_field(o,val_id("transactionDate"),alloc_int(static_cast<int>(transactionDate)));
-    alloc_field(o,val_id("receipt"),safe_alloc_string(receipt));
-    val_call1(purchaseEventHandle->get(), o);
+	alloc_field(o,val_id("receipt"),safe_alloc_string(receipt));
+	val_call1(purchaseEventHandle->get(), o);
 }
