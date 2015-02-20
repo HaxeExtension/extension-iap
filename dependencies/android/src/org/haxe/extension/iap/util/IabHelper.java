@@ -619,6 +619,10 @@ public class IabHelper {
                 catch (IabException ex) {
                     result = ex.getResult();
                 }
+                catch (NullPointerException ex) {
+                    logWarn("IabHelper has been disposed.");
+                    return;
+                }
 
                 flagEndAsync();
 
