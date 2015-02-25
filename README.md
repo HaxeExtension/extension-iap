@@ -1,6 +1,6 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/iap.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/extension-iap) [![Build Status](https://img.shields.io/travis/openfl/iap.svg?style=flat)](https://travis-ci.org/openfl/extension-iap)
 
-extension-iap
+IAP
 ===
 Provides an access to in-app purchases (iOS) and in-app billing (Android) for OpenFL projects using a common API.
 
@@ -8,7 +8,7 @@ Provides an access to in-app purchases (iOS) and in-app billing (Android) for Op
 Installation
 ============
 
-You can easily install extension-iap using haxelib:
+You can easily install IAP using haxelib:
 
     haxelib install extension-iap
 
@@ -20,7 +20,7 @@ To add it to a Lime or OpenFL project, add this to your project file:
 Development Builds
 ==================
 
-Clone the extension-iap repository:
+Clone the IAP repository:
 
     git clone https://github.com/openfl/extension-iap
 
