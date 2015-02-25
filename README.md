@@ -1,6 +1,6 @@
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/iap.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/iap) [![Build Status](https://img.shields.io/travis/openfl/iap.svg?style=flat)](https://travis-ci.org/openfl/iap)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/iap.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/extension-iap) [![Build Status](https://img.shields.io/travis/openfl/iap.svg?style=flat)](https://travis-ci.org/openfl/extension-iap)
 
-IAP
+extension-iap
 ===
 Provides an access to in-app purchases (iOS) and in-app billing (Android) for OpenFL projects using a common API.
 
@@ -8,30 +8,30 @@ Provides an access to in-app purchases (iOS) and in-app billing (Android) for Op
 Installation
 ============
 
-You can easily install IAP using haxelib:
+You can easily install extension-iap using haxelib:
 
-    haxelib install iap
+    haxelib install extension-iap
 
 To add it to a Lime or OpenFL project, add this to your project file:
 
-    <haxelib name="iap" />
+    <haxelib name="extension-iap" />
 
 
 Development Builds
 ==================
 
-Clone the IAP repository:
+Clone the extension-iap repository:
 
-    git clone https://github.com/openfl/iap
+    git clone https://github.com/openfl/extension-iap
 
 Tell haxelib where your development copy of IAP is installed:
 
-    haxelib dev iap iap
+    haxelib dev extension-iap extension-iap
 
 You can build the binaries using "lime rebuild"
 
-    lime rebuild iap ios
+    lime rebuild extension-iap ios
 
 To return to release builds:
 
-    haxelib dev iap
+    haxelib dev extension-iap
