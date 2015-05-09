@@ -369,7 +369,7 @@ class Store extends Sprite
 		
 		for (fastEl in model.data.node.storeItems.elements) {
 			
-			productsArray.push( { productID: fastEl.att.id, localizedTitle: fastEl.att.title, price: fastEl.att.price } );
+			productsArray.push( { productID: fastEl.att.id, localizedTitle: fastEl.att.title, price: Std.parseFloat(fastEl.att.price) } );
 			
 		}
 		
