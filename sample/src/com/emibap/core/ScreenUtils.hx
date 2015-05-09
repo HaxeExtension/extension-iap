@@ -28,26 +28,26 @@ class ScreenUtils
 		/**
 		 * DPIs: http://en.wikipedia.org/wiki/List_of_displays_by_pixel_density
 		 
-		iPhone 4S / iPod Touch	4S / 4th Gen	8.9 (3.5 inches)	960×640	128 (326)		3:2
-		iPhone 5 / iPod Touch	5 / 5th Gen	10 (4 inches)			1136×640	128 (326)	71:40
+		iPhone 4S / iPod Touch	4S / 4th Gen	8.9 (3.5 inches)	960Ã—640	128 (326)		3:2
+		iPhone 5 / iPod Touch	5 / 5th Gen	10 (4 inches)			1136Ã—640	128 (326)	71:40
 		
-		iPad mini	Original	20 (7.9 inches)						1024×768	64 (163)	4:3
-		iPad	Original, 2	25 (9.7 inches)							1024×768	52 (132)	4:3
-		iPad with Retina Display	3rd, 4th Gen	25 (9.7 inches)	2048×1536	104 (264)	4:3
+		iPad mini	Original	20 (7.9 inches)						1024Ã—768	64 (163)	4:3
+		iPad	Original, 2	25 (9.7 inches)							1024Ã—768	52 (132)	4:3
+		iPad with Retina Display	3rd, 4th Gen	25 (9.7 inches)	2048Ã—1536	104 (264)	4:3
 		
-		BlackBerry PlayBook	18 (7)									1024×600	67 (169)	15:9–16:9	1
-		BlackBerry 10 Dev Alpha	11 (4.2)							1280×768	140 (356)	15:9–16:9	
+		BlackBerry PlayBook	18 (7)									1024Ã—600	67 (169)	15:9â€“16:9	1
+		BlackBerry 10 Dev Alpha	11 (4.2)							1280Ã—768	140 (356)	15:9â€“16:9	
 		
 		
 		Kindle Fire HD 8.9"[3]	23 (8.9)	1920x1200	100 (254)	16:10	1.5
 		Kindle Fire HD 7"[4]	18 (7)	1280x800	85 (216)	16:10	1.5
-		Kindle Fire[5]	18 (7)	1024×600	67 (169)	5.12:3
+		Kindle Fire[5]	18 (7)	1024Ã—600	67 (169)	5.12:3
 		 
 		 */
 		
 		//Code for SWF output
 
-		#if cpp
+		#if (cpp || neko)
 		applicationWidth = Std.int(Capabilities.screenResolutionX);
 		applicationHeight = Std.int(Capabilities.screenResolutionY);
 		#end
