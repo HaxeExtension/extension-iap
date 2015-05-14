@@ -678,7 +678,7 @@ private class IAPHandler {
 		//trace(Type.getClass(response));
 		//trace(Reflect.fields(response));
 		
-		if (cast(response, String) == "Success") {
+		if (Std.is(response, String) && cast(response, String) == "Success") {
 			androidAvailable = true;
 			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT));
 		} else {
