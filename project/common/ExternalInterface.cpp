@@ -70,7 +70,6 @@ DEFINE_PRIM(iap_finish_transaction, 1);
 
 static value iap_canbuy() 
 {
-	printf("init 222222 can buy --------------------------------------------------- xx\n");
 	return alloc_bool(canPurchase());
 }
 DEFINE_PRIM (iap_canbuy, 0);
@@ -98,7 +97,12 @@ static value iap_release()
 }
 DEFINE_PRIM (iap_release, 0);
 
-
+static value iap_poll_event()
+{
+	pollEvent();
+	return alloc_null();
+}
+DEFINE_PRIM (iap_poll_event, 0);
 
 extern "C" void iap_main() 
 {

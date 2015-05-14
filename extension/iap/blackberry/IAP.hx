@@ -1,4 +1,4 @@
-package extension.iap.fallback;
+package extension.iap.blackberry;
 
 import extension.iap.IAP;
 import flash.errors.Error;
@@ -6,45 +6,7 @@ import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.Lib;
 import haxe.Json;
-
-/**
- * Provides convenience methods and properties for in-app purchases (Android & iOS).
- * The methods and properties are static, so there's no need to instantiate an instance,
- * but an initialization is required prior to the first use.
- * Every method is asynchronous (non-blocking). The callbacks always fire events indicating
- * the success or failure of every operation.
- *
- * The first step is to initialize the extension. You do so by calling the {@link #initialize}
- * method. The result comes with a PURCHASE_INIT or PURCHASE_INIT_FAILED IAPEvent. Also, the
- * available property will tell if you can use the extension at any time.
- *
- * Although we aim to provide a unified API for every target, there are some differences that
- * required to leave platform exclusive methods and properties. So you'll find different workflows.
- *
- * Android workflow:
- * ----------------
- *
- * After initialization is complete, you will typically want to request an inventory of owned
- * items and subscriptions. See {@link #queryInventory} and related events. This method can also be
- * used to retrieve a detailed list of products.
- *
- * Then you may want to buy items with the {@link #purchase} method, and if the item is consumable,
- * the {@link #consume} method should be called after a successful purchase.
- *
- * iOS workflow:
- * ------------
- *
- * After initialization is complete, you will typically want request details about the products
- * being sold {@link #requestProductData}, and also probably try to restore non consumable
- * items previously purchased by the user using the {@link #restore} method.
- *
- * Then you may want to buy items with the {@link #purchase} method. You don't need to call the
- * consume method for iOS, but for consumable items you may want to locally erase the purchase from
- * the Inventory.
- *
- * You may want to check the IAPEvent, Purchase and ProductDetails classes to explore further.
- *
- */
+import haxe.Timer;
 
 @:allow(extension.iap) class IAP {
 
@@ -60,7 +22,6 @@ import haxe.Json;
 	// Event dispatcher composition
 	private static var dispatcher = new EventDispatcher ();
 
-
 	/**
      * Initializes the extension.
 	 *
@@ -73,10 +34,13 @@ import haxe.Json;
 	 * 		PURCHASE_INIT: Fired when the initialization was successful
 	 * 		PURCHASE_INIT_FAILED: Fired when the initialization failed
      */
-
 	public static function initialize (publicKey:String = ""):Void {
 
-		dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT_FAILED, null));
+		purchases_initialize();
+		var poller = new Timer(100);
+		poller.run = purchase_poll_event;
+
+		//dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT_FAILED, null));
 
 	}
 
@@ -93,7 +57,6 @@ import haxe.Json;
 	 * 		PURCHASE_FAILURE: Fired when the purchase attempt failed
 	 * 		PURCHASE_CANCEL: Fired when the purchase attempt was cancelled by the user
      */
-
 	public static function purchase (productID:String, devPayload:String = ""):Void {
 
 	}
@@ -107,11 +70,9 @@ import haxe.Json;
 	 * 		PURCHASE_CONSUME_SUCCESS: Fired when the consume attempt was successful
 	 * 		PURCHASE_CONSUME_FAILURE: Fired when the consume attempt failed
      */
-
 	public static function consume (purchase:Purchase):Void {
 
 	}
-
 
 	/**
      * Queries the inventory. This will query all owned items from the server, as well as
@@ -127,12 +88,7 @@ import haxe.Json;
 	 * 			The inventory static property will be populated with new data.
 	 * 		PURCHASE_QUERY_INVENTORY_FAILED: Fired when the query inventory attempt failed
      */
-
 	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
-
-	}
-
-	private static function notifyListeners (inEvent:Dynamic):Void {
 
 	}
 
@@ -181,5 +137,19 @@ import haxe.Json;
 		return dispatcher.hasEventListener (type);
 
 	}
+
+	// Native Methods
+
+	private static var purchases_initialize = Lib.load ("iap", "iap_initialize", 0);
+	private static var purchases_restore = Lib.load ("iap", "iap_restore", 0);
+	private static var purchases_buy = Lib.load ("iap", "iap_buy", 1);
+	private static var purchases_get_data = Lib.load ("iap", "iap_get_data", 1);
+	private static var purchases_finish_transaction = Lib.load ("iap", "iap_finish_transaction", 1);
+	private static var purchases_canbuy = Lib.load ("iap", "iap_canbuy", 0);
+	private static var purchases_get_manualtransactionmode = Lib.load ("iap", "iap_get_manualtransactionmode", 0);
+	private static var purchases_set_manualtransactionmode = Lib.load ("iap", "iap_set_manualtransactionmode", 1);
+	private static var purchases_release = Lib.load ("iap", "iap_release", 0);
+	private static var set_event_handle = Lib.load ("iap", "iap_set_event_handle", 1);
+	private static var purchase_poll_event = Lib.load ("iap", "iap_poll_event", 0);
 
 }

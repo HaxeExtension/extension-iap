@@ -1,41 +1,54 @@
 <xml>
-	
+
 	<include name="${HXCPP}/build-tool/BuildCommon.xml"/>
-	
+
 	<set name="debug_extra" value="-debug" if="fulldebug" />
-	
+
 	<files id="common">
-		
+
 		<compilerflag value="-Iinclude"/>
-		
+
 		<file name="common/ExternalInterface.cpp"/>
-		
+
 	</files>
-	
+
 	<files id="iphone">
-		
+
 		<compilerflag value="-IiPhone/include"/>
 		<compilerflag value="-Iinclude"/>
-		
+
 		<file name="iphone/InAppPurchase.mm"/>
-		
+
 	</files>
-	
+
+	<files id="blackberry">
+
+		<compilerflag value="-Iinclude" />
+		<file name="blackberry/InAppPurchase.cpp" />
+
+	</files>
+
 	<target id="NDLL" output="${LIBPREFIX}iap${debug_extra}${LIBEXTRA}" tool="linker" toolid="${STD_MODULE_LINK}">
-		
+
 		<outdir name="../ndll/${BINDIR}"/>
-		
+
 		<ext value=".ndll" if="windows || mac || linux" />
-		
+
 		<files id="common"/>
 		<files id="iphone" if="iphone"/>
-		
+
+		<section if="blackberry">
+			<files id="blackberry" />
+			<compilerflag value="-DBLACKBERRY" />
+			<lib name="-lbps" />
+		</section>
+
 	</target>
-	
+
 	<target id="default">
-		
+
 		<target id="NDLL"/>
-		
+
 	</target>
-	
+
 </xml>

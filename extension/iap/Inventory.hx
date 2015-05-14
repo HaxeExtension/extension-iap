@@ -32,13 +32,13 @@ class Inventory
 				
 				for (dynItm in dynPurchases) {
 					purchaseMap.set(cast Reflect.field(dynItm, "key"), 
-            new Purchase(Reflect.field(dynItm, "value"), Reflect.field(dynItm, "itemType"), Reflect.field(dynItm, "signature")));
+            		new Purchase(Reflect.field(dynItm, "value"), Reflect.field(dynItm, "itemType"), Reflect.field(dynItm, "signature")));
 				}
 				
 			}
 			
 		}
-		//trace("Inventory. EndParse: ");
+
 	}
 	
 	/** Returns the listing details for an in-app product. */
