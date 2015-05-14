@@ -74,5 +74,4 @@ class Inventory
         if (purchaseMap.exists(productId)) purchaseMap.remove(productId);
     }
 	
-	
 }
