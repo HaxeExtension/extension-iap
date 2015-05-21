@@ -172,20 +172,6 @@ import openfl.utils.JNI;
 
 	}
 
-	// Private Static Methods
-	/*
-
-	private static function registerHandle ():Void {
-
-	}
-
-
-	private static function notifyListeners (inEvent:Dynamic):Void {
-
-
-	}
-	*/
-
 	// Getter & Setter Methods
 
 
