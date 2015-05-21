@@ -15,11 +15,6 @@ namespace iap
 		const char* purchase_id;
 	} InventoryEntry;
 
-	typedef struct {
-		const char *id;
-		unsigned price;
-	} ProductData;
-
 	#endif
 
 	#ifndef BLACKBERRY
@@ -32,14 +27,12 @@ namespace iap
 		void initInAppPurchase();
 		void purchaseProduct(const char* productID);
 		void releaseInAppPurchase();
+		void requestProductData(const char *productID);
 		void restorePurchases();
 		void setManualTransactionMode(bool val);
 		#ifdef BLACKBERRY
 		void pollEvent();
 		void queryInventory();
-		void requestProductData(const char *productID, ProductData *pData);
-		#else
-		void requestProductData(const char *productID);
 		#endif
 	#ifndef BLACKBERRY
 	}

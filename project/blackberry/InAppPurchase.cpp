@@ -92,28 +92,12 @@ namespace iap {
 
 	}
 
-	void requestProductData(const char *productID, ProductData *pData) {
+	void requestProductData(const char *productID) {
 
 		log("requestProductData call - start");
 
 		unsigned price;
-		paymentservice_get_price(productID, NULL, groupName, &price);
-
-		/*
-		char strPrice[64];
-		snprintf(strPrice, 64, "%d milibarios", price);
-		sendPurchaseProductDataEvent(
-			"product_data",
-			productID,
-			"<title>",
-			"<description>",
-			price,
-			strPrice,
-			"<Mbr>"
-		);
-		*/
-		pData->id = productID;
-		pData->price = price;
+		paymentservice_get_price(productID, NULL, groupName, &waitingEventProductId);
 
 		log("requestProductData call - end");
 
@@ -203,6 +187,26 @@ namespace iap {
 
 	}
 
+	void onGetPriceSucess(bps_event_t *event) {
+
+		if (event == NULL) {
+			fprintf(stderr, "Invalid event.\n");
+			return;
+		}
+
+		const char *str_price = paymentservice_event_get_price(event);
+		const char* digital_good = paymentservice_event_get_digital_good_id(event, 0);
+		sendPurchaseProductDataEvent(
+			"product_data",
+			digital_good,
+			"",						//const char* localizedTitle,
+			"",						//const char* localizedDescription,
+			0,						//int priceAmountMicros,
+			str_price,				//const char* localizedPrice,
+			"U$SDSSA"				//const char* priceCurrencyCode
+		);
+	}
+
 	void pollEvent() {
 
 		bps_event_t *event = NULL;
@@ -225,9 +229,12 @@ namespace iap {
 			log(test);
 
 			if (SUCCESS_RESPONSE == paymentservice_event_get_response_code(event)) {
-				if (PURCHASE_RESPONSE == bps_event_get_code(event)) {
+				unsigned bps_code = bps_event_get_code(event);
+				if (PURCHASE_RESPONSE == bps_code) {
 					// Handle a successful purchase here
 					onPurchaseSuccess(event);
+				} else if (GET_PRICE_RESPONSE == bps_code) {
+					onGetPriceSucess(event);
 				} else {
 					// Handle a successful query for past purchases here
 					log("query response");

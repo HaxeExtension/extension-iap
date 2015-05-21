@@ -66,6 +66,7 @@ import haxe.Timer;
 	public static function purchase (productID:String, devPayload:String = ""):Void {
 
 		trace("purchase a");
+
 		waitingEvent = true;
 		purchases_buy(productID);
 		while (waitingEvent) {
@@ -88,8 +89,11 @@ import haxe.Timer;
 	 */
 	public static function requestProductData (inArg:Dynamic):Void {
 
-		var p = purchases_get_data(inArg);
-		trace("price: " + Reflect.field(p, "price"));
+		waitingEvent = true;
+		purchases_get_data(inArg);
+		while (waitingEvent) {
+			pollEvent();
+		}		
 
 	}
 
@@ -167,6 +171,7 @@ import haxe.Timer;
 			case "product_data": {
 				trace("price: " + Reflect.field (inEvent, "localizedPrice"));
 				trace("precio micros: " + Reflect.field (inEvent, "priceAmountMicros"));
+				trace("productID: " + Reflect.field (inEvent, "productID"));
 			}
 			case "inventory_sucess": {
 				trace("inventory");

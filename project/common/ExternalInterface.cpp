@@ -54,17 +54,8 @@ DEFINE_PRIM(iap_buy, 1);
 
 static value iap_get_data(value productID)
 {
-	#ifdef BLACKBERRY
-	ProductData pData;
-	requestProductData(val_string(productID), &pData);
-	value o = alloc_empty_object();
-	alloc_field(o, val_id("id"), safe_alloc_string(pData.id));
-	alloc_field(o, val_id("price"), alloc_int(pData.price));
-	return o;
-	#else
 	requestProductData(val_string(productID));
 	return alloc_null();
-	#endif
 }
 DEFINE_PRIM(iap_get_data, 1);
 
