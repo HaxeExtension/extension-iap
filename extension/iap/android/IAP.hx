@@ -122,6 +122,23 @@ import openfl.utils.JNI;
 
 	}
 
+
+	/**
+	 * Retrieves localized information about a list of products.
+	 * 
+	 * @param inArg. A String with the product Id, or an Array of Strings with multiple product Ids.
+	 * 
+	 * Related Events (IAPEvent): 
+	 * 		PURCHASE_PRODUCT_DATA_COMPLETE: Fired when the products data has been retrieved. 
+	 * 			The event will come with a productsData array.
+	 * 			This method also populates the productDetailsMap property of the inventory, so it can be accessed anytime after calling it.
+	 */
+	
+	public static function requestProductData (inArg:Dynamic) : Void {
+
+	}
+
+
 	/**
 	 * Sends a consume intent for a given product.
 	 *

@@ -41,6 +41,7 @@
 			<files id="blackberry" />
 			<compilerflag value="-DBLACKBERRY" />
 			<lib name="-lbps" />
+			<lib name="-lc" />
 		</section>
 
 	</target>

@@ -97,6 +97,7 @@ static value iap_release()
 }
 DEFINE_PRIM (iap_release, 0);
 
+#ifdef BLACKBERRY
 static value iap_poll_event()
 {
 	pollEvent();
@@ -110,6 +111,7 @@ static value iap_query_inventory()
 	return alloc_null();
 }
 DEFINE_PRIM (iap_query_inventory, 0);
+#endif
 
 extern "C" void iap_main() 
 {

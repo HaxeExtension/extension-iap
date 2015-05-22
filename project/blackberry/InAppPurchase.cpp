@@ -26,22 +26,34 @@ extern "C" void sendPurchaseInventoryData(
 	int inventoryLength
 );
 
+extern "C" void sendPurchaseFinishEvent(
+	const char* type,
+	const char* productID,
+	const char* transactionID,
+	double transactionDate,
+	const char* receipt
+);
+
 namespace iap {
 
 	char groupName[256];
 	unsigned waitingEventProductId;
 
 	void log(const char *msg) {
+		/*
 		FILE *logFile = fopen("logs/log.txt", "a");
 		fprintf(logFile, "%s\n", msg);
 		fclose(logFile);
+		*/
 	}
 
 	void initInAppPurchase() {
 
 		// Reset log file
+		/*
 		FILE *logFile = fopen("logs/log.txt", "w");
 		fclose(logFile);
+		*/
 
 		bps_initialize();
 
@@ -157,7 +169,7 @@ namespace iap {
 		const char* metadata = paymentservice_event_get_metadata(event, 0);
 		const char* purchase_id = paymentservice_event_get_purchase_id(event, 0);
 
-		sendPurchaseEvent("purchase_sucess", digital_good);
+		sendPurchaseFinishEvent("purchase_sucess", digital_good, purchase_id, atof(date), NULL);
 
 	}
 
@@ -205,6 +217,7 @@ namespace iap {
 			str_price,				//const char* localizedPrice,
 			"U$SDSSA"				//const char* priceCurrencyCode
 		);
+
 	}
 
 	void pollEvent() {
@@ -217,11 +230,9 @@ namespace iap {
 		}
 
 		if (bps_event_get_domain(event) == paymentservice_get_domain()) {
-			
-			log("recibio evento de compras");
+
 			unsigned request_id = paymentservice_event_get_request_id(event);
 			if (request_id!=waitingEventProductId) {
-				log("No era");
 				return;
 			}
 			char test[64];

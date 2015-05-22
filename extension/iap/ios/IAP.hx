@@ -1,5 +1,6 @@
-package extension.iap.android;
+package extension.iap.ios;
 
+import extension.iap.IAP;
 import flash.errors.Error;
 import flash.events.Event;
 import flash.events.EventDispatcher;
@@ -61,17 +62,17 @@ import haxe.Json;
 
 
 	/**
-     * Initializes the extension.
+	 * Initializes the extension.
 	 *
-     * @param publicKey (Android). Your application's public key, encoded in base64.
-     *     This is used for verification of purchase signatures. You can find your app's base64-encoded
-     *     public key in your application's page on Google Play Developer Console. Note that this
-     *     is NOT your "developer public key".
+	 * @param publicKey (Android). Your application's public key, encoded in base64.
+	 *     This is used for verification of purchase signatures. You can find your app's base64-encoded
+	 *     public key in your application's page on Google Play Developer Console. Note that this
+	 *     is NOT your "developer public key".
 	 *
 	 * Related Events (IAPEvent):
 	 * 		PURCHASE_INIT: Fired when the initialization was successful
 	 * 		PURCHASE_INIT_FAILED: Fired when the initialization failed
-     */
+	 */
 
 	public static function initialize (publicKey:String = ""):Void {
 
@@ -90,18 +91,18 @@ import haxe.Json;
 	}
 
 	/**
-     * Sends a purchase intent for a given product.
+	 * Sends a purchase intent for a given product.
 	 *
-     * @param productID (iOS & Android). The unique Id for the desired product (Android Sku).
+	 * @param productID (iOS & Android). The unique Id for the desired product (Android Sku).
 	 * @param devPayload (Android). Extra data (developer payload), which will be returned with the purchase data
-     *     when the purchase completes. This extra data will be permanently bound to that purchase
-     *     and will always be returned when the purchase is queried.
+	 *     when the purchase completes. This extra data will be permanently bound to that purchase
+	 *     and will always be returned when the purchase is queried.
 	 *
 	 * Related Events (IAPEvent):
 	 * 		PURCHASE_SUCCESS: Fired when the purchase attempt was successful
 	 * 		PURCHASE_FAILURE: Fired when the purchase attempt failed
 	 * 		PURCHASE_CANCEL: Fired when the purchase attempt was cancelled by the user
-     */
+	 */
 
 	public static function purchase (productID:String, devPayload:String = ""):Void {
 
@@ -110,15 +111,15 @@ import haxe.Json;
 	}
 
 	/**
-     * Retrieves localized information about a list of products.
+	 * Retrieves localized information about a list of products.
 	 *
-     * @param inArg. A String with the product Id, or an Array of Strings with multiple product Ids.
+	 * @param inArg. A String with the product Id, or an Array of Strings with multiple product Ids.
 	 *
 	 * Related Events (IAPEvent):
 	 * 		PURCHASE_PRODUCT_DATA_COMPLETE: Fired when the products data has been retrieved.
 	 * 			The event will come with a productsData array.
 	 * 			This method also populates the productDetailsMap property of the inventory, so it can be accessed anytime after calling it.
-     */
+	 */
 
 	public static function requestProductData (inArg:Dynamic):Void {
 
@@ -136,12 +137,12 @@ import haxe.Json;
 	}
 
 	/**
-     * Asks the payment queue to restore previously completed purchases.
+	 * Asks the payment queue to restore previously completed purchases.
 	 *
 	 * Related Events (IAPEvent):
 	 * 		PRODUCTS_RESTORED: Fired when the restore process has successfully finished.
 	 * 		PRODUCTS_RESTORED_WITH_ERRORS: Fired when the restore process finished with errors.
-     */
+	 */
 
 	public static function restorePurchases ():Void {
 
@@ -149,12 +150,42 @@ import haxe.Json;
 
 	}
 
+	/**
+	 * Sends a consume intent for a given product.
+	 *
+	 * @param purchase. The previously purchased product.
+	 *
+	 * Related Events (IAPEvent):
+	 * 		PURCHASE_CONSUME_SUCCESS: Fired when the consume attempt was successful
+	 * 		PURCHASE_CONSUME_FAILURE: Fired when the consume attempt failed
+	 */
 
+	public static function consume (purchase:Purchase) : Void {
 
+	}
+
+	/**
+	 * Queries the inventory. This will query all owned items from the server, as well as
+	 * information on additional products, if specified.
+	 *
+	 * @param queryItemDetails if true, product details (price, description, etc) will be queried as well
+	 *     as purchase information.
+	 * @param moreItems additional PRODUCT IDs to query information on, regardless of ownership. 
+	 *     Ignored if null or if queryItemDetails is false.
+	 * 
+	 * Related Events (IAPEvent): 
+	 * 		PURCHASE_QUERY_INVENTORY_COMPLETE: Fired when the query inventory attempt was successful. 
+	 * 			The inventory static property will be populated with new data.
+	 * 		PURCHASE_QUERY_INVENTORY_FAILED: Fired when the query inventory attempt failed
+	 */
+	
+	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
+
+	}
 
 	public static function finishTransactionManually (transactionID:String):Void {
 
-			purchases_finish_transaction (transactionID);
+		purchases_finish_transaction (transactionID);
 
 	}
 

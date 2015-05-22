@@ -2,6 +2,7 @@ package extension.iap.blackberry;
 
 import cpp.vm.Thread;
 import extension.iap.IAP;
+import extension.iap.IAPEvent;
 import flash.errors.Error;
 import flash.events.Event;
 import flash.events.EventDispatcher;
@@ -9,11 +10,18 @@ import flash.Lib;
 import haxe.Json;
 import haxe.Timer;
 
+private enum EventType {
+	None;
+	Purchase;
+	RequestProductData;
+	QueryInventory;
+}
+
 @:allow(extension.iap) class IAP {
 
 	private static var dispatcher = new EventDispatcher ();
 	private static var initialized : Bool = false;
-	private static var waitingEvent : Bool = false;
+	private static var waitingEvent : EventType = None;
 	public static var available (get, null):Bool;
 	public static var inventory(default, null):Inventory = null;
 
@@ -33,12 +41,14 @@ import haxe.Timer;
 
 		if (!initialized) {
 
-			trace("initialize");
+			inventory = new Inventory(null);
 
 			purchases_initialize();
 			set_event_handle(notifyListeners);
 
 			initialized = true;
+
+			dispatchEvent(new IAPEvent (IAPEvent.PURCHASE_INIT));
 
 		}
 
@@ -63,13 +73,13 @@ import haxe.Timer;
 	 * 		PURCHASE_FAILURE: Fired when the purchase attempt failed
 	 * 		PURCHASE_CANCEL: Fired when the purchase attempt was cancelled by the user
 	 */
-	public static function purchase (productID:String, devPayload:String = ""):Void {
+	public static function purchase (productID:String, devPayload:String = "") : Void {
 
 		trace("purchase a");
 
-		waitingEvent = true;
+		waitingEvent = Purchase;
 		purchases_buy(productID);
-		while (waitingEvent) {
+		while (waitingEvent!=None) {
 			pollEvent();
 		}
 
@@ -89,11 +99,11 @@ import haxe.Timer;
 	 */
 	public static function requestProductData (inArg:Dynamic):Void {
 
-		waitingEvent = true;
+		waitingEvent = RequestProductData;
 		purchases_get_data(inArg);
-		while (waitingEvent) {
+		while (waitingEvent!=None) {
 			pollEvent();
-		}		
+		}
 
 	}
 
@@ -128,9 +138,9 @@ import haxe.Timer;
 
 		trace("queryInventory a");
 
-		waitingEvent = true;
+		waitingEvent = QueryInventory;
 		purchases_query_inventory();
-		while (waitingEvent) {
+		while (waitingEvent!=None) {
 			pollEvent();
 		}
 
@@ -166,21 +176,64 @@ import haxe.Timer;
 		var data = Std.string (Reflect.field (inEvent, "data"));
 
 		switch (type) {
-			case "purchase_sucess": 	{ trace("purchase sucess"); }
-			case "failure":				{ trace("generic failure: " + data); }
+			case "purchase_sucess": {
+				var evt = new IAPEvent(IAPEvent.PURCHASE_SUCCESS);
+				evt.purchase = new Purchase(inEvent);
+				evt.productID = evt.purchase.productID;
+				inventory.purchaseMap.set(evt.purchase.productID, evt.purchase);
+				dispatchEvent(evt);
+			}
+			case "failure":	{
+				var evt = switch (waitingEvent) {
+					case Purchase:				new IAPEvent(IAPEvent.PURCHASE_FAILURE);
+					case RequestProductData:	new IAPEvent(IAPEvent.PURCHASE_PRODUCT_DATA_FAILED);
+					case QueryInventory:		new IAPEvent(IAPEvent.PURCHASE_QUERY_INVENTORY_FAILED);
+					case None:					null;	// Shouldnt ever happen
+				}
+				if (evt!=null) {
+					evt.message = data;
+					dispatchEvent(evt);
+				}
+			}
 			case "product_data": {
-				trace("price: " + Reflect.field (inEvent, "localizedPrice"));
-				trace("precio micros: " + Reflect.field (inEvent, "priceAmountMicros"));
-				trace("productID: " + Reflect.field (inEvent, "productID"));
+				var evt = new IAPEvent(IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE);
+				var details : IAProduct = {
+					productID : Reflect.field(inEvent, "productID"),
+					localizedPrice : Reflect.field(inEvent, "localizedPrice")
+				};
+				evt.productsData = [details];
+				inventory.productDetailsMap.set(details.productID, new ProductDetails(details));
+				dispatchEvent(evt);
 			}
 			case "inventory_sucess": {
-				trace("inventory");
-				trace("data: " + data);
+				
+				// Reset inventory purchaseMap
+				var keys = [for (k in inventory.purchaseMap.keys()) k];
+				for (k in keys) {
+					inventory.purchaseMap.remove(k);
+				}
+
+				var evt = new IAPEvent(IAPEvent.PURCHASE_QUERY_INVENTORY_COMPLETE);
+				evt.productsData = [];
+				var dynInventory : Array<Dynamic> = Reflect.field(inEvent, "data");
+				for (entry in dynInventory) {
+					var purchase = new Purchase(null);
+					purchase.date = Reflect.field(entry, "date");
+					purchase.digital_good = Reflect.field(entry, "digital_good");
+					purchase.digital_sku = Reflect.field(entry, "digital_sku");
+					purchase.license_key = Reflect.field(entry, "license_key");
+					purchase.metadata = Reflect.field(entry, "metadata");
+					purchase.productID = purchase.purchase_id = Reflect.field(entry, "purchase_id");
+					inventory.purchaseMap.set(purchase.purchase_id, purchase);
+				}
+
 			}
-			default: { trace("N/A"); }
+			default: {
+				trace("N/A");
+			}
 		}
 
-		waitingEvent = false;
+		waitingEvent = None;
 
 	}
 
