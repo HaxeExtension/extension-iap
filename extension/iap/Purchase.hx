@@ -4,7 +4,7 @@ import haxe.Json;
 class Purchase
 {
 
-	public var productID(default, null):String;
+	public var productID:String;
 	
 	// Android Properties
 	public var itemType(default, null):String;
@@ -21,9 +21,22 @@ class Purchase
 	// iOS Properties
 	public var transactionID(default, null):String;
 	public var transactionDate(default, null):Int;
+
+	// Blackberry Properties
+	public var date : String;
+	public var digital_good : String;
+	public var digital_sku : String;
+	public var license_key : String;
+	public var metadata : String;
+	public var purchase_id : String;
 	
 	public function new(baseObj:Dynamic, ?itemType:String, ?signature:String) 
 	{
+
+		if (baseObj==null) {
+			return;
+		}
+
 		var originalJson:String = "";
 		var dynObj:Dynamic = null;
 		

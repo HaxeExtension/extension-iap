@@ -70,7 +70,6 @@ DEFINE_PRIM(iap_finish_transaction, 1);
 
 static value iap_canbuy() 
 {
-	printf("init 222222 can buy --------------------------------------------------- xx\n");
 	return alloc_bool(canPurchase());
 }
 DEFINE_PRIM (iap_canbuy, 0);
@@ -98,7 +97,21 @@ static value iap_release()
 }
 DEFINE_PRIM (iap_release, 0);
 
+#ifdef BLACKBERRY
+static value iap_poll_event()
+{
+	pollEvent();
+	return alloc_null();
+}
+DEFINE_PRIM (iap_poll_event, 0);
 
+static value iap_query_inventory()
+{
+	queryInventory();
+	return alloc_null();
+}
+DEFINE_PRIM (iap_query_inventory, 0);
+#endif
 
 extern "C" void iap_main() 
 {
@@ -120,6 +133,28 @@ extern "C" void sendPurchaseEvent(const char* type, const char* data)
 	val_call1(purchaseEventHandle->get(), o);
 }
 
+#ifdef BLACKBERRY
+
+extern "C" void sendPurchaseInventoryData(const char* type, InventoryEntry *inventoryEntries, int inventoryLength)
+{
+	value o = alloc_empty_object();
+	alloc_field(o,val_id("type"), safe_alloc_string(type));
+	value arr = alloc_array(inventoryLength);
+	for (int i=0; i<inventoryLength; ++i) {
+		value entry = alloc_empty_object();
+		alloc_field(entry, val_id("date"), safe_alloc_string(inventoryEntries[i].date));
+		alloc_field(entry, val_id("digital_good"), safe_alloc_string(inventoryEntries[i].digital_good));
+		alloc_field(entry, val_id("digital_sku"), safe_alloc_string(inventoryEntries[i].digital_sku));
+		alloc_field(entry, val_id("license_key"), safe_alloc_string(inventoryEntries[i].license_key));
+		alloc_field(entry, val_id("metadata"), safe_alloc_string(inventoryEntries[i].metadata));
+		alloc_field(entry, val_id("purchase_id"), safe_alloc_string(inventoryEntries[i].purchase_id));
+		val_array_set_i(arr, i, entry);
+	}
+	alloc_field(o, val_id("data"), arr);
+	val_call1(purchaseEventHandle->get(), o);
+}
+
+#endif
 
 extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productID, const char* transactionID, const char* downloadPath, const char* downloadVersion, const char* downloadProgress)
 {
