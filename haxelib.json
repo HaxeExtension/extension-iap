@@ -1,11 +1,11 @@
 {
-	"name": "iap",
+	"name": "extension-iap",
 	"url": "http://www.openfl.org",
 	"license": "MIT",
 	"tags": [],
-	"description": "",
-	"version": "1.0.6",
-	"releasenote": "Fixed minor bugs",
+	"description": "In-app purchase support",
+	"version": "1.1.0",
+	"releasenote": "Ongoing improvements",
 	"contributors": [ "singmajesty" ],
 	"dependencies": {}
 }
