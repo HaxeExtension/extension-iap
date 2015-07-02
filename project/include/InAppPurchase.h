@@ -23,7 +23,7 @@ namespace iap
 	#endif
 		bool canPurchase();
 		bool getManualTransactionMode();
-		void finishTransactionManually(const char *transactionID);
+		bool finishTransactionManually(const char *transactionID);
 		void initInAppPurchase();
 		void purchaseProduct(const char* productID);
 		void releaseInAppPurchase();
