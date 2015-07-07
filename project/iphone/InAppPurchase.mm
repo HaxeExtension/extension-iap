@@ -111,6 +111,11 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 	int count = [response.products count];
     NSLog(@"productsRequest");
 	NSLog(@"Number of Products: %i", count);
+
+	// release the products request BEFORE calling the completion to support calling purchase()
+	// in the completion result handlers
+	//[productsRequest release];
+	productsRequest = NULL;
     
 	if(count > 0) 
     {
@@ -154,9 +159,6 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     {
 		NSLog(@"No products are available");
 	}
-    
-    //[productsRequest release];
-    productsRequest = NULL;
 }
 
 - (BOOL) finishTransactionManually:(NSString *)transactionID
