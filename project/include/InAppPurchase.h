@@ -24,7 +24,11 @@ namespace iap
 		bool canPurchase();
 		bool getManualTransactionMode();
 		void finishTransactionManually(const char *transactionID);
+		#ifdef BLACKBERRY
+		void initInAppPurchase(bool local);
+		#else
 		void initInAppPurchase();
+		#endif
 		void purchaseProduct(const char* productID);
 		void releaseInAppPurchase();
 		void requestProductData(const char *productID);

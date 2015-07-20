@@ -27,6 +27,16 @@ static value iap_set_event_handle(value onEvent)
 }
 DEFINE_PRIM(iap_set_event_handle, 1);
 
+#ifdef BLACKBERRY
+
+static value iap_initialize(value local) 
+{
+	initInAppPurchase(val_bool(local));
+	return alloc_null();
+}
+DEFINE_PRIM (iap_initialize, 1);
+
+#else
 
 static value iap_initialize() 
 {
@@ -35,6 +45,7 @@ static value iap_initialize()
 }
 DEFINE_PRIM (iap_initialize, 0);
 
+#endif
 
 static value iap_restore() 
 {

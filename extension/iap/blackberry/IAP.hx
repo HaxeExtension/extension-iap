@@ -37,13 +37,13 @@ private enum EventType {
 	 * 		PURCHASE_INIT: Fired when the initialization was successful
 	 * 		PURCHASE_INIT_FAILED: Fired when the initialization failed
 	 */
-	public static function initialize (publicKey:String = ""):Void {
+	public static function initialize (publicKey:String = "", localOnly : Bool = true):Void {
 
 		if (!initialized) {
 
 			inventory = new Inventory(null);
 
-			purchases_initialize();
+			purchases_initialize(localOnly);
 			set_event_handle(notifyListeners);
 
 			initialized = true;
@@ -75,15 +75,11 @@ private enum EventType {
 	 */
 	public static function purchase (productID:String, devPayload:String = "") : Void {
 
-		trace("purchase a");
-
 		waitingEvent = Purchase;
 		purchases_buy(productID);
 		while (waitingEvent!=None) {
 			pollEvent();
 		}
-
-		trace("purchase b");
 
 	}
 
@@ -136,15 +132,11 @@ private enum EventType {
 	 */
 	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
 
-		trace("queryInventory a");
-
 		waitingEvent = QueryInventory;
 		purchases_query_inventory();
 		while (waitingEvent!=None) {
 			pollEvent();
 		}
-
-		trace("queryInventory b");
 
 	}
 
@@ -206,7 +198,7 @@ private enum EventType {
 				dispatchEvent(evt);
 			}
 			case "inventory_sucess": {
-				
+
 				// Reset inventory purchaseMap
 				var keys = [for (k in inventory.purchaseMap.keys()) k];
 				for (k in keys) {
@@ -264,7 +256,7 @@ private enum EventType {
 	// Native Methods
 	private static var purchases_buy = Lib.load ("iap", "iap_buy", 1);
 	private static var purchases_get_data = Lib.load ("iap", "iap_get_data", 1);
-	private static var purchases_initialize = Lib.load ("iap", "iap_initialize", 0);
+	private static var purchases_initialize = Lib.load ("iap", "iap_initialize", 1);
 	private static var purchases_poll_event = Lib.load ("iap", "iap_poll_event", 0);
 	private static var purchases_query_inventory = Lib.load ("iap", "iap_query_inventory", 0);
 	private static var set_event_handle = Lib.load ("iap", "iap_set_event_handle", 1);

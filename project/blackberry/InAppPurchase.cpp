@@ -47,7 +47,7 @@ namespace iap {
 		*/
 	}
 
-	void initInAppPurchase() {
+	void initInAppPurchase(bool local) {
 
 		// Reset log file
 		/*
@@ -68,7 +68,7 @@ namespace iap {
 		* Set the Payment Service connection mode to local. This allows us to
 		* test the API without the need to contact the AppWorld nor payment servers.
 		*/
-		paymentservice_set_connection_mode(true);
+		paymentservice_set_connection_mode(local);
 
 	}
 
