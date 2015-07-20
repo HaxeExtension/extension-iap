@@ -73,8 +73,7 @@ DEFINE_PRIM(iap_get_data, 1);
 
 static value iap_finish_transaction(value transactionID)
 {
-	finishTransactionManually(val_string(transactionID));
-	return alloc_null();
+	return alloc_bool(finishTransactionManually(val_string(transactionID)));
 }
 DEFINE_PRIM(iap_finish_transaction, 1);
 

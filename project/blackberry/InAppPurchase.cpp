@@ -125,8 +125,8 @@ namespace iap {
 
 	}
 
-	void finishTransactionManually(const char *transactionID) {
-
+	bool finishTransactionManually(const char *transactionID) {
+		return false;
 	}
 
 	bool getManualTransactionMode() {

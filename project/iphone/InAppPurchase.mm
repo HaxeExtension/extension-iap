@@ -24,7 +24,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 - (BOOL)canMakePurchases;
 - (void)purchaseProduct:(NSString*)productIdentifiers;
 - (void)requestProductData:(NSString*)productIdentifiers;
-- (void)finishTransactionManually:(NSString *)transactionID;
+- (BOOL)finishTransactionManually:(NSString *)transactionID;
 
 @property bool manualTransactionMode;
 @end
@@ -111,6 +111,11 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 	int count = [response.products count];
     NSLog(@"productsRequest");
 	NSLog(@"Number of Products: %i", count);
+
+	// release the products request BEFORE calling the completion to support calling purchase()
+	// in the completion result handlers
+	//[productsRequest release];
+	productsRequest = NULL;
     
 	if(count > 0) 
     {
@@ -154,23 +159,24 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     {
 		NSLog(@"No products are available");
 	}
-    
-    //[productsRequest release];
-    productsRequest = NULL;
 }
 
-- (void)finishTransactionManually:(NSString *)transactionID
+- (BOOL) finishTransactionManually:(NSString *)transactionID
 {
-	if (manualTransactionMode && [[SKPaymentQueue defaultQueue] transactions]) {
-		NSArray *transactions = [[SKPaymentQueue defaultQueue] transactions];
-		
-		if ([transactions containsObject:transactionID]) {
-			//[self finishTransaction:[transactions objectAtIndex:[transactions indexOfObject:transactionID]]  wasSuccessful:YES];
-			[[SKPaymentQueue defaultQueue] finishTransaction:[transactions objectAtIndex:[transactions indexOfObject:transactionID]]];
-		}
-		
-		//[transactions release];
-	}
+    NSArray * transactions = [[SKPaymentQueue defaultQueue] transactions];
+    if (manualTransactionMode && transactions) {
+        // 'transactions' contains SKPaymentTransaction, find the appropriate transaction
+        for (SKPaymentTransaction * transaction in transactions) {
+            if ([transaction.transactionIdentifier isEqualToString:transactionID]) {
+                [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+                return true;
+            }
+        }
+
+        // transaction identifier was not found, quick developer log and return failure
+        NSLog(@"Failed to complete transaction manually. [expected_transaction=%@; open_transactions=%@]", transactionID, [[transactions valueForKey:@"transactionIdentifier"] componentsJoinedByString:@", "]);
+    }
+    return false;
 }
 
 - (void)finishTransaction:(SKPaymentTransaction*)transaction wasSuccessful:(BOOL)wasSuccessful
@@ -354,10 +360,10 @@ extern "C"
 		[inAppPurchase requestProductData:productID];
 	}
 	
-	void finishTransactionManually(const char *inTransactionID)
+	bool finishTransactionManually(const char *inTransactionID)
 	{
 		NSString *transactionID = [[NSString alloc] initWithUTF8String:inTransactionID];
-		[inAppPurchase finishTransactionManually:transactionID];
+		return [inAppPurchase finishTransactionManually:transactionID];
 	}
 	
 	bool getManualTransactionMode()

@@ -48,7 +48,7 @@
 
 	<target id="default">
 
-		<target id="NDLL"/>
+		<target id="NDLL" if="blackberry || ios" />
 
 	</target>
 
