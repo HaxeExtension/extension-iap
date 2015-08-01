@@ -37,7 +37,7 @@ private enum EventType {
 	 * 		PURCHASE_INIT: Fired when the initialization was successful
 	 * 		PURCHASE_INIT_FAILED: Fired when the initialization failed
 	 */
-	public static function initialize (publicKey:String = "", localOnly : Bool = true):Void {
+	public static function initialize (publicKey:String = "", localOnly : Bool = false):Void {
 
 		if (!initialized) {
 
