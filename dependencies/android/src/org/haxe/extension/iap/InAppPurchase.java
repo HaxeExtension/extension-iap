@@ -219,7 +219,11 @@ public class InAppPurchase extends Extension {
 			{
 				@Override public void run () 
 				{
-					InAppPurchase.callback.call ("onFailedPurchase", new Object[] { ("{\"result\":" + result.toJsonString() + ", \"product\":" + ((purchase != null)? purchase.getOriginalJson() : "null") + "}") });
+					if (result.getResponse() == IabHelper.IABHELPER_USER_CANCELLED) {
+						InAppPurchase.callback.call ("onCanceledPurchase", new Object[] { ((purchase == null) ? "null" : purchase.getPackageName()) });
+					} else {
+						InAppPurchase.callback.call ("onFailedPurchase", new Object[] { ("{\"result\":" + result.toJsonString() + ", \"product\":" + ((purchase != null)? purchase.getOriginalJson() : "null") + "}") });
+					}
 				}
 			});
 				
