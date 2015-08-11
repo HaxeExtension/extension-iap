@@ -32,7 +32,7 @@ public class InAppPurchase extends Extension {
 	private static IabHelper inAppPurchaseHelper;
 	private static String publicKey = "";
 
-	public static void buy (String productID, String devPayload) {
+	public static void buy (final String productID, final String devPayload) {
 		// IabHelper.launchPurchaseFlow() must be called from the main activity's UI thread
 		Extension.mainActivity.runOnUiThread(new Runnable() {
 				public void run() {
