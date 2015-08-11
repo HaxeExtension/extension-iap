@@ -33,9 +33,12 @@ public class InAppPurchase extends Extension {
 	private static String publicKey = "";
 
 	public static void buy (String productID, String devPayload) {
-		
-		InAppPurchase.inAppPurchaseHelper.launchPurchaseFlow (Extension.mainActivity, productID, 1001, mPurchaseFinishedListener, devPayload);
-		
+		// IabHelper.launchPurchaseFlow() must be called from the main activity's UI thread
+		Extension.mainActivity.runOnUiThread(new Runnable() {
+				public void run() {
+					InAppPurchase.inAppPurchaseHelper.launchPurchaseFlow (Extension.mainActivity, productID, 1001, mPurchaseFinishedListener, devPayload);
+				}
+			});
 	}
 	
 	public static void consume (final String purchaseJson, final String itemType, final String signature) 
