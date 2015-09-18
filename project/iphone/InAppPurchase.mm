@@ -208,8 +208,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)completeTransaction:(SKPaymentTransaction*)transaction
 {
-	
-	if (transaction.downloads) {
+
 	if (transaction.downloads && transaction.downloads.count > 0) {
 		sendPurchaseDownloadEvent("downloadStart", [transaction.payment.productIdentifier UTF8String], [transaction.transactionIdentifier UTF8String], nil, nil, nil);
 		[[SKPaymentQueue defaultQueue] startDownloads:transaction.downloads];
