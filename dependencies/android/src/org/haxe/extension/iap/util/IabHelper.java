@@ -857,7 +857,7 @@ public class IabHelper {
 
     int queryPurchases(Inventory inv, String itemType) throws JSONException, RemoteException {
         if(isServiceDisconnected()) {
-            logDebug("iap service distonnected before queryPurchases");
+            logDebug("iap service disconnected before queryPurchases");
             return IABHELPER_BAD_RESPONSE;
         }
 
@@ -926,7 +926,7 @@ public class IabHelper {
             throws RemoteException, JSONException {
         logDebug("Querying SKU details.");
         if(isServiceDisconnected()) {
-            logDebug("iap service distonnected before querySkuDetails");
+            logDebug("iap service disconnected before querySkuDetails");
             return IABHELPER_BAD_RESPONSE;
         }
         ArrayList<String> skuList = new ArrayList<String>();
