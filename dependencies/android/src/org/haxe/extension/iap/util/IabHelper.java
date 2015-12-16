@@ -303,6 +303,15 @@ public class IabHelper {
         if (mDisposed) throw new IllegalStateException("IabHelper was disposed of, so it cannot be used.");
     }
 
+    private void checkServiceConnected() throws IabException {
+        if(isServiceDisconnected())
+            throw new IabException(IABHELPER_BAD_RESPONSE, "Service is disconnected");
+    }
+
+    private boolean isServiceDisconnected() {
+        return mService == null;
+    }
+
     /** Returns whether subscriptions are supported. */
     public boolean subscriptionsSupported() {
         checkNotDisposed();
@@ -369,16 +378,26 @@ public class IabHelper {
      */
     public void launchPurchaseFlow(Activity act, String sku, String itemType, int requestCode,
                         OnIabPurchaseFinishedListener listener, String extraData) {
+
         checkNotDisposed();
         checkSetupDone("launchPurchaseFlow");
+        if(listener == null) {
+            logDebug("No listener");
+            return;
+        }
+        if(isServiceDisconnected()) {
+            IabResult r = new IabResult(IABHELPER_BAD_RESPONSE, "Service is disconnected");
+            listener.onIabPurchaseFinished(r, null);
+            return;
+        }
+
         flagStartAsync("launchPurchaseFlow");
         IabResult result;
 
         if (itemType.equals(ITEM_TYPE_SUBS) && !mSubscriptionsSupported) {
-            IabResult r = new IabResult(IABHELPER_SUBSCRIPTIONS_NOT_AVAILABLE,
-                    "Subscriptions are not available.");
+            IabResult r = new IabResult(IABHELPER_SUBSCRIPTIONS_NOT_AVAILABLE, "Subscriptions are not available.");
             flagEndAsync();
-            if (listener != null) listener.onIabPurchaseFinished(r, null);
+            listener.onIabPurchaseFinished(r, null);
             return;
         }
 
@@ -390,7 +409,7 @@ public class IabHelper {
                 logError("Unable to buy item, Error response: " + getResponseDesc(response));
                 flagEndAsync();
                 result = new IabResult(response, "Unable to buy item");
-                if (listener != null) listener.onIabPurchaseFinished(result, null);
+                listener.onIabPurchaseFinished(result, null);
                 return;
             }
 
@@ -410,7 +429,7 @@ public class IabHelper {
             flagEndAsync();
 
             result = new IabResult(IABHELPER_SEND_INTENT_FAILED, "Failed to send intent.");
-            if (listener != null) listener.onIabPurchaseFinished(result, null);
+            listener.onIabPurchaseFinished(result, null);
         }
         catch (RemoteException e) {
             logError("RemoteException while launching purchase flow for sku " + sku);
@@ -418,7 +437,7 @@ public class IabHelper {
             flagEndAsync();
 
             result = new IabResult(IABHELPER_REMOTE_EXCEPTION, "Remote exception while starting purchase flow");
-            if (listener != null) listener.onIabPurchaseFinished(result, null);
+            listener.onIabPurchaseFinished(result, null);
         }
     }
 
@@ -661,6 +680,7 @@ public class IabHelper {
     void consume(Purchase itemInfo) throws IabException {
         checkNotDisposed();
         checkSetupDone("consume");
+        checkServiceConnected();
 
         if (!itemInfo.mItemType.equals(ITEM_TYPE_INAPP)) {
             throw new IabException(IABHELPER_INVALID_CONSUMPTION,
@@ -836,7 +856,11 @@ public class IabHelper {
 
 
     int queryPurchases(Inventory inv, String itemType) throws JSONException, RemoteException {
-        // Query purchases
+        if(isServiceDisconnected()) {
+            logDebug("iap service disconnected before queryPurchases");
+            return IABHELPER_BAD_RESPONSE;
+        }
+
         logDebug("Querying owned items, item type: " + itemType);
         logDebug("Package name: " + mContext.getPackageName());
         boolean verificationFailed = false;
@@ -901,6 +925,10 @@ public class IabHelper {
     int querySkuDetails(String itemType, Inventory inv, List<String> moreSkus)
             throws RemoteException, JSONException {
         logDebug("Querying SKU details.");
+        if(isServiceDisconnected()) {
+            logDebug("iap service disconnected before querySkuDetails");
+            return IABHELPER_BAD_RESPONSE;
+        }
         ArrayList<String> skuList = new ArrayList<String>();
         skuList.addAll(inv.getAllOwnedSkus(itemType));
         if (moreSkus != null) {
