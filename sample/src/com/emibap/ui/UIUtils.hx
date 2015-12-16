@@ -14,7 +14,7 @@ class UIUtils
 		res.width = ScreenUtils.scaleFloat(w);
 		res.height = ScreenUtils.scaleFloat(h);
 		
-		var tf:TextFormat = new TextFormat(null, ScreenUtils.scaleFloat(fontSize), fontColor, fontBold, fontItalic);
+		var tf:TextFormat = new TextFormat(null, cast ScreenUtils.scaleFloat(fontSize), fontColor, fontBold, fontItalic);
 		
 		res.defaultTextFormat = tf;
 		

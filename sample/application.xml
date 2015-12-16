@@ -22,7 +22,7 @@
 	<source path="src" />
 	<haxelib name="openfl" />
 	<haxelib name="actuate" />
-	<haxelib name="iap" />
+	<haxelib name="extension-iap" />
 	
 	<!-- assets -->
 	<icon path="assets/openfl.svg" />
