@@ -403,7 +403,15 @@ public class IabHelper {
 
         try {
             logDebug("Constructing buy intent for " + sku + ", item type: " + itemType);
+            // This is where it has a null pointer exception in our code base (source repo is slightly ahead)
+            if (mService == null || mContext == null) {
+                result = new IabResult(IABHELPER_SEND_INTENT_FAILED, "mService or mContext is null.  Initialization was not correct");
+                listener.onIabPurchaseFinished(result, null);
+                return;
+            }
+
             Bundle buyIntentBundle = mService.getBuyIntent(3, mContext.getPackageName(), sku, itemType, extraData);
+            //
             int response = getResponseCodeFromBundle(buyIntentBundle);
             if (response != BILLING_RESPONSE_RESULT_OK) {
                 logError("Unable to buy item, Error response: " + getResponseDesc(response));
