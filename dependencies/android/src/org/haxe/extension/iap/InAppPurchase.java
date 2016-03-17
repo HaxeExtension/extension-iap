@@ -82,7 +82,6 @@ public class InAppPurchase extends Extension {
 	}
 	
 	public static void queryInventory (final boolean querySkuDetails, String[] moreSkusArr) {
-		Log.d("DanB", "querying inventory");
 		final List<String> moreSkus = Arrays.asList(moreSkusArr); 
 		Extension.mainActivity.runOnUiThread(new Runnable() {
 			public void run() {
