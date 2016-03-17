@@ -41,6 +41,7 @@ public class InAppPurchase extends Extension {
 					} catch (Exception exception) {
 						// see: https://github.com/openfl/extension-iap/issues/28
 						Log.e("IAP", "Failed to launch purchase flow.", exception);
+						InAppPurchase.callback.call("loggerCallback", new Object[] { "AndroidFailedToLaunchPurchaseFlow" });
 						mPurchaseFinishedListener.onIabPurchaseFinished(
 							new IabResult(IabHelper.BILLING_RESPONSE_RESULT_ERROR, null),
 							null);
@@ -81,12 +82,15 @@ public class InAppPurchase extends Extension {
 	}
 	
 	public static void queryInventory (final boolean querySkuDetails, String[] moreSkusArr) {
+		Log.d("DanB", "querying inventory");
 		final List<String> moreSkus = Arrays.asList(moreSkusArr); 
 		Extension.mainActivity.runOnUiThread(new Runnable() {
 			public void run() {
 				try {
 					InAppPurchase.inAppPurchaseHelper.queryInventoryAsync(querySkuDetails, moreSkus, mGotInventoryListener);
+					InAppPurchase.callback.call("loggerCallback", new Object[] { "AndroidQueryInventorySuccessful" });
 				} catch(Exception e) {
+					InAppPurchase.callback.call("onQueryInventoryException", new Object[] { e.getMessage() });
 					Log.d("IAP", e.getMessage());
 				}
 			}
@@ -134,9 +138,7 @@ public class InAppPurchase extends Extension {
 					Extension.callbackHandler.post (new Runnable () {
 						
 						@Override public void run () {
-							
 							InAppPurchase.callback.call ("onStarted", new Object[] { "Failure" });
-							
 						}
 						
 					});

@@ -73,7 +73,6 @@ import openfl.utils.JNI;
 	 */
 
 	public static function initialize (publicKey:String = ""):Void {
-
 		if (funcInit == null) {
 			funcInit = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "initialize", "(Ljava/lang/String;Lorg/haxe/lime/HaxeObject;)V");
 		}
@@ -255,6 +254,23 @@ private class IAPHandler {
 		evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
 		evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
 		IAP.dispatcher.dispatchEvent (evt);
+	}
+
+	public function loggerCallback(response:String):Void {
+		var productID:String = "";
+		productID = lastPurchaseRequest; //temporal fix
+		var evt:IAPEvent = new IAPEvent (IAPEvent.IAP_LOGGING_EVENT, productID);
+		evt.message = response;
+		IAP.dispatcher.dispatchEvent (evt);
+	}
+
+	public function onQueryInventoryException(response:String):Void {
+		var productID:String = "";
+		productID = lastPurchaseRequest; //temporal fix
+		var evt:IAPEvent = new IAPEvent (IAPEvent.IAP_QUERY_INVENTORY_EXCEPTION, productID);
+		evt.message = response;
+		IAP.dispatcher.dispatchEvent (evt);
+
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
