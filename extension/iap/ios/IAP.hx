@@ -291,6 +291,10 @@ import haxe.Json;
 
 				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED, data));
 
+			case "productDataEmpty":
+
+				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_EMPTY, data));
+
 			default:
 
 		}
