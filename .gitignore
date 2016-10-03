@@ -2,9 +2,9 @@
 ndll/*/*.a
 ndll/*/*.so
 ndll/*/*.ndll
+ndll/*/*.hash
 project/obj/*
-
+*.zip
 *.hxproj
-
 sample/_material/*
 sample/bin

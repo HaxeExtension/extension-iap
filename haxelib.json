@@ -2,10 +2,10 @@
 	"name": "extension-iap",
 	"url": "http://www.openfl.org",
 	"license": "MIT",
-	"tags": [],
+	"tags": ["iap","openfl","purchase"],
 	"description": "In-app purchase support",
-	"version": "1.2.0",
-	"releasenote": "improvements, add BlackBerry",
+	"version": "1.2.1",
+	"releasenote": "Add gradle support",
 	"contributors": [ "singmajesty", "fbricker" ],
 	"dependencies": {}
 }
