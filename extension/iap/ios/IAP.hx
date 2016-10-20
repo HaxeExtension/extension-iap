@@ -1,10 +1,10 @@
 package extension.iap.ios;
 
+import cpp.Lib;
 import extension.iap.IAP;
 import flash.errors.Error;
 import flash.events.Event;
 import flash.events.EventDispatcher;
-import flash.Lib;
 import haxe.Json;
 
 /**
