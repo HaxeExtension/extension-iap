@@ -184,6 +184,8 @@ public class InAppPurchase extends Extension {
 	static IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
 	   
 		public void onQueryInventoryFinished(final IabResult result, final Inventory inventory) {
+			Log.i ("IAP", "onQueryInventoryFinished");
+			Log.i ("IAP", Boolean.toString(result.isFailure()));
 
 		  if (result.isFailure()) {
 			// handle error here
@@ -199,7 +201,7 @@ public class InAppPurchase extends Extension {
 			});
 		  }
 		  else {
-			
+			  //Log.i ("IAP", inventory.toJsonString());
 			Extension.callbackHandler.post (new Runnable ()
 			{
 				@Override public void run ()
