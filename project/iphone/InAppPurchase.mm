@@ -313,6 +313,8 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)dealloc
 {
+    NSLog(@"dealloc inapppurchase");
+    
 	if(myProduct)
         [myProduct release];
     
@@ -376,6 +378,6 @@ extern "C"
 	
 	void releaseInAppPurchase()
     {
-		//[inAppPurchase release];
+		[inAppPurchase release];
 	}
 }

@@ -86,8 +86,17 @@ import haxe.Json;
 
 		}
 
-		purchases_initialize ();
+		purchases_initialize();
 
+	}
+
+	public static function cleanup (publicKey:String = ""):Void {
+		if (initialized) {
+
+			purchases_release();
+
+			initialized = false;
+		}
 	}
 
 	/**
