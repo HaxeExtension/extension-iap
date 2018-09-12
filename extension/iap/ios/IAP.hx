@@ -90,7 +90,7 @@ import haxe.Json;
 
 	}
 
-	public static function cleanup (publicKey:String = ""):Void {
+	public static function cleanup ():Void {
 		if (initialized) {
 
 			purchases_release();

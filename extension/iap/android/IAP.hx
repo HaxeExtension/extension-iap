@@ -82,6 +82,10 @@ import openfl.utils.JNI;
 		funcInit (publicKey, new IAPHandler ());
 	}
 
+	public static function cleanup ():Void {
+
+	}
+
 	/**
 	 * Sends a purchase intent for a given product.
 	 *
