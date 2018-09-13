@@ -36,9 +36,14 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 - (void)initInAppPurchase 
 {
+    static dispatch_once_t onceToken;
+    
 	manualTransactionMode = false;
 	NSLog(@"xxxxxxx purchase init");
-	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+    dispatch_once(&onceToken, ^{
+        [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+    });
+	
 	sendPurchaseEvent("started", "");
 }
 
@@ -378,6 +383,6 @@ extern "C"
 	
 	void releaseInAppPurchase()
     {
-		[inAppPurchase release];
+		//[inAppPurchase release];
 	}
 }
