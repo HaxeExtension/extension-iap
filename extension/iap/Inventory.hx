@@ -1,5 +1,8 @@
 package extension.iap;
 
+import extension.iap.IAP;
+import extension.iap.IAPEvent;
+
 /**
  * Represents a block of information about in-app items.
  * An Inventory is returned by such methods as {@link IAP#queryInventory}.
@@ -71,7 +74,13 @@ class Inventory
      */
     public function erasePurchase(productId:String) :Void {
 		
-        if (purchaseMap.exists(productId)) purchaseMap.remove(productId);
+        if (purchaseMap.exists(productId)) {
+        	purchaseMap.remove(productId);
+    	} else {
+    		var evt:IAPEvent = new IAPEvent (IAPEvent.IAP_LOGGING_EVENT, productId);
+			evt.message = "AndroidPaymentsProductIdNotFoundInPurchaseMap";
+    		IAP.dispatcher.dispatchEvent (evt);
+    	}
     }
 	
 }
