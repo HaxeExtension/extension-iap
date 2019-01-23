@@ -158,6 +158,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     else 
     {
 		NSLog(@"No products are available");
+		sendPurchaseEvent("productDataEmpty", nil);
 	}
 }
 
