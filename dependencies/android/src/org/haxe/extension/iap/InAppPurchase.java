@@ -20,6 +20,9 @@ import android.widget.ImageView;
 import org.haxe.extension.iap.util.*;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
+import com.android.billingclient.api.BillingClient.BillingResponse;
+import com.android.billingclient.api.Purchase;
+import org.haxe.extension.iap.util.BillingManager.BillingUpdatesListener;
 
 import org.json.JSONException;
 import android.graphics.Bitmap;
@@ -27,54 +30,80 @@ import android.graphics.BitmapFactory;
 
 public class InAppPurchase extends Extension {
 	
-	
+	private static String TAG = "IAP";
 	private static HaxeObject callback = null;
-	private static IabHelper inAppPurchaseHelper;
+	private static BillingManager billingManager = null;
 	private static String publicKey = "";
+	private static UpdateListener updateListener = null;
+	private static Map<String, Purchase> consumeInProgress = new HashMap<String, Purchase>();
+
+	private static class UpdateListener implements BillingUpdatesListener {
+        @Override
+        public void onBillingClientSetupFinished() {
+			Extension.callbackHandler.post (new Runnable () {
+				@Override public void run () {
+					InAppPurchase.callback.call ("onStarted", new Object[] { "Success" });
+				}
+			});
+			//TODO: handle failed
+			//InAppPurchase.callback.call ("onStarted", new Object[] { "Failure" });
+        }
+
+		@Override
+		public void onConsumeFinished(String token, @BillingResponse int result) {
+			Log.d(TAG, "Consumption finished. Purchase token: " + token + ", result: " + result);
+			final Purchase purchase = InAppPurchase.consumeInProgress.get(token);
+			InAppPurchase.consumeInProgress.remove(token);
+			if (result == BillingResponse.OK) {
+				Extension.callbackHandler.post (new Runnable ()
+				{
+					@Override public void run ()
+					{
+						InAppPurchase.callback.call ("onConsume", new Object[] { purchase.getOriginalJson() });
+					}
+				});
+			} else {
+				Extension.callbackHandler.post (new Runnable ()
+				{
+					@Override public void run () 
+					{
+						InAppPurchase.callback.call ("onFailedConsume", new Object[] { ("{\"result\":" + result + ", \"product\":" + purchase.getOriginalJson() + "}") });
+					}
+				});
+			}
+		}
+
+        @Override
+        public void onPurchasesUpdated(List<Purchase> purchaseList) {
+            for (Purchase purchase : purchaseList) {
+                switch (purchase.getSku()) {
+                }
+            }
+        }
+    }
 
 	public static void buy (final String productID, final String devPayload) {
 		// IabHelper.launchPurchaseFlow() must be called from the main activity's UI thread
 		Extension.mainActivity.runOnUiThread(new Runnable() {
 				public void run() {
 					try {
-						InAppPurchase.inAppPurchaseHelper.launchPurchaseFlow (Extension.mainActivity, productID, 1001, mPurchaseFinishedListener, devPayload);
+						InAppPurchase.billingManager.launchPurchaseFlow (Extension.mainActivity, productID, 1001, mPurchaseFinishedListener, devPayload);
 					} catch (Exception exception) {
-						// see: https://github.com/openfl/extension-iap/issues/28
-						Log.e("IAP", "Failed to launch purchase flow.", exception);
-						mPurchaseFinishedListener.onIabPurchaseFinished(
-							new IabResult(IabHelper.BILLING_RESPONSE_RESULT_ERROR, null),
-							null);
+						
 					}
 				}
 			});
 	}
 	
-	public static void consume (final String purchaseJson, final String itemType, final String signature) 
+	public static void consume (final String purchaseJson, final String signature) 
 	{
 		Extension.callbackHandler.post (new Runnable () 
 		{
 			@Override public void run () 
 			{
-		
-				try {
-					final Purchase purchase = new Purchase(itemType, purchaseJson, signature);
-					InAppPurchase.inAppPurchaseHelper.consumeAsync(purchase, mConsumeFinishedListener);
-				} 
-		
-				catch (JSONException e) 
-				{
-					// This is not a normal consume failure, just a Json parsing error
-					
-					Extension.callbackHandler.post (new Runnable ()
-					{
-						@Override public void run () 
-						{
-							String resultJson = "{\"response\": -999, \"message\":\"Json Parse Error \"}";
-							InAppPurchase.callback.call ("onFailedConsume", new Object[] { ("{\"result\":" + resultJson + ", \"product\":" + null  + "}") });
-						}
-					});
-
-				} // catch
+				final Purchase purchase = new Purchase(purchaseJson, signature);
+				InAppPurchase.consumeInProgress.put(purchase.getPurchaseToken(), purchase);
+				InAppPurchase.billingManager.consumeAsync(purchase.getPurchaseToken());
 			} // run
 		});
 
@@ -85,7 +114,7 @@ public class InAppPurchase extends Extension {
 		Extension.mainActivity.runOnUiThread(new Runnable() {
 			public void run() {
 				try {
-					InAppPurchase.inAppPurchaseHelper.queryInventoryAsync(querySkuDetails, moreSkus, mGotInventoryListener);
+					InAppPurchase.billingManager.queryInventoryAsync(querySkuDetails, moreSkus, mGotInventoryListener);
 				} catch(Exception e) {
 					Log.d("IAP", e.getMessage());
 				}
@@ -104,83 +133,29 @@ public class InAppPurchase extends Extension {
 		
 		Log.i ("IAP", "Initializing billing service");
 		
+		InAppPurchase.updateListener = new UpdateListener();
 		InAppPurchase.publicKey = publicKey;
 		InAppPurchase.callback = callback;
 		
-		if (InAppPurchase.inAppPurchaseHelper != null) {
-			
-			InAppPurchase.inAppPurchaseHelper.dispose ();
-			
-		}
-		
-		InAppPurchase.inAppPurchaseHelper = new IabHelper (Extension.mainContext, publicKey);
-		InAppPurchase.inAppPurchaseHelper.startSetup (new IabHelper.OnIabSetupFinishedListener () {
-			
-			public void onIabSetupFinished (final IabResult result) {
-				
-				if (result.isSuccess ()) {
-					
-					Extension.callbackHandler.post (new Runnable () {
-						
-						@Override public void run () {
-							
-							InAppPurchase.callback.call ("onStarted", new Object[] { "Success" });
-							
-						}
-						
-					});
-					
-				} else {
-					Extension.callbackHandler.post (new Runnable () {
-						
-						@Override public void run () {
-							
-							InAppPurchase.callback.call ("onStarted", new Object[] { "Failure" });
-							
-						}
-						
-					});
-				}
-				
-			}
-			
-		});
-		
-	}
-	
-	
-	@Override public boolean onActivityResult (int requestCode, int resultCode, Intent data) {
-		
-		if (inAppPurchaseHelper != null) {
-			
-			return !inAppPurchaseHelper.handleActivityResult (requestCode, resultCode, data);
-			
-		}
-		
-		return super.onActivityResult (requestCode, resultCode, data);
-		
+		BillingManager.BASE_64_ENCODED_PUBLIC_KEY = publicKey;
+		InAppPurchase.billingManager = new BillingManager(Extension.mainActivity, InAppPurchase.updateListener);
 	}
 	
 	
 	@Override public void onDestroy () {
-		
-		if (InAppPurchase.inAppPurchaseHelper != null) {
-			
-			InAppPurchase.inAppPurchaseHelper.dispose ();
-			InAppPurchase.inAppPurchaseHelper = null;
-			
+		if (InAppPurchase.billingManager != null) {
+			InAppPurchase.billingManager = null;
 		}
-		
 	}
 	
 	
 	public static void setPublicKey (String s) {
-		
 		publicKey = s;
-		
+		BillingManager.BASE_64_ENCODED_PUBLIC_KEY = publicKey;
 	}
 	
-	
+
+/*	
 	static IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
 	   
 		public void onQueryInventoryFinished(final IabResult result, final Inventory inventory) {
@@ -285,7 +260,7 @@ public class InAppPurchase extends Extension {
 		}
 		
 	};
-	
+*/
 	
 	
 	
