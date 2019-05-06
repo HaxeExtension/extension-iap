@@ -17,6 +17,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     SKProductsRequest* productsRequest;
 	NSString* productID;
 	bool manualTransactionMode;
+    bool inited;
 }
 
 - (void)initInAppPurchase;
@@ -27,10 +28,12 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 - (BOOL)finishTransactionManually:(NSString *)transactionID;
 
 @property bool manualTransactionMode;
+@property bool inited;
 @end
 
 @implementation InAppPurchase
 @synthesize manualTransactionMode;
+@synthesize inited;
 
 #pragma Public methods 
 
@@ -45,6 +48,9 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     });
 	
 	sendPurchaseEvent("started", "");
+    
+    inited = true;
+    [self updateAllTransactionsManually];
 }
 
 - (void)restorePurchases 
@@ -248,16 +254,19 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     }
 }
 
-- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray*)transactions
+- (void) updateAllTransactionsManually
 {
-	
-	NSLog(@"updatedTransactions");
-	for(SKPaymentTransaction *transaction in transactions)
+    if (inited == false) return;
+    
+    NSArray * transactions = [[SKPaymentQueue defaultQueue] transactions];
+    NSLog(@"manual updatedTransactions count %lu", [transactions count]);
+    
+    for(SKPaymentTransaction *transaction in transactions)
     {
         switch(transaction.transactionState)
         {
             case SKPaymentTransactionStatePurchased:
-			case SKPaymentTransactionStateRestored:
+            case SKPaymentTransactionStateRestored:
                 [self completeTransaction:transaction];
                 break;
                 
@@ -266,13 +275,19 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
                 break;
                 
             /*case SKPaymentTransactionStateRestored:
-                [self restoreTransaction:transaction];
-                break;
-            */
+             [self restoreTransaction:transaction];
+             break;
+             */
             default:
                 break;
         }
     }
+}
+
+- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray*)transactions
+{
+	NSLog(@"auto updatedTransactions");
+    [self updateAllTransactionsManually];
 }
 
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedDownloads:(NSArray*)downloads
