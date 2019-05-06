@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
 import android.util.Log;
+import com.android.billingclient.api.SkuDetails;
 
 
 /**
@@ -103,7 +104,7 @@ public class Inventory {
                         
             while (skuMapIt.hasNext()) {
                 Map.Entry pairs = (Map.Entry)skuMapIt.next();
-                jsonResp += "{\"key\":\"" + pairs.getKey() + "\", \"value\":" + ((SkuDetails)pairs.getValue()).toJsonString() + "},";
+                jsonResp += "{\"key\":\"" + pairs.getKey() + "\", \"value\":" + ((SkuDetails)pairs.getValue()).getOriginalJson() + "},";
                 skuMapIt.remove(); // avoids a ConcurrentModificationException
             }
             

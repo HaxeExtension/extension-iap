@@ -137,10 +137,10 @@ import openfl.utils.JNI;
 	public static function consume (purchase:Purchase):Void {
 
 		if (funcConsume == null) {
-			funcConsume = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "consume", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+			funcConsume = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "consume", "(Ljava/lang/String;Ljava/lang/String;)V");
 		}
 		IAPHandler.lastPurchaseRequest = purchase.productID;
-		funcConsume (purchase.originalJson, purchase.itemType, purchase.signature);
+		funcConsume (purchase.originalJson, purchase.signature);
 
 	}
 
