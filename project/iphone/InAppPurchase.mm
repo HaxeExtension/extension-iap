@@ -49,8 +49,8 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 	
 	sendPurchaseEvent("started", "");
     
-    inited = true;
-    [self updateAllTransactionsManually];
+    //inited = true;
+    //[self updateAllTransactionsManually];
 }
 
 - (void)restorePurchases 
@@ -162,7 +162,11 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 
 			}
 			
+            inited = true;
+            [self updateAllTransactionsManually];
+            
 			sendPurchaseEvent("productDataComplete", nil);
+            
 		}
 	} 
     
