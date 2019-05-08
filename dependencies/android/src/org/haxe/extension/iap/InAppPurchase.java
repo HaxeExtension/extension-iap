@@ -21,7 +21,9 @@ import org.haxe.extension.iap.util.*;
 import org.haxe.extension.Extension;
 import org.haxe.lime.HaxeObject;
 import com.android.billingclient.api.BillingClient.BillingResponse;
+import com.android.billingclient.api.BillingClient.SkuType;
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.SkuDetails;
 import org.haxe.extension.iap.util.BillingManager.BillingUpdatesListener;
 
 import org.json.JSONException;
@@ -35,22 +37,19 @@ public class InAppPurchase extends Extension {
 	private static BillingManager billingManager = null;
 	private static String publicKey = "";
 	private static UpdateListener updateListener = null;
+	private static List<String> purchaseInProgress = new ArrayList();
 	private static Map<String, Purchase> consumeInProgress = new HashMap<String, Purchase>();
 
 	private static class UpdateListener implements BillingUpdatesListener {
-        @Override
-        public void onBillingClientSetupFinished() {
-			Extension.callbackHandler.post (new Runnable () {
-				@Override public void run () {
-					InAppPurchase.callback.call ("onStarted", new Object[] { "Success" });
-				}
-			});
+		@Override
+		public void onBillingClientSetupFinished() {
+				InAppPurchase.callback.call ("onStarted", new Object[] { "Success" });
 			//TODO: handle failed
 			//InAppPurchase.callback.call ("onStarted", new Object[] { "Failure" });
-        }
+		}
 
 		@Override
-		public void onConsumeFinished(String token, @BillingResponse int result) {
+		public void onConsumeFinished(String token, final @BillingResponse int result) {
 			Log.d(TAG, "Consumption finished. Purchase token: " + token + ", result: " + result);
 			final Purchase purchase = InAppPurchase.consumeInProgress.get(token);
 			InAppPurchase.consumeInProgress.remove(token);
@@ -73,24 +72,52 @@ public class InAppPurchase extends Extension {
 			}
 		}
 
-        @Override
-        public void onPurchasesUpdated(List<Purchase> purchaseList) {
-            for (Purchase purchase : purchaseList) {
-                switch (purchase.getSku()) {
-                }
-            }
-        }
-    }
+		@Override
+		public void onPurchasesUpdated(List<Purchase> purchaseList) {
+				for (Purchase purchase : purchaseList) {
+						String sku = purchase.getSku();
+						Boolean wasInProgress = purchaseInProgress.remove(sku);
+						InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson(), "", purchase.getSignature() });
+				}
+		}
+
+		@Override
+		public void onQuerySkuDetailsFinished(List<SkuDetails> skuList, final @BillingResponse int result) {
+			Log.d(TAG, "onQuerySkuDetailsFinished: result: " + result);
+			if (result == BillingResponse.OK) {
+				String jsonResp =  "{ \"products\":[ ";
+				for (SkuDetails sku : skuList) {
+						jsonResp += sku.getOriginalJson() + ",";
+				}
+				jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
+				jsonResp += "]}";
+				Log.d(TAG, "onQuerySkuDetailsFinished: " + jsonResp + ", result: " + result);
+				InAppPurchase.callback.call ("onRequestProductDataComplete", new Object[] { jsonResp });
+			}
+		}
+
+		@Override
+		public void onQueryPurchasesFinished(List<Purchase> purchaseList) {
+			String jsonResp =  "{ \"purchases\":[ ";
+			for (Purchase purchase : purchaseList) {
+					jsonResp += "{" +
+					"\"key\":\"" + purchase.getSku() + "\", " + 
+					"\"value\":" + purchase.getOriginalJson() + "," + 
+					"\"itemType\":\"\"," + 
+					"\"signature\":\"" + purchase.getSignature() + "\"},";
+			}
+			jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
+			jsonResp += "]}";
+			InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { jsonResp });
+		}
+	}
 
 	public static void buy (final String productID, final String devPayload) {
 		// IabHelper.launchPurchaseFlow() must be called from the main activity's UI thread
 		Extension.mainActivity.runOnUiThread(new Runnable() {
 				public void run() {
-					try {
-						InAppPurchase.billingManager.launchPurchaseFlow (Extension.mainActivity, productID, 1001, mPurchaseFinishedListener, devPayload);
-					} catch (Exception exception) {
-						
-					}
+						purchaseInProgress.add(productID);
+						InAppPurchase.billingManager.initiatePurchaseFlow(productID);
 				}
 			});
 	}
@@ -101,31 +128,34 @@ public class InAppPurchase extends Extension {
 		{
 			@Override public void run () 
 			{
-				final Purchase purchase = new Purchase(purchaseJson, signature);
-				InAppPurchase.consumeInProgress.put(purchase.getPurchaseToken(), purchase);
-				InAppPurchase.billingManager.consumeAsync(purchase.getPurchaseToken());
+				try
+				{
+					final Purchase purchase = new Purchase(purchaseJson, signature);
+					InAppPurchase.consumeInProgress.put(purchase.getPurchaseToken(), purchase);
+					InAppPurchase.billingManager.consumeAsync(purchase.getPurchaseToken());
+				}
+				catch(JSONException e)
+				{
+					InAppPurchase.callback.call ("onFailedConsume", new Object[] {});
+				}
 			} // run
 		});
+	}
 
+	public static void querySkuDetails(String[] ids) {
+		InAppPurchase.billingManager.querySkuDetailsAsync(SkuType.INAPP, Arrays.asList(ids));
 	}
 	
-	public static void queryInventory (final boolean querySkuDetails, String[] moreSkusArr) {
-		final List<String> moreSkus = Arrays.asList(moreSkusArr); 
+	public static void queryInventory(final boolean querySkuDetails, String[] moreSkusArr) {
 		Extension.mainActivity.runOnUiThread(new Runnable() {
 			public void run() {
-				try {
-					InAppPurchase.billingManager.queryInventoryAsync(querySkuDetails, moreSkus, mGotInventoryListener);
-				} catch(Exception e) {
-					Log.d("IAP", e.getMessage());
-				}
+					InAppPurchase.billingManager.queryPurchases();
 			}
 		});
 	}
 	
 	public static String getPublicKey () {
-		
 		return publicKey;
-		
 	}
 	
 	
@@ -144,6 +174,7 @@ public class InAppPurchase extends Extension {
 	
 	@Override public void onDestroy () {
 		if (InAppPurchase.billingManager != null) {
+			InAppPurchase.billingManager.destroy();
 			InAppPurchase.billingManager = null;
 		}
 	}
@@ -157,12 +188,12 @@ public class InAppPurchase extends Extension {
 
 /*	
 	static IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
-	   
+		 
 		public void onQueryInventoryFinished(final IabResult result, final Inventory inventory) {
 			Log.i ("IAP", "onQueryInventoryFinished");
 			Log.i ("IAP", Boolean.toString(result.isFailure()));
 
-		  if (result.isFailure()) {
+			if (result.isFailure()) {
 			// handle error here
 			Extension.callbackHandler.post (new Runnable ()
 			{
@@ -174,9 +205,9 @@ public class InAppPurchase extends Extension {
 					
 				}	
 			});
-		  }
-		  else {
-			  //Log.i ("IAP", inventory.toJsonString());
+			}
+			else {
+				//Log.i ("IAP", inventory.toJsonString());
 			Extension.callbackHandler.post (new Runnable ()
 			{
 				@Override public void run ()
@@ -186,9 +217,9 @@ public class InAppPurchase extends Extension {
 					
 				}	
 			});
-		  }
-	   }
-	   
+			}
+		 }
+		 
 	};
 	
 	

@@ -88,6 +88,8 @@ public class BillingManager implements PurchasesUpdatedListener {
         void onBillingClientSetupFinished();
         void onConsumeFinished(String token, @BillingResponse int result);
         void onPurchasesUpdated(List<Purchase> purchases);
+        void onQueryPurchasesFinished(List<Purchase> purchases);
+        void onQuerySkuDetailsFinished(List<SkuDetails> skuDetailsList, @BillingResponse int result);
     }
 
     /**
@@ -113,9 +115,6 @@ public class BillingManager implements PurchasesUpdatedListener {
             public void run() {
                 // Notifying the listener that billing client is ready
                 mBillingUpdatesListener.onBillingClientSetupFinished();
-                // IAB is fully set up. Now, let's get an inventory of stuff we own.
-                Log.d(TAG, "Setup successful. Querying inventory.");
-                queryPurchases();
             }
         });
     }
@@ -135,6 +134,10 @@ public class BillingManager implements PurchasesUpdatedListener {
         } else {
             Log.w(TAG, "onPurchasesUpdated() got unknown resultCode: " + resultCode);
         }
+    }
+
+    public void initiatePurchaseFlow(final String skuId) {
+        initiatePurchaseFlow(skuId, null, SkuType.INAPP);
     }
 
     /**
@@ -178,9 +181,9 @@ public class BillingManager implements PurchasesUpdatedListener {
         }
     }
 
-    public void querySkuDetailsAsync(@SkuType final String itemType, final List<String> skuList,
-                                     final SkuDetailsResponseListener listener) {
+    public void querySkuDetailsAsync(@SkuType final String itemType, final List<String> skuList) {
         // Creating a runnable from the request to use it inside our connection retry policy below
+        Log.d(TAG, "Quering skuDetails");
         Runnable queryRequest = new Runnable() {
             @Override
             public void run() {
@@ -192,7 +195,8 @@ public class BillingManager implements PurchasesUpdatedListener {
                             @Override
                             public void onSkuDetailsResponse(int responseCode,
                                                              List<SkuDetails> skuDetailsList) {
-                                listener.onSkuDetailsResponse(responseCode, skuDetailsList);
+                                Log.d(TAG, "onSkuDetailsResponse");
+                                mBillingUpdatesListener.onQuerySkuDetailsFinished(skuDetailsList, responseCode);
                             }
                         });
             }
@@ -274,10 +278,7 @@ public class BillingManager implements PurchasesUpdatedListener {
         }
 
         Log.d(TAG, "Query inventory was successful.");
-
-        // Update the UI and purchases inventory with new list of purchases
-        mPurchases.clear();
-        onPurchasesUpdated(BillingResponse.OK, result.getPurchasesList());
+        mBillingUpdatesListener.onQueryPurchasesFinished(result.getPurchasesList());
     }
 
     /**

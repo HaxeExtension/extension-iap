@@ -122,7 +122,12 @@ import openfl.utils.JNI;
 	 * 			This method also populates the productDetailsMap property of the inventory, so it can be accessed anytime after calling it.
 	 */
 	
-	public static function requestProductData (inArg:Dynamic) : Void { }
+	public static function requestProductData (ids:Array<String>):Void {
+		if (funcQuerySkuDetails == null) {
+			funcQuerySkuDetails = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "querySkuDetails", "([Ljava/lang/String;)V");
+		}
+		funcQuerySkuDetails(ids);
+	}
 
 	/**
 	 * Sends a consume intent for a given product.
@@ -221,6 +226,7 @@ import openfl.utils.JNI;
 	private static var funcConsume:Dynamic;
 	private static var funcRestore:Dynamic;
 	private static var funcQueryInventory:Dynamic;
+	private static var funcQuerySkuDetails:Dynamic;
 	private static var funcTest:Dynamic;
 
 }
@@ -305,6 +311,42 @@ private class IAPHandler {
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
+
+	public function onRequestProductDataComplete(response:String):Void {
+
+		if (response == "Failure") {
+
+			androidAvailable = false;
+			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED));
+
+		} else {
+
+			var dynResp:Dynamic = Json.parse(response);
+			var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_COMPLETE);
+			evt.productsData = new Array<IAProduct>();
+
+			var dynDescriptions:Array<Dynamic> = Reflect.field(dynResp, "products");
+			var dynItmValue:Dynamic;
+			var prod:IAProduct;
+
+			if (dynDescriptions != null) {
+				for (dynItm in dynDescriptions) {
+					prod = { productID: Reflect.field(dynItm, "productId") };
+					prod.type = Reflect.field(dynItm, "type");
+					prod.localizedPrice = Reflect.field(dynItm, "price");
+					prod.priceAmountMicros = Reflect.field(dynItm, "price_amount_micros");
+					prod.price = prod.priceAmountMicros / 1000 / 1000;
+					prod.priceCurrencyCode = Reflect.field(dynItm, "price_currency_code");
+					prod.localizedTitle = Reflect.field(dynItm, "title");
+					prod.localizedDescription = Reflect.field(dynItm, "description");
+					evt.productsData.push(prod);
+				}
+			}
+
+			IAP.dispatcher.dispatchEvent (evt);
+			androidAvailable = true;
+		}
+	}
 
 	public function onQueryInventoryComplete (response:String):Void {
 
