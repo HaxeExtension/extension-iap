@@ -170,7 +170,7 @@ import haxe.Json;
 	 */
 
 	public static function consume (purchase:Purchase) : Void {
-
+		purchases_finish_transaction (purchase.transactionID);
 	}
 
 	/**
@@ -189,20 +189,6 @@ import haxe.Json;
 	 */
 	
 	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
-
-	}
-
-	/**
-	 * Manually finishes a transaction from the SKPaymentQueue. If <code>manualTransactionMode</code> is false,
-	 * this method will no-op.
-	 *
-	 * @param transactionID Transaction identifier. {@link Purchase#transactionID}
-	 * @return True if the transaction existed in the SKPaymentQueue and was successfully finished.
-	 */
-
-	public static function finishTransactionManually (transactionID:String):Bool {
-
-		return purchases_finish_transaction (transactionID);
 
 	}
 
