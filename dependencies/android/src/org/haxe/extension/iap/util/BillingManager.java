@@ -85,9 +85,15 @@ public class BillingManager implements PurchasesUpdatedListener {
      * item was finished
      */
     public interface BillingUpdatesListener {
-        void onBillingClientSetupFinished();
+        void onBillingClientSetupFinished(final Boolean success);
         void onConsumeFinished(String token, @BillingResponse int result);
+<<<<<<< HEAD
         void onPurchasesUpdated(List<Purchase> purchases);
+=======
+        void onPurchasesUpdated(List<Purchase> purchases, @BillingResponse int result);
+        void onQueryPurchasesFinished(List<Purchase> purchases, @BillingResponse int result);
+        void onQuerySkuDetailsFinished(List<SkuDetails> skuDetailsList, @BillingResponse int result);
+>>>>>>> android billing library usage
     }
 
     /**
@@ -104,6 +110,7 @@ public class BillingManager implements PurchasesUpdatedListener {
         mBillingClient = BillingClient.newBuilder(mActivity).setListener(this).build();
 
         Log.d(TAG, "Starting setup.");
+<<<<<<< HEAD
 
         // Start setup. This is asynchronous and the specified listener will be called
         // once setup completes.
@@ -118,6 +125,9 @@ public class BillingManager implements PurchasesUpdatedListener {
                 queryPurchases();
             }
         });
+=======
+        queryPurchases();
+>>>>>>> android billing library usage
     }
 
     /**
@@ -129,10 +139,9 @@ public class BillingManager implements PurchasesUpdatedListener {
             for (Purchase purchase : purchases) {
                 handlePurchase(purchase);
             }
-            mBillingUpdatesListener.onPurchasesUpdated(mPurchases);
-        } else if (resultCode == BillingResponse.USER_CANCELED) {
-            Log.i(TAG, "onPurchasesUpdated() - user cancelled the purchase flow - skipping");
+            mBillingUpdatesListener.onPurchasesUpdated(mPurchases, resultCode);
         } else {
+            mBillingUpdatesListener.onPurchasesUpdated(null, resultCode);
             Log.w(TAG, "onPurchasesUpdated() got unknown resultCode: " + resultCode);
         }
     }
@@ -270,14 +279,21 @@ public class BillingManager implements PurchasesUpdatedListener {
         if (mBillingClient == null || result.getResponseCode() != BillingResponse.OK) {
             Log.w(TAG, "Billing client was null or result code (" + result.getResponseCode()
                     + ") was bad - quitting");
+            mBillingUpdatesListener.onQueryPurchasesFinished(null, result.getResponseCode());
+            mBillingUpdatesListener.onBillingClientSetupFinished(false);
             return;
         }
 
         Log.d(TAG, "Query inventory was successful.");
+<<<<<<< HEAD
 
         // Update the UI and purchases inventory with new list of purchases
         mPurchases.clear();
         onPurchasesUpdated(BillingResponse.OK, result.getPurchasesList());
+=======
+        mBillingUpdatesListener.onQueryPurchasesFinished(result.getPurchasesList(), result.getResponseCode());
+        mBillingUpdatesListener.onBillingClientSetupFinished(true);
+>>>>>>> android billing library usage
     }
 
     /**

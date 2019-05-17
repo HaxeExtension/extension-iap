@@ -174,25 +174,6 @@ import haxe.Json;
 	}
 
 	/**
-	 * Queries the inventory. This will query all owned items from the server, as well as
-	 * information on additional products, if specified.
-	 *
-	 * @param queryItemDetails if true, product details (price, description, etc) will be queried as well
-	 *     as purchase information.
-	 * @param moreItems additional PRODUCT IDs to query information on, regardless of ownership. 
-	 *     Ignored if null or if queryItemDetails is false.
-	 * 
-	 * Related Events (IAPEvent): 
-	 * 		PURCHASE_QUERY_INVENTORY_COMPLETE: Fired when the query inventory attempt was successful. 
-	 * 			The inventory static property will be populated with new data.
-	 * 		PURCHASE_QUERY_INVENTORY_FAILED: Fired when the query inventory attempt failed
-	 */
-	
-	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
-
-	}
-
-	/**
 	 * Manually finishes a transaction from the SKPaymentQueue. If <code>manualTransactionMode</code> is false,
 	 * this method will no-op.
 	 *
