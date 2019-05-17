@@ -293,9 +293,6 @@ private class IAPHandler {
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-<<<<<<< HEAD
-	public function onQueryInventoryComplete (response:String):Void {
-=======
 	public function onRequestProductDataComplete(response:String):Void {
 
 		if (response == "Failure") {
@@ -333,7 +330,6 @@ private class IAPHandler {
 	}
 
 	public function onQueryInventoryComplete(response:String):Void {
->>>>>>> android billing library usage
 
 		if (response == "Failure") {
 			androidAvailable = false;
