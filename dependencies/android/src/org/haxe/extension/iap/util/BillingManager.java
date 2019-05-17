@@ -125,6 +125,10 @@ public class BillingManager implements PurchasesUpdatedListener {
         }
     }
 
+    public void initiatePurchaseFlow(final String skuId) {
+        initiatePurchaseFlow(skuId, null, SkuType.INAPP);
+    }
+
     /**
      * Start a purchase flow
      */
@@ -166,9 +170,9 @@ public class BillingManager implements PurchasesUpdatedListener {
         }
     }
 
-    public void querySkuDetailsAsync(@SkuType final String itemType, final List<String> skuList,
-                                     final SkuDetailsResponseListener listener) {
+    public void querySkuDetailsAsync(@SkuType final String itemType, final List<String> skuList) {
         // Creating a runnable from the request to use it inside our connection retry policy below
+        Log.d(TAG, "Quering skuDetails");
         Runnable queryRequest = new Runnable() {
             @Override
             public void run() {
@@ -180,7 +184,8 @@ public class BillingManager implements PurchasesUpdatedListener {
                             @Override
                             public void onSkuDetailsResponse(int responseCode,
                                                              List<SkuDetails> skuDetailsList) {
-                                listener.onSkuDetailsResponse(responseCode, skuDetailsList);
+                                Log.d(TAG, "onSkuDetailsResponse");
+                                mBillingUpdatesListener.onQuerySkuDetailsFinished(skuDetailsList, responseCode);
                             }
                         });
             }

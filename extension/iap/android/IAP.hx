@@ -122,7 +122,12 @@ import openfl.utils.JNI;
 	 * 			This method also populates the productDetailsMap property of the inventory, so it can be accessed anytime after calling it.
 	 */
 	
-	public static function requestProductData (inArg:Dynamic) : Void { }
+	public static function requestProductData (ids:Array<String>):Void {
+		if (funcQuerySkuDetails == null) {
+			funcQuerySkuDetails = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "querySkuDetails", "([Ljava/lang/String;)V");
+		}
+		funcQuerySkuDetails(ids);
+	}
 
 	/**
 	 * Sends a consume intent for a given product.
@@ -199,6 +204,7 @@ import openfl.utils.JNI;
 	private static var funcConsume:Dynamic;
 	private static var funcRestore:Dynamic;
 	private static var funcQueryInventory:Dynamic;
+	private static var funcQuerySkuDetails:Dynamic;
 	private static var funcTest:Dynamic;
 
 }
