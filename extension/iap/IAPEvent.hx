@@ -19,8 +19,6 @@ class IAPEvent extends Event {
 	public static inline var PURCHASE_CONSUME_FAILURE = "consumeFailed";
 	public static inline var PURCHASE_PRODUCT_DATA_COMPLETE = "productDataComplete";
 	public static inline var PURCHASE_PRODUCT_DATA_FAILED = "productDataFailed";
-	public static inline var PURCHASE_QUERY_INVENTORY_COMPLETE = "queryInventoryComplete";
-	public static inline var PURCHASE_QUERY_INVENTORY_FAILED = "queryInventoryFailed";
 	public static inline var DOWNLOAD_COMPLETE = "downloadComplete";
 	public static inline var DOWNLOAD_START = "downloadStart";
 	public static inline var DOWNLOAD_PROGRESS = "downloadProgress";

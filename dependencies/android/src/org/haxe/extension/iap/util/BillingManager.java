@@ -85,10 +85,10 @@ public class BillingManager implements PurchasesUpdatedListener {
      * item was finished
      */
     public interface BillingUpdatesListener {
-        void onBillingClientSetupFinished();
+        void onBillingClientSetupFinished(final Boolean success);
         void onConsumeFinished(String token, @BillingResponse int result);
-        void onPurchasesUpdated(List<Purchase> purchases);
-        void onQueryPurchasesFinished(List<Purchase> purchases);
+        void onPurchasesUpdated(List<Purchase> purchases, @BillingResponse int result);
+        void onQueryPurchasesFinished(List<Purchase> purchases, @BillingResponse int result);
         void onQuerySkuDetailsFinished(List<SkuDetails> skuDetailsList, @BillingResponse int result);
     }
 
@@ -106,17 +106,7 @@ public class BillingManager implements PurchasesUpdatedListener {
         mBillingClient = BillingClient.newBuilder(mActivity).setListener(this).build();
 
         Log.d(TAG, "Starting setup.");
-
-        // Start setup. This is asynchronous and the specified listener will be called
-        // once setup completes.
-        // It also starts to report all the new purchases through onPurchasesUpdated() callback.
-        startServiceConnection(new Runnable() {
-            @Override
-            public void run() {
-                // Notifying the listener that billing client is ready
-                mBillingUpdatesListener.onBillingClientSetupFinished();
-            }
-        });
+        queryPurchases();
     }
 
     /**
@@ -128,10 +118,9 @@ public class BillingManager implements PurchasesUpdatedListener {
             for (Purchase purchase : purchases) {
                 handlePurchase(purchase);
             }
-            mBillingUpdatesListener.onPurchasesUpdated(mPurchases);
-        } else if (resultCode == BillingResponse.USER_CANCELED) {
-            Log.i(TAG, "onPurchasesUpdated() - user cancelled the purchase flow - skipping");
+            mBillingUpdatesListener.onPurchasesUpdated(mPurchases, resultCode);
         } else {
+            mBillingUpdatesListener.onPurchasesUpdated(null, resultCode);
             Log.w(TAG, "onPurchasesUpdated() got unknown resultCode: " + resultCode);
         }
     }
@@ -274,11 +263,14 @@ public class BillingManager implements PurchasesUpdatedListener {
         if (mBillingClient == null || result.getResponseCode() != BillingResponse.OK) {
             Log.w(TAG, "Billing client was null or result code (" + result.getResponseCode()
                     + ") was bad - quitting");
+            mBillingUpdatesListener.onQueryPurchasesFinished(null, result.getResponseCode());
+            mBillingUpdatesListener.onBillingClientSetupFinished(false);
             return;
         }
 
         Log.d(TAG, "Query inventory was successful.");
-        mBillingUpdatesListener.onQueryPurchasesFinished(result.getPurchasesList());
+        mBillingUpdatesListener.onQueryPurchasesFinished(result.getPurchasesList(), result.getResponseCode());
+        mBillingUpdatesListener.onBillingClientSetupFinished(true);
     }
 
     /**

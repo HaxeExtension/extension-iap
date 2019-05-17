@@ -31,8 +31,8 @@ class Inventory
 			if (dynPurchases != null) {
 				
 				for (dynItm in dynPurchases) {
-					purchaseMap.set(cast Reflect.field(dynItm, "key"), 
-            		new Purchase(Reflect.field(dynItm, "value"), Reflect.field(dynItm, "itemType"), Reflect.field(dynItm, "signature")));
+					var p = new Purchase(Reflect.field(dynItm, "value"), Reflect.field(dynItm, "itemType"), Reflect.field(dynItm, "signature"));
+					purchaseMap.set(cast Reflect.field(dynItm, "key"), p);
 				}
 				
 			}

@@ -149,29 +149,7 @@ import openfl.utils.JNI;
 
 	}
 
-	/**
-	 * Queries the inventory. This will query all owned items from the server, as well as
-	 * information on additional products, if specified.
-	 *
-	 * @param queryItemDetails if true, product details (price, description, etc) will be queried as well
-	 *     as purchase information.
-	 * @param moreItems additional PRODUCT IDs to query information on, regardless of ownership.
-	 *     Ignored if null or if queryItemDetails is false.
-	 *
-	 * Related Events (IAPEvent):
-	 * 		PURCHASE_QUERY_INVENTORY_COMPLETE: Fired when the query inventory attempt was successful.
-	 * 			The inventory static property will be populated with new data.
-	 * 		PURCHASE_QUERY_INVENTORY_FAILED: Fired when the query inventory attempt failed
-	 */
-
-	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
-
-		if (funcQueryInventory == null) {
-			funcQueryInventory = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "queryInventory", "(Z[Ljava/lang/String;)V");
-		}
-		funcQueryInventory (queryItemDetails, moreItems);
-
-	}
+	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {}
 
 	// Getter & Setter Methods
 
@@ -273,27 +251,31 @@ private class IAPHandler {
 	public function onConsume (response:String):Void {
 		var productID:String = "";
 
+		trace('onConsume: $response');
+
 		productID = lastPurchaseRequest; //temporal fix
 
 		var dynResp:Dynamic = Json.parse(response);
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_SUCCESS);
-		evt.productID = Reflect.field(dynResp, "productId");
-		IAP.dispatcher.dispatchEvent (evt);
+		evt.productID = Reflect.field(dynResp, "productId");		
+		IAP.dispatcher.dispatchEvent(evt);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	public function onFailedPurchase (response:String):Void {
-		var productID:String = "";
-
-		productID = lastPurchaseRequest; //temporal fix
+		var productID:String = lastPurchaseRequest; //temporal fix
 
 		var dynResp:Dynamic = Json.parse(response);
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_FAILURE);
 		if (Reflect.field(dynResp, "product") != null) evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
-		evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
-		IAP.dispatcher.dispatchEvent (evt);
+		if (evt.productID == productID)
+		{
+			evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
+			IAP.dispatcher.dispatchEvent (evt);
+			lastPurchaseRequest = "";
+		}
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -303,10 +285,15 @@ private class IAPHandler {
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_SUCCESS);
 
 		evt.purchase = new Purchase(response, itemType, signature);
-		evt.productID = evt.purchase.productID;
-		IAP.inventory.purchaseMap.set(evt.purchase.productID, evt.purchase);
+		if (lastPurchaseRequest == evt.purchase.productID)
+		{
+			evt.productID = evt.purchase.productID;
+			IAP.inventory.purchaseMap.set(evt.purchase.productID, evt.purchase);
 
-		IAP.dispatcher.dispatchEvent (evt);
+			IAP.dispatcher.dispatchEvent (evt);
+			lastPurchaseRequest = "";
+		}
+		
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -348,42 +335,14 @@ private class IAPHandler {
 		}
 	}
 
-	public function onQueryInventoryComplete (response:String):Void {
+	public function onQueryInventoryComplete(response:String):Void {
 
 		if (response == "Failure") {
-
 			androidAvailable = false;
-			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_FAILED));
-
+			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED));
 		} else {
-
 			var dynResp:Dynamic = Json.parse(response);
 			IAP.inventory = new Inventory(dynResp);
-
-			//trace("Parsed!: " + dynResp);
-			var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_QUERY_INVENTORY_COMPLETE);
-			evt.productsData = new Array<IAProduct>();
-
-			var dynDescriptions:Array<Dynamic> = Reflect.field(dynResp, "descriptions");
-			var dynItmValue:Dynamic;
-			var prod:IAProduct;
-
-			if (dynDescriptions != null) {
-				for (dynItm in dynDescriptions) {
-					dynItmValue = Reflect.field(dynItm, "value");
-					prod = { productID: Reflect.field(dynItmValue, "productId") };
-					prod.type = Reflect.field(dynItmValue, "type");
-					prod.localizedPrice = Reflect.field(dynItmValue, "price");
-					prod.priceAmountMicros = Reflect.field(dynItmValue, "price_amount_micros");
-					prod.price = prod.priceAmountMicros / 1000 / 1000;
-					prod.priceCurrencyCode = Reflect.field(dynItmValue, "price_currency_code");
-					prod.localizedTitle = Reflect.field(dynItmValue, "title");
-					prod.localizedDescription = Reflect.field(dynItmValue, "description");
-					evt.productsData.push(prod);
-				}
-			}
-
-			IAP.dispatcher.dispatchEvent (evt);
 			androidAvailable = true;
 		}
 	}
