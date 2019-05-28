@@ -184,7 +184,7 @@ public class BillingManager implements PurchasesUpdatedListener {
                             @Override
                             public void onSkuDetailsResponse(int responseCode,
                                                              List<SkuDetails> skuDetailsList) {
-                                Log.d(TAG, "onSkuDetailsResponse");
+                                Log.d(TAG, "onSkuDetailsResponse code:" + responseCode);
                                 mBillingUpdatesListener.onQuerySkuDetailsFinished(skuDetailsList, responseCode);
                             }
                         });
@@ -341,12 +341,17 @@ public class BillingManager implements PurchasesUpdatedListener {
                         executeOnSuccess.run();
                     }
                 }
+                else {
+                    mBillingUpdatesListener.onBillingClientSetupFinished(false);
+                }
                 mBillingClientResponseCode = billingResponseCode;
             }
 
             @Override
             public void onBillingServiceDisconnected() {
+                Log.d(TAG, "OnBillingServiceDisconnected");
                 mIsServiceConnected = false;
+                mBillingUpdatesListener.onBillingClientSetupFinished(false);
             }
         });
     }
