@@ -32,7 +32,7 @@ import android.graphics.BitmapFactory;
 
 public class InAppPurchase extends Extension {
 	
-	private static String TAG = "IAP";
+	private static String TAG = "BillingManager";
 	private static HaxeObject callback = null;
 	private static BillingManager billingManager = null;
 	private static String publicKey = "";
@@ -82,9 +82,12 @@ public class InAppPurchase extends Extension {
 			}
 			
 			for (Purchase purchase : purchaseList) {
-					String sku = purchase.getSku();
-					Boolean wasInProgress = purchaseInProgress.remove(sku);
+				String sku = purchase.getSku();
+				Boolean wasInProgress = purchaseInProgress.remove(sku);
+				if (wasInProgress)
+				{
 					InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson(), "", purchase.getSignature() });
+				}
 			}
 		}
 

@@ -115,6 +115,7 @@ public class BillingManager implements PurchasesUpdatedListener {
     @Override
     public void onPurchasesUpdated(int resultCode, List<Purchase> purchases) {
         if (resultCode == BillingResponse.OK) {
+            mPurchases.clear();
             for (Purchase purchase : purchases) {
                 handlePurchase(purchase);
             }
@@ -212,6 +213,7 @@ public class BillingManager implements PurchasesUpdatedListener {
             public void onConsumeResponse(@BillingResponse int responseCode, String purchaseToken) {
                 // If billing service was disconnected, we try to reconnect 1 time
                 // (feel free to introduce your retry policy here).
+                mTokensToBeConsumed.remove(purchaseToken);
                 mBillingUpdatesListener.onConsumeFinished(purchaseToken, responseCode);
             }
         };
@@ -221,6 +223,7 @@ public class BillingManager implements PurchasesUpdatedListener {
             @Override
             public void run() {
                 // Consume the purchase async
+                Log.i(TAG, "Consuming:" + purchaseToken);
                 mBillingClient.consumeAsync(purchaseToken, onConsumeListener);
             }
         };
@@ -300,6 +303,8 @@ public class BillingManager implements PurchasesUpdatedListener {
                 PurchasesResult purchasesResult = mBillingClient.queryPurchases(SkuType.INAPP);
                 Log.i(TAG, "Querying purchases elapsed time: " + (System.currentTimeMillis() - time)
                         + "ms");
+                Log.i(TAG, "purchasesResult:" + purchasesResult);
+                /*
                 // If there are subscriptions supported, we add subscription rows as well
                 if (areSubscriptionsSupported()) {
                     PurchasesResult subscriptionResult
@@ -322,6 +327,7 @@ public class BillingManager implements PurchasesUpdatedListener {
                     Log.w(TAG, "queryPurchases() got an error response code: "
                             + purchasesResult.getResponseCode());
                 }
+                */
                 onQueryPurchasesFinished(purchasesResult);
             }
         };
