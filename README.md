@@ -1,5 +1,11 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/extension-iap.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/extension-iap) [![Build Status](https://img.shields.io/travis/openfl/extension-iap.svg?style=flat)](https://travis-ci.org/openfl/extension-iap)
 
+Fork changes:
+---
+* Change _openfl.utils.JNI_ -> _lime.system.JNI_
+* build.gradle change dependencies methods
+* Don't forget to rebuild the lib at first time!
+
 IAP
 ===
 Provides an access to in-app purchases (iOS) and in-app billing (Android) for OpenFL projects using a common API.
