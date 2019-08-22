@@ -156,9 +156,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 				
 				NSString *priceCurrencyCode = [prod.priceLocale objectForKey:NSLocaleCurrencyCode];
 
-				int priceAmountMicros = [[prod.price decimalNumberByMultiplyingBy:[NSDecimalNumber decimalNumberWithString:@"1000000"]] intValue];			
-
-				sendPurchaseProductDataEvent("productData", [prod.productIdentifier UTF8String], [prod.localizedTitle UTF8String], [prod.localizedDescription UTF8String], priceAmountMicros, [formattedPrice UTF8String], [priceCurrencyCode UTF8String]);
+				sendPurchaseProductDataEvent("productData", [prod.productIdentifier UTF8String], [prod.localizedTitle UTF8String], [prod.localizedDescription UTF8String], [prod.price intValue], [formattedPrice UTF8String], [priceCurrencyCode UTF8String]);
 
 			}
 			
