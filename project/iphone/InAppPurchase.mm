@@ -156,7 +156,14 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 				
 				NSString *priceCurrencyCode = [prod.priceLocale objectForKey:NSLocaleCurrencyCode];
 
-				sendPurchaseProductDataEvent("productData", [prod.productIdentifier UTF8String], [prod.localizedTitle UTF8String], [prod.localizedDescription UTF8String], [prod.price intValue], [formattedPrice UTF8String], [priceCurrencyCode UTF8String]);
+                int priceByMultiplying = [[prod.price decimalNumberByMultiplyingBy:[NSDecimalNumber decimalNumberWithString: @"100"]] intValue];
+
+				sendPurchaseProductDataEvent("productData",
+				    [prod.productIdentifier UTF8String],
+				    [prod.localizedTitle UTF8String],
+				    [prod.localizedDescription UTF8String],
+				    priceByMultiplying,
+				    [formattedPrice UTF8String], [priceCurrencyCode UTF8String]);
 
 			}
 			
@@ -261,7 +268,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
     if (inited == false) return;
     
     NSArray * transactions = [[SKPaymentQueue defaultQueue] transactions];
-    NSLog(@"manual updatedTransactions count %lu", [transactions count]);
+    // NSLog(@"manual updatedTransactions count %lu", [transactions count]);
     
     for(SKPaymentTransaction *transaction in transactions)
     {
