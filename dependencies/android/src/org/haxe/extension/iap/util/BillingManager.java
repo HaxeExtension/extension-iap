@@ -121,7 +121,8 @@ public class BillingManager implements PurchasesUpdatedListener {
             }
             mBillingUpdatesListener.onPurchasesUpdated(mPurchases, resultCode);
         } else {
-            mBillingUpdatesListener.onPurchasesUpdated(null, resultCode);
+            Log.w(TAG, "onPurchasesUpdated() mPurchases: " + purchases);
+            mBillingUpdatesListener.onPurchasesUpdated(purchases, resultCode);
             Log.w(TAG, "onPurchasesUpdated() got unknown resultCode: " + resultCode);
         }
     }

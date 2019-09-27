@@ -37,7 +37,6 @@ public class InAppPurchase extends Extension {
 	private static BillingManager billingManager = null;
 	private static String publicKey = "";
 	private static UpdateListener updateListener = null;
-	private static List<String> purchaseInProgress = new ArrayList();
 	private static Map<String, Purchase> consumeInProgress = new HashMap<String, Purchase>();
 
 	private static class UpdateListener implements BillingUpdatesListener {
@@ -66,27 +65,25 @@ public class InAppPurchase extends Extension {
 		@Override
 		public void onPurchasesUpdated(List<Purchase> purchaseList, final @BillingResponse int result) {
 			Log.d(TAG, "onPurchasesUpdated: " + result);
-			if (result != BillingResponse.OK)
+			if (result == BillingResponse.OK)
 			{
-				for (String purchase : purchaseInProgress) {
-					if (result ==  BillingResponse.USER_CANCELED) {
-						InAppPurchase.callback.call("onCanceledPurchase", new Object[] { purchase });
-					}
-					else {
-						Log.d(TAG, "onFailedPurchase: " + "{\"result\":{\"message\":\"" + result + "\"}, \"product\":{\"productId:\""  + purchase + "\"}}");
-						InAppPurchase.callback.call("onFailedPurchase", new Object[] { ("{\"result\":{\"message\":\"" + result + "\"}, \"product\":{\"productId\":\""  + purchase + "\"}}") });
-					}
-				}
-				purchaseInProgress.clear();
-				return;
-			}
-			
-			for (Purchase purchase : purchaseList) {
-				String sku = purchase.getSku();
-				Boolean wasInProgress = purchaseInProgress.remove(sku);
-				if (wasInProgress)
+				for (Purchase purchase : purchaseList) 
 				{
+					String sku = purchase.getSku();
 					InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson(), "", purchase.getSignature() });
+				}
+			}
+			else
+			{
+				if (result ==  BillingResponse.USER_CANCELED) 
+				{
+					InAppPurchase.callback.call("onCanceledPurchase", new Object[] { "canceled" });
+				}
+				else
+				{
+					String message = "{\"result\":{\"message\":\"" + result + "\"}}";
+					Log.d(TAG, "onFailedPurchase: " + message);
+					InAppPurchase.callback.call("onFailedPurchase", new Object[] { (message) });
 				}
 			}
 		}
@@ -135,7 +132,6 @@ public class InAppPurchase extends Extension {
 		// IabHelper.launchPurchaseFlow() must be called from the main activity's UI thread
 		Extension.mainActivity.runOnUiThread(new Runnable() {
 				public void run() {
-						purchaseInProgress.add(productID);
 						InAppPurchase.billingManager.initiatePurchaseFlow(productID);
 				}
 			});
