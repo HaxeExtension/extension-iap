@@ -358,7 +358,6 @@ public class BillingManager implements PurchasesUpdatedListener {
             public void onBillingServiceDisconnected() {
                 Log.d(TAG, "OnBillingServiceDisconnected");
                 mIsServiceConnected = false;
-                mBillingUpdatesListener.onBillingClientSetupFinished(false);
             }
         });
     }
