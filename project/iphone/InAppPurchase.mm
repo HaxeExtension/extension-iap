@@ -207,7 +207,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
         NSData *receipt = [NSData dataWithContentsOfURL:receiptURL];
         NSString *jsonObjectString = [receipt base64EncodedStringWithOptions:0];
 
-        sendPurchaseFinishEvent("success", [transaction.payment.productIdentifier UTF8String], [transaction.transactionIdentifier UTF8String], ([transaction.transactionDate timeIntervalSince1970] * 1000), [jsonObjectString UTF8String]);
+        sendPurchaseFinishEvent("success", [transaction.payment.productIdentifier UTF8String], [transaction.transactionIdentifier UTF8String], [transaction.transactionDate timeIntervalSince1970], [jsonObjectString UTF8String]);
     }
     
     else
