@@ -88,7 +88,7 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 	{
 		NSLog(@"product found");
 		SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:product];
-        payment.quantity = 1;
+        	payment.quantity = 1;
 		[[SKPaymentQueue defaultQueue] addPayment:payment];
 	}
 	else
@@ -106,9 +106,9 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 	}
 
 	NSSet *productIdentifiersSet = [NSSet setWithArray:[productIdentifiers componentsSeparatedByString:@","] ];
-    productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:productIdentifiersSet];
-    productsRequest.delegate = self;
-    [productsRequest start];
+    	productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:productIdentifiersSet];
+    	productsRequest.delegate = self;
+    	[productsRequest start];
     
     // we will release the request object in the delegate callback
 }
@@ -139,8 +139,8 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse*)response
 {   	
 	int count = [response.products count];
-    NSLog(@"!!!!!!!!!!!productsRequest!");
-	NSLog(@"Number of Products_: %i", count);
+    	NSLog(@"productsRequest");
+	NSLog(@"Number of Products: %i", count);
 
 	// release the products request BEFORE calling the completion to support calling purchase()
 	// in the completion result handlers
@@ -148,7 +148,7 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 	productsRequest = NULL;
     
 	if(count > 0) 
-    {
+	{
 		products =  [[NSArray alloc] initWithArray:response.products];
 
 		for(SKProduct *prod in response.products)
@@ -170,9 +170,9 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 		}
 		
 		static dispatch_once_t onceToken;
-    	dispatch_once(&onceToken, ^{
-        	[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
-    	});
+		dispatch_once(&onceToken, ^{
+			[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+		});
 		[self updateAllTransactionsManually];
 		inited = true;
 		
@@ -207,32 +207,25 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 {
     if(wasSuccessful)
     {
-		if (!inited)
-		{
-			[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
-		}
+	if (!inited)
+	{
+		[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+	}
 
     	NSLog(@"Successful Purchase");
         NSString* receiptString = [[NSString alloc] initWithString:transaction.payment.productIdentifier];
-		NSLog(@"Successful Purchase receiptString %@", receiptString);
         
         NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
         NSData *receipt = [NSData dataWithContentsOfURL:receiptURL];
         NSString *jsonObjectString = [receipt base64EncodedStringWithOptions:0];
-
-		NSLog(@"Successful Purchase receiptURL %@", receiptURL);
-		NSLog(@"Successful Purchase receipt %@", receipt);
-		NSLog(@"Successful Purchase jsonObjectString! %@", jsonObjectString);
-		//NSLog(@"Successful Purchase jsonObjectString utf8! %s", [jsonObjectString UTF8String]);
-
-        //sendPurchaseFinishEventWrap("success", [transaction.payment.productIdentifier UTF8String], [transaction.transactionIdentifier UTF8String], [transaction.transactionDate timeIntervalSince1970], [jsonObjectString UTF8String]);
-		sendPurchaseFinishEventWrap("success", transaction.payment.productIdentifier, transaction.transactionIdentifier, [transaction.transactionDate timeIntervalSince1970], jsonObjectString);
+	    
+	sendPurchaseFinishEventWrap("success", transaction.payment.productIdentifier, transaction.transactionIdentifier, [transaction.transactionDate timeIntervalSince1970], jsonObjectString);
     }
     
     else
     {
     	NSLog(@"Failed Purchase");
-		[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+	[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
         if (transaction.error.code != SKErrorPaymentCancelled)
         {
             NSLog(@"Transaction error: %@", transaction.error.localizedDescription);
@@ -287,17 +280,17 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
         switch(transaction.transactionState)
         {
             case SKPaymentTransactionStatePurchased:
-				NSLog(@"SKPaymentTransactionStatePurchased"); 
+		NSLog(@"SKPaymentTransactionStatePurchased"); 
                 [self completeTransaction:transaction];
-				break;
+		break;
 
             case SKPaymentTransactionStateRestored:
-				 NSLog(@"SKPaymentTransactionStateRestored"); 
+		NSLog(@"SKPaymentTransactionStateRestored"); 
                 [self completeTransaction:transaction];
                 break;
                 
             case SKPaymentTransactionStateFailed:
-				NSLog(@"SKPaymentTransactionStateFailed"); 
+		NSLog(@"SKPaymentTransactionStateFailed"); 
                 [self failedTransaction:transaction];
                 break;
                 
@@ -314,7 +307,7 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray*)transactions
 {
 	NSLog(@"auto updatedTransactions");
-    [self updateAllTransactionsManually];
+	[self updateAllTransactionsManually];
 }
 
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedDownloads:(NSArray*)downloads
