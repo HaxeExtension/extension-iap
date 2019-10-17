@@ -55,7 +55,7 @@ class Purchase
 		// itemType = Reflect.field(dynObj, "itemType");
 		orderId = Reflect.field(dynObj, "orderId");
 		packageName = Reflect.field(dynObj, "packageName");
-		purchaseTime = Reflect.field(dynObj, "purchaseTime");
+		purchaseTime = Reflect.field(dynObj, "purchaseTime") * 0.001;
 		purchaseState = Reflect.field(dynObj, "purchaseState");
 		developerPayload = Reflect.field(dynObj, "developerPayload");
 		purchaseToken = Reflect.field(dynObj, "purchaseToken");
