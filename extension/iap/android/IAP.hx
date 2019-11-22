@@ -50,6 +50,8 @@ import lime.system.JNI;
 
 @:allow(extension.iap) class IAP {
 
+	public static var initCounter:Int = 0;
+
 	public static var available (get, null):Bool;
 	public static var manualTransactionMode (get, set):Bool;
 	public static var inventory(default, null):Inventory = null;
@@ -58,6 +60,7 @@ import lime.system.JNI;
 
 	// Event dispatcher composition
 	private static var dispatcher = new EventDispatcher ();
+	private static var cleanupJobs:Array<Void -> Void> = [];
 
 	/**
 	 * Initializes the extension.
@@ -74,16 +77,30 @@ import lime.system.JNI;
 
 	public static function initialize (publicKey:String = ""):Void {
 
+		if (initialized)
+		{
+			trace("IAP: already initialized - cleanup it");
+			return;
+		}
+
 		if (funcInit == null) {
 			funcInit = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "initialize", "(Ljava/lang/String;Lorg/haxe/lime/HaxeObject;)V");
 		}
 
-		if (inventory == null) inventory = new Inventory(null);
+		inventory = new Inventory(null);
 		funcInit (publicKey, new IAPHandler ());
+
+		initialized = true;
 	}
 
 	public static function cleanup ():Void {
-
+		inventory = null;		
+		for (job in cleanupJobs)
+		{
+			job();
+		}
+		cleanupJobs = [];
+		initialized = false;
 	}
 
 	/**
@@ -106,7 +123,6 @@ import lime.system.JNI;
 			funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;Ljava/lang/String;)V");
 		}
 
-		IAPHandler.lastPurchaseRequest = productID;
 		funcBuy (productID, devPayload);
 	}
 
@@ -144,7 +160,6 @@ import lime.system.JNI;
 		if (funcConsume == null) {
 			funcConsume = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "consume", "(Ljava/lang/String;Ljava/lang/String;)V");
 		}
-		IAPHandler.lastPurchaseRequest = purchase.productID;
 		funcConsume (purchase.originalJson, purchase.signature);
 
 	}
@@ -156,7 +171,7 @@ import lime.system.JNI;
 
 	private static function get_available ():Bool {
 
-		return IAPHandler.androidAvailable;
+		return true;
 
 	}
 
@@ -177,7 +192,7 @@ import lime.system.JNI;
 	public static function addEventListener (type:String, listener:Dynamic, useCapture:Bool = false, priority:Int = 0, useWeakReference:Bool = false):Void {
 
 		dispatcher.addEventListener (type, listener, useCapture, priority, useWeakReference);
-
+		cleanupJobs.push(dispatcher.removeEventListener.bind(type, listener, useCapture));
 	}
 
 	public static function removeEventListener (type:String, listener:Dynamic, capture:Bool = false):Void {
@@ -215,9 +230,6 @@ import lime.system.JNI;
 
 private class IAPHandler {
 
-	public static var lastPurchaseRequest:String = "";
-	public static var androidAvailable:Bool = true;
-
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -226,20 +238,16 @@ private class IAPHandler {
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	public function onCanceledPurchase (productID:String):Void {
-		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_CANCEL, productID));
+	public function onCanceledPurchase (message:String):Void {
+		IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_CANCEL));
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	public function onFailedConsume (response:String):Void {
-		var productID:String = "";
-
-		productID = lastPurchaseRequest; //temporal fix
-
 		var dynResp:Dynamic = Json.parse(response);
-		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_FAILURE, productID);
+		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_FAILURE);
 		evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
 		evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
 		IAP.dispatcher.dispatchEvent (evt);
@@ -249,11 +257,7 @@ private class IAPHandler {
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	public function onConsume (response:String):Void {
-		var productID:String = "";
-
 		trace('onConsume: $response');
-
-		productID = lastPurchaseRequest; //temporal fix
 
 		var dynResp:Dynamic = Json.parse(response);
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_SUCCESS);
@@ -265,17 +269,11 @@ private class IAPHandler {
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	public function onFailedPurchase (response:String):Void {
-		var productID:String = lastPurchaseRequest; //temporal fix
-
 		var dynResp:Dynamic = Json.parse(response);
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_FAILURE);
 		if (Reflect.field(dynResp, "product") != null) evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
-		if (evt.productID == productID)
-		{
-			evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
-			IAP.dispatcher.dispatchEvent (evt);
-			lastPurchaseRequest = "";
-		}
+		evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
+		IAP.dispatcher.dispatchEvent (evt);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -285,15 +283,10 @@ private class IAPHandler {
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_SUCCESS);
 
 		evt.purchase = new Purchase(response, itemType, signature);
-		if (lastPurchaseRequest == evt.purchase.productID)
-		{
-			evt.productID = evt.purchase.productID;
-			IAP.inventory.purchaseMap.set(evt.purchase.productID, evt.purchase);
+		evt.productID = evt.purchase.productID;
+		IAP.inventory.purchaseMap.set(evt.purchase.productID, evt.purchase);
 
-			IAP.dispatcher.dispatchEvent (evt);
-			lastPurchaseRequest = "";
-		}
-		
+		IAP.dispatcher.dispatchEvent (evt);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -302,8 +295,6 @@ private class IAPHandler {
 	public function onRequestProductDataComplete(response:String):Void {
 
 		if (response == "Failure") {
-
-			androidAvailable = false;
 			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED));
 
 		} else {
@@ -331,31 +322,27 @@ private class IAPHandler {
 			}
 
 			IAP.dispatcher.dispatchEvent (evt);
-			androidAvailable = true;
 		}
 	}
 
 	public function onQueryInventoryComplete(response:String):Void {
 
 		if (response == "Failure") {
-			androidAvailable = false;
 			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED));
 		} else {
 			var dynResp:Dynamic = Json.parse(response);
 			IAP.inventory = new Inventory(dynResp);
-			androidAvailable = true;
 		}
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 
+	
 	public function onStarted (response:String):Void {
 		if (response == "Success") {
-			androidAvailable = true;
 			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT));
 		} else {
-			androidAvailable = false;
 			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT_FAILED));
 		}
 	}
