@@ -231,8 +231,9 @@ import haxe.Json;
 				dispatchEvent (evt);
 
 			case "failed":
-
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_FAILURE, data));
+				var event = new IAPEvent (IAPEvent.PURCHASE_FAILURE);
+				event.message = data;
+				dispatchEvent (event);
 
 			case "cancel":
 
@@ -277,8 +278,9 @@ import haxe.Json;
 				tempProductsData.splice(0, tempProductsData.length);
 
 			case "productDataFailed":
-
-				dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED, data));
+				var event = new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED);
+				event.message = data;
+				dispatchEvent (event);
 
 			default:
 

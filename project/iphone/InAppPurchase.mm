@@ -230,7 +230,8 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
         {
             NSLog(@"Transaction error: %@", transaction.error.localizedDescription);
         }
-        sendPurchaseEventWrap("failed", transaction.payment.productIdentifier);
+        /* Pass error message instead of transaction.payment.productIdentifier */
+        sendPurchaseEventWrap("failed", transaction.error.localizedDescription);
     }
 }
 
