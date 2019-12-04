@@ -47,7 +47,7 @@ public class BillingManager implements PurchasesUpdatedListener {
     // Default value of mBillingClientResponseCode until BillingManager was not yeat initialized
     public static final int BILLING_MANAGER_NOT_INITIALIZED  = -1;
 
-    private static final String TAG = "BillingManager";
+    private static final String TAG = "BillingManager hx:";
 
     /** A reference to BillingClient **/
     private BillingClient mBillingClient;
@@ -86,9 +86,9 @@ public class BillingManager implements PurchasesUpdatedListener {
      */
     public interface BillingUpdatesListener {
         void onBillingClientSetupFinished(final Boolean success);
+        void onQueryPurchasesFinished(List<Purchase> purchases);
         void onConsumeFinished(String token, @BillingResponse int result);
         void onPurchasesUpdated(List<Purchase> purchases, @BillingResponse int result);
-        void onQueryPurchasesFinished(List<Purchase> purchases, @BillingResponse int result);
         void onQuerySkuDetailsFinished(List<SkuDetails> skuDetailsList, @BillingResponse int result);
     }
 
@@ -153,7 +153,14 @@ public class BillingManager implements PurchasesUpdatedListener {
             }
         };
 
-        executeServiceRequest(purchaseFlowRequest);
+         Runnable onError = new Runnable() {
+            @Override
+            public void run() {
+                mBillingUpdatesListener.onPurchasesUpdated(null, mBillingClientResponseCode);
+            };
+        };
+
+        executeServiceRequest(purchaseFlowRequest, onError);
     }
 
     public Context getContext() {
@@ -193,7 +200,14 @@ public class BillingManager implements PurchasesUpdatedListener {
             }
         };
 
-        executeServiceRequest(queryRequest);
+        Runnable onError = new Runnable() {
+            @Override
+            public void run() {
+                mBillingUpdatesListener.onQuerySkuDetailsFinished(null, mBillingClientResponseCode);
+            }
+        };
+
+        executeServiceRequest(queryRequest, onError);
     }
 
     public void consumeAsync(final String purchaseToken) {
@@ -229,7 +243,14 @@ public class BillingManager implements PurchasesUpdatedListener {
             }
         };
 
-        executeServiceRequest(consumeRequest);
+        Runnable onError = new Runnable() {
+            @Override
+            public void run() {
+                mBillingUpdatesListener.onConsumeFinished(null, mBillingClientResponseCode);
+            }
+        };
+
+        executeServiceRequest(consumeRequest, onError);
     }
 
     /**
@@ -267,13 +288,12 @@ public class BillingManager implements PurchasesUpdatedListener {
         if (mBillingClient == null || result.getResponseCode() != BillingResponse.OK) {
             Log.w(TAG, "Billing client was null or result code (" + result.getResponseCode()
                     + ") was bad - quitting");
-            mBillingUpdatesListener.onQueryPurchasesFinished(null, result.getResponseCode());
             mBillingUpdatesListener.onBillingClientSetupFinished(false);
             return;
         }
 
         Log.d(TAG, "Query inventory was successful.");
-        mBillingUpdatesListener.onQueryPurchasesFinished(result.getPurchasesList(), result.getResponseCode());
+        mBillingUpdatesListener.onQueryPurchasesFinished(result.getPurchasesList());
         mBillingUpdatesListener.onBillingClientSetupFinished(true);
     }
 
@@ -333,14 +353,21 @@ public class BillingManager implements PurchasesUpdatedListener {
             }
         };
 
-        executeServiceRequest(queryToExecute);
+        Runnable onError = new Runnable() {
+            @Override
+            public void run() {
+                mBillingUpdatesListener.onBillingClientSetupFinished(false);
+            }
+        };
+        executeServiceRequest(queryToExecute, onError);
     }
 
-    public void startServiceConnection(final Runnable executeOnSuccess) {
+    public void startServiceConnection(final Runnable executeOnSuccess, final Runnable executeOnError) {
         mBillingClient.startConnection(new BillingClientStateListener() {
             @Override
             public void onBillingSetupFinished(@BillingResponse int billingResponseCode) {
                 Log.d(TAG, "Setup finished. Response code: " + billingResponseCode);
+                mBillingClientResponseCode = billingResponseCode;
 
                 if (billingResponseCode == BillingResponse.OK) {
                     mIsServiceConnected = true;
@@ -349,9 +376,11 @@ public class BillingManager implements PurchasesUpdatedListener {
                     }
                 }
                 else {
-                    mBillingUpdatesListener.onBillingClientSetupFinished(false);
+                    if (executeOnError != null) {
+                        executeOnError.run();
+                    }
+                    mIsServiceConnected = false;
                 }
-                mBillingClientResponseCode = billingResponseCode;
             }
 
             @Override
@@ -362,13 +391,13 @@ public class BillingManager implements PurchasesUpdatedListener {
         });
     }
 
-    private void executeServiceRequest(Runnable runnable) {
+    private void executeServiceRequest(Runnable runnable, Runnable onError) {
         if (mIsServiceConnected) {
             runnable.run();
         } else {
             // If billing service was disconnected, we try to reconnect 1 time.
             // (feel free to introduce your retry policy here).
-            startServiceConnection(runnable);
+            startServiceConnection(runnable, onError);
         }
     }
 

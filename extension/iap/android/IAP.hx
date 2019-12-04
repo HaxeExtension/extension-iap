@@ -327,12 +327,8 @@ private class IAPHandler {
 
 	public function onQueryInventoryComplete(response:String):Void {
 
-		if (response == "Failure") {
-			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED));
-		} else {
-			var dynResp:Dynamic = Json.parse(response);
-			IAP.inventory = new Inventory(dynResp);
-		}
+		var dynResp:Dynamic = Json.parse(response);
+		IAP.inventory = new Inventory(dynResp);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
