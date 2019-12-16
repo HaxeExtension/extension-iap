@@ -107,24 +107,18 @@ public class InAppPurchase extends Extension {
 		}
 
 		@Override
-		public void onQueryPurchasesFinished(List<Purchase> purchaseList, final @BillingResponse int result) {
-			Log.d(TAG, "onQueryPurchasesFinished: result: " + result);
-			if (result == BillingResponse.OK) {
-				String jsonResp =  "{ \"purchases\":[ ";
-				for (Purchase purchase : purchaseList) {
-						jsonResp += "{" +
-						"\"key\":\"" + purchase.getSku() + "\", " + 
-						"\"value\":" + purchase.getOriginalJson() + "," + 
-						"\"itemType\":\"\"," + 
-						"\"signature\":\"" + purchase.getSignature() + "\"},";
-				}
-				jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
-				jsonResp += "]}";
-				InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { jsonResp });
+		public void onQueryPurchasesFinished(List<Purchase> purchaseList) {
+			String jsonResp =  "{ \"purchases\":[ ";
+			for (Purchase purchase : purchaseList) {
+					jsonResp += "{" +
+					"\"key\":\"" + purchase.getSku() + "\", " + 
+					"\"value\":" + purchase.getOriginalJson() + "," + 
+					"\"itemType\":\"\"," + 
+					"\"signature\":\"" + purchase.getSignature() + "\"},";
 			}
-			else {
-				InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { "Failure" });
-			}
+			jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
+			jsonResp += "]}";
+			InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { jsonResp });
 		}
 	}
 
