@@ -1,7 +1,7 @@
 buildscript {
 	repositories {
 		maven {
-			url "http://repo1.maven.org/maven2/"
+			url "https://repo1.maven.org/maven2/"
 		}
 	}
 	dependencies {
@@ -25,6 +25,6 @@ android {
 }
 
 dependencies {
-	compile project(':deps:extension-api')
-	compile 'com.android.billingclient:billing:1.2.2'
+	api project(':deps:extension-api')
+	implementation 'com.android.billingclient:billing:1.2.2'
 }
