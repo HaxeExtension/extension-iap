@@ -7,7 +7,11 @@ import flash.events.EventDispatcher;
 import flash.Lib;
 import haxe.Json;
 
+#if (haxe_ver >= 4)
 import lime.system.JNI;
+#else
+import openfl.utils.JNI;
+#end
 
 /**
  * Provides convenience methods and properties for in-app purchases (Android & iOS).
