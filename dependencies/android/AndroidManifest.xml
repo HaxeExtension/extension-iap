@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.haxe.extension.iap" >
-	<uses-sdk android:minSdkVersion="15"
-          android:targetSdkVersion="19" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+		  package="org.haxe.extension.iap" >
+
+	<uses-sdk
+			android:minSdkVersion="::ANDROID_MINIMUM_SDK_VERSION::"
+			android:targetSdkVersion="::ANDROID_TARGET_SDK_VERSION::"
+	/>
+
 	<uses-permission android:name="com.android.vending.BILLING" />
-	
+
 </manifest>
