@@ -29,6 +29,7 @@ import org.haxe.extension.iap.util.BillingManager.BillingUpdatesListener;
 import org.json.JSONException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.opengl.GLSurfaceView;
 
 public class InAppPurchase extends Extension {
 	
@@ -43,10 +44,10 @@ public class InAppPurchase extends Extension {
 		@Override
 		public void onBillingClientSetupFinished(final Boolean success) {
 			if (success) {
-				InAppPurchase.callback.call("onStarted", new Object[] { "Success" });
+				fireCallback("onStarted", new Object[] { "Success" });
 			}
 			else {
-				InAppPurchase.callback.call("onStarted", new Object[] { "Failure" });
+				fireCallback("onStarted", new Object[] { "Failure" });
 			}
 		}
 
@@ -56,9 +57,9 @@ public class InAppPurchase extends Extension {
 			final Purchase purchase = InAppPurchase.consumeInProgress.get(token);
 			InAppPurchase.consumeInProgress.remove(token);
 			if (result == BillingResponse.OK) {
-				InAppPurchase.callback.call("onConsume", new Object[] { purchase.getOriginalJson() });
+				fireCallback("onConsume", new Object[] { purchase.getOriginalJson() });
 			} else {
-				InAppPurchase.callback.call("onFailedConsume", new Object[] { ("{\"result\":" + result + ", \"product\":" + purchase.getOriginalJson() + "}") });
+				fireCallback("onFailedConsume", new Object[] { ("{\"result\":" + result + ", \"product\":" + purchase.getOriginalJson() + "}") });
 			}
 		}
 
@@ -70,20 +71,20 @@ public class InAppPurchase extends Extension {
 				for (Purchase purchase : purchaseList) 
 				{
 					String sku = purchase.getSku();
-					InAppPurchase.callback.call ("onPurchase", new Object[] { purchase.getOriginalJson(), "", purchase.getSignature() });
+					fireCallback("onPurchase", new Object[] { purchase.getOriginalJson(), "", purchase.getSignature() });
 				}
 			}
 			else
 			{
 				if (result ==  BillingResponse.USER_CANCELED) 
 				{
-					InAppPurchase.callback.call("onCanceledPurchase", new Object[] { "canceled" });
+					fireCallback("onCanceledPurchase", new Object[] { "canceled" });
 				}
 				else
 				{
 					String message = "{\"result\":{\"message\":\"" + result + "\"}}";
 					Log.d(TAG, "onFailedPurchase: " + message);
-					InAppPurchase.callback.call("onFailedPurchase", new Object[] { (message) });
+					fireCallback("onFailedPurchase", new Object[] { (message) });
 				}
 			}
 		}
@@ -99,10 +100,10 @@ public class InAppPurchase extends Extension {
 				jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
 				jsonResp += "]}";
 				Log.d(TAG, "onQuerySkuDetailsFinished: " + jsonResp + ", result: " + result);
-				InAppPurchase.callback.call ("onRequestProductDataComplete", new Object[] { jsonResp });
+				fireCallback("onRequestProductDataComplete", new Object[] { jsonResp });
 			}
 			else {
-				InAppPurchase.callback.call ("onRequestProductDataComplete", new Object[] { "Failure" });
+				fireCallback("onRequestProductDataComplete", new Object[] { "Failure" });
 			}
 		}
 
@@ -118,36 +119,49 @@ public class InAppPurchase extends Extension {
 			}
 			jsonResp = jsonResp.substring(0, jsonResp.length() - 1);
 			jsonResp += "]}";
-			InAppPurchase.callback.call ("onQueryInventoryComplete", new Object[] { jsonResp });
+			fireCallback("onQueryInventoryComplete", new Object[] { jsonResp });
 		}
 	}
 
 	public static void buy (final String productID, final String devPayload) {
 		// IabHelper.launchPurchaseFlow() must be called from the main activity's UI thread
-		Extension.mainActivity.runOnUiThread(new Runnable() {
-				public void run() {
-						InAppPurchase.billingManager.initiatePurchaseFlow(productID);
-				}
-			});
+		Extension.mainActivity.runOnUiThread(new Runnable()
+		{
+			public void run()
+			{
+				InAppPurchase.billingManager.initiatePurchaseFlow(productID);
+			}
+		});
 	}
 	
 	public static void consume (final String purchaseJson, final String signature) 
 	{
-		Extension.callbackHandler.post (new Runnable () 
+		try
 		{
-			@Override public void run () 
+			final Purchase purchase = new Purchase(purchaseJson, signature);
+			InAppPurchase.consumeInProgress.put(purchase.getPurchaseToken(), purchase);
+			InAppPurchase.billingManager.consumeAsync(purchase.getPurchaseToken());
+		}
+		catch(JSONException e)
+		{
+			fireCallback("onFailedConsume", new Object[] {});
+		}
+	}
+
+	private static void fireCallback(final String name, final Object[] payload)
+	{
+		if (Extension.mainView == null) return;
+		GLSurfaceView view = (GLSurfaceView) Extension.mainView;
+
+		view.queueEvent(new Runnable()
+		{
+			public void run()
 			{
-				try
+				if (InAppPurchase.callback != null)
 				{
-					final Purchase purchase = new Purchase(purchaseJson, signature);
-					InAppPurchase.consumeInProgress.put(purchase.getPurchaseToken(), purchase);
-					InAppPurchase.billingManager.consumeAsync(purchase.getPurchaseToken());
+					InAppPurchase.callback.call(name, payload);
 				}
-				catch(JSONException e)
-				{
-					InAppPurchase.callback.call ("onFailedConsume", new Object[] {});
-				}
-			} // run
+			}
 		});
 	}
 

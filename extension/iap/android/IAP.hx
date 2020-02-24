@@ -206,9 +206,7 @@ import openfl.utils.JNI;
 	}
 
 	public static function dispatchEvent (event:Event):Bool {
-
 		return dispatcher.dispatchEvent (event);
-
 	}
 
 	public static function hasEventListener (type:String):Bool {
@@ -216,6 +214,7 @@ import openfl.utils.JNI;
 		return dispatcher.hasEventListener (type);
 
 	}
+
 
 	// Native Methods
 	private static var funcInit:Dynamic;
@@ -254,7 +253,7 @@ private class IAPHandler {
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_FAILURE);
 		evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
 		evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
-		IAP.dispatcher.dispatchEvent (evt);
+		IAP.dispatchEvent (evt);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -266,7 +265,7 @@ private class IAPHandler {
 		var dynResp:Dynamic = Json.parse(response);
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_SUCCESS);
 		evt.productID = Reflect.field(dynResp, "productId");		
-		IAP.dispatcher.dispatchEvent(evt);
+		IAP.dispatchEvent(evt);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -277,7 +276,7 @@ private class IAPHandler {
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_FAILURE);
 		if (Reflect.field(dynResp, "product") != null) evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
 		evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
-		IAP.dispatcher.dispatchEvent (evt);
+		IAP.dispatchEvent (evt);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -290,7 +289,7 @@ private class IAPHandler {
 		evt.productID = evt.purchase.productID;
 		IAP.inventory.purchaseMap.set(evt.purchase.productID, evt.purchase);
 
-		IAP.dispatcher.dispatchEvent (evt);
+		IAP.dispatchEvent (evt);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -299,7 +298,7 @@ private class IAPHandler {
 	public function onRequestProductDataComplete(response:String):Void {
 
 		if (response == "Failure") {
-			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED));
+			IAP.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_PRODUCT_DATA_FAILED));
 
 		} else {
 
@@ -325,7 +324,7 @@ private class IAPHandler {
 				}
 			}
 
-			IAP.dispatcher.dispatchEvent (evt);
+			IAP.dispatchEvent (evt);
 		}
 	}
 
@@ -341,9 +340,9 @@ private class IAPHandler {
 	
 	public function onStarted (response:String):Void {
 		if (response == "Success") {
-			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT));
+			IAP.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT));
 		} else {
-			IAP.dispatcher.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT_FAILED));
+			IAP.dispatchEvent (new IAPEvent (IAPEvent.PURCHASE_INIT_FAILED));
 		}
 	}
 
