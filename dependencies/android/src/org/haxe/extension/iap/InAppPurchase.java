@@ -151,18 +151,28 @@ public class InAppPurchase extends Extension {
 	private static void fireCallback(final String name, final Object[] payload)
 	{
 		if (Extension.mainView == null) return;
-		GLSurfaceView view = (GLSurfaceView) Extension.mainView;
 
-		view.queueEvent(new Runnable()
+		if (Extension.mainView instanceof GLSurfaceView)
 		{
-			public void run()
+			GLSurfaceView view = (GLSurfaceView) Extension.mainView;
+			view.queueEvent(new Runnable()
 			{
-				if (InAppPurchase.callback != null)
+				public void run()
 				{
-					InAppPurchase.callback.call(name, payload);
+					if (InAppPurchase.callback != null)
+					{
+						InAppPurchase.callback.call(name, payload);
+					}
 				}
+			});
+		}
+		else
+		{
+			if (InAppPurchase.callback != null)
+			{
+				InAppPurchase.callback.call(name, payload);
 			}
-		});
+		}
 	}
 
 	public static void querySkuDetails(String[] ids) {
@@ -176,7 +186,7 @@ public class InAppPurchase extends Extension {
 	
 	public static void initialize (String publicKey, HaxeObject callback) {
 		
-		Log.i ("IAP", "Initializing billing service");
+		Log.i (TAG, "Initializing billing service");
 		
 		InAppPurchase.updateListener = new UpdateListener();
 		InAppPurchase.publicKey = publicKey;
