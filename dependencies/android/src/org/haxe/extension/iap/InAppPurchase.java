@@ -127,6 +127,7 @@ public class InAppPurchase extends Extension {
 		// IabHelper.launchPurchaseFlow() must be called from the main activity's UI thread
 		Extension.mainActivity.runOnUiThread(new Runnable()
 		{
+			@Override
 			public void run()
 			{
 				InAppPurchase.billingManager.initiatePurchaseFlow(productID);
@@ -150,7 +151,7 @@ public class InAppPurchase extends Extension {
 
 	private static void fireCallback(final String name, final Object[] payload)
 	{
-		if (Extension.mainView == null) return;
+		if (Extension.mainView == null || InAppPurchase.callback == null) return;
 
 		if (Extension.mainView instanceof GLSurfaceView)
 		{
@@ -159,19 +160,20 @@ public class InAppPurchase extends Extension {
 			{
 				public void run()
 				{
-					if (InAppPurchase.callback != null)
-					{
-						InAppPurchase.callback.call(name, payload);
-					}
+					InAppPurchase.callback.call(name, payload);
 				}
 			});
 		}
 		else
 		{
-			if (InAppPurchase.callback != null)
+			Extension.mainActivity.runOnUiThread(new Runnable()
 			{
-				InAppPurchase.callback.call(name, payload);
-			}
+				@Override
+				public void run()
+				{
+					InAppPurchase.callback.call(name, payload);
+				}
+			});
 		}
 	}
 

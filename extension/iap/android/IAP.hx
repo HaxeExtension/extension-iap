@@ -206,7 +206,12 @@ import openfl.utils.JNI;
 	}
 
 	public static function dispatchEvent (event:Event):Bool {
-		return dispatcher.dispatchEvent (event);
+		// fix for runinig callback from extension in proper gui thread
+		haxe.Timer.delay(() -> {
+			dispatcher.dispatchEvent (event);
+		}, 0);
+
+		return true;
 	}
 
 	public static function hasEventListener (type:String):Bool {
