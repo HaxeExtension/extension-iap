@@ -207,7 +207,7 @@ import openfl.utils.JNI;
 
 	public static function dispatchEvent (event:Event):Bool {
 		// fix for runinig callback from extension in proper gui thread
-		haxe.Timer.delay(() -> {
+		haxe.Timer.delay(function() {
 			dispatcher.dispatchEvent (event);
 		}, 0);
 
