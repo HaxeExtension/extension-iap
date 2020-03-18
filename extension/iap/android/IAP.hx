@@ -7,10 +7,10 @@ import flash.events.EventDispatcher;
 import flash.Lib;
 import haxe.Json;
 
-#if (haxe_ver >= 4)
-import lime.system.JNI;
-#else
+#if (openfl < "4.0.0")
 import openfl.utils.JNI;
+#else
+import lime.system.JNI;
 #end
 
 /**
