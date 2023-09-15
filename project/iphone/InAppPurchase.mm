@@ -207,25 +207,22 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 {
     if(wasSuccessful)
     {
-	if (!inited)
-	{
-		[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
-	}
+        NSLog(@"Successful Purchase");
+        [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
 
-    	NSLog(@"Successful Purchase");
         NSString* receiptString = [[NSString alloc] initWithString:transaction.payment.productIdentifier];
         
         NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
         NSData *receipt = [NSData dataWithContentsOfURL:receiptURL];
         NSString *jsonObjectString = [receipt base64EncodedStringWithOptions:0];
 
-	sendPurchaseFinishEventWrap("success", transaction.payment.productIdentifier, transaction.transactionIdentifier, [transaction.transactionDate timeIntervalSince1970], jsonObjectString);
+        sendPurchaseFinishEventWrap("success", transaction.payment.productIdentifier, transaction.transactionIdentifier, [transaction.transactionDate timeIntervalSince1970], jsonObjectString);
     }
     
     else
     {
-    	NSLog(@"Failed Purchase");
-	[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+        NSLog(@"Failed Purchase");
+        [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
         if (transaction.error.code != SKErrorPaymentCancelled)
         {
             NSLog(@"Transaction error: %@", transaction.error.localizedDescription);
