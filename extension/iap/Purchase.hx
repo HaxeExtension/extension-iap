@@ -14,13 +14,18 @@ class Purchase
 	public var purchaseState(default, null):Int;
 	public var developerPayload(default, null):String;
 	public var purchaseToken(default, null):String;
+	public var acknowledged(default, null):Bool;
 	public var signature(default, null):String;
 	public var originalJson(default, null):String;
 	public var json(default, null):String;
+	
+	//And only for restore
+	public var originalJsonB64:String = "";
 
 	// iOS Properties
 	public var transactionID(default, null):String;
 	public var transactionDate(default, null):Int;
+	public var receipt(default, null):String;
 
 	// Blackberry Properties
 	public var date : String;
@@ -40,7 +45,7 @@ class Purchase
 		var originalJson:String = "";
 		var dynObj:Dynamic = null;
 		
-		if (Std.is(baseObj, String)) {
+		if (Std.isOfType(baseObj, String)) {
 			originalJson = cast (baseObj, String);
 			dynObj = Json.parse(originalJson);
 		}
@@ -59,12 +64,14 @@ class Purchase
 		purchaseState = Reflect.field(dynObj, "purchaseState");
 		developerPayload = Reflect.field(dynObj, "developerPayload");
 		purchaseToken = Reflect.field(dynObj, "purchaseToken");
+		acknowledged = Reflect.field(dynObj, "acknowledged");
 		
 		this.signature = signature;
 		this.itemType = itemType;
 		
 		transactionID = Reflect.field(dynObj, "transactionID");
 		transactionDate = Reflect.field(dynObj, "transactionDate");
+		receipt = Reflect.field(dynObj, "receipt");
 		
 		this.originalJson = originalJson;
 	}

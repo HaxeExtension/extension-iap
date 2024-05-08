@@ -7,6 +7,7 @@ typedef TIAProduct = {
 	?price:Float,
 	?localizedPrice:String,
 	?priceCurrencyCode:String,
+	?priceCountryCode:String,
 	?priceAmountMicros:Float,
 	?type:String		//android
 }

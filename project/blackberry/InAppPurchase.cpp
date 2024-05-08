@@ -17,7 +17,8 @@ extern "C" void sendPurchaseProductDataEvent(
 	const char* localizedDescription,
 	int priceAmountMicros,
 	const char* localizedPrice,
-	const char* priceCurrencyCode
+	const char* priceCurrencyCode,
+	const char* priceCountryCode
 );
 
 extern "C" void sendPurchaseInventoryData(
@@ -215,7 +216,8 @@ namespace iap {
 			"",						//const char* localizedDescription,
 			0,						//int priceAmountMicros,
 			str_price,				//const char* localizedPrice,
-			"U$SDSSA"				//const char* priceCurrencyCode
+			"U$SDSSA",				//const char* priceCurrencyCode
+			"CA"					//const char* priceCountryCode
 		);
 
 	}

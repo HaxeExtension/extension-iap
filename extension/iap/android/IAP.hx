@@ -7,10 +7,10 @@ import flash.events.EventDispatcher;
 import flash.Lib;
 import haxe.Json;
 
-#if (openfl < "4.0.0")
-import openfl.utils.JNI;
-#else
+#if (haxe_ver >= 4)
 import lime.system.JNI;
+#else
+import openfl.utils.JNI;
 #end
 
 /**
@@ -104,7 +104,9 @@ import lime.system.JNI;
 			job();
 		}
 		cleanupJobs = [];
-		initialized = false;
+		//tova predi ne beshe kometirano i syotvetno se syzdavashe vsi4ko na novo vseki pyt
+		//uj ba4kashe ako v novoto neshto ne ba4ka da se probva da se razkometira tuk
+		//initialized = false;
 	}
 
 	/**
@@ -123,11 +125,19 @@ import lime.system.JNI;
 
 	public static function purchase (productID:String, devPayload:String = ""):Void {
 
-		if (funcBuy == null) {
-			funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;Ljava/lang/String;)V");
-		}
+		try {
 
-		funcBuy (productID, devPayload);
+			if (funcBuy == null) {
+				funcBuy = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "buy", "(Ljava/lang/String;Ljava/lang/String;)V");
+			}
+
+			funcBuy (productID, devPayload);
+
+		}
+		catch (err : Error)
+		{
+			trace(err.getStackTrace());
+		}
 	}
 
 
@@ -143,10 +153,18 @@ import lime.system.JNI;
 	 */
 	
 	public static function requestProductData (ids:Array<String>):Void {
-		if (funcQuerySkuDetails == null) {
-			funcQuerySkuDetails = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "querySkuDetails", "([Ljava/lang/String;)V");
+
+		try {
+
+			if (funcQuerySkuDetails == null) {
+				funcQuerySkuDetails = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "querySkuDetails", "([Ljava/lang/String;)V");
+			}
+			funcQuerySkuDetails(ids);
 		}
-		funcQuerySkuDetails(ids);
+		catch (err : Error)
+		{
+			trace(err.getStackTrace());
+		}
 	}
 
 	/**
@@ -161,14 +179,58 @@ import lime.system.JNI;
 
 	public static function consume (purchase:Purchase):Void {
 
-		if (funcConsume == null) {
-			funcConsume = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "consume", "(Ljava/lang/String;Ljava/lang/String;)V");
+		try {
+		
+			if (funcConsume == null) {
+				funcConsume = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "consume", "(Ljava/lang/String;Ljava/lang/String;)V");
+			}
+			funcConsume (purchase.originalJson, purchase.signature);
+
 		}
-		funcConsume (purchase.originalJson, purchase.signature);
+		catch (err : Error)
+		{
+			trace(err.getStackTrace());
+		}
 
 	}
 
-	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {}
+	/**
+	 * Sends a acknowledgePurchase intent for a given product.
+	 *
+	 * @param purchase. The previously purchased product.
+	 *
+	 * Related Events (IAPEvent):
+	 * 		PURCHASE_ACKNOWLEDGE_SUCCESS: Fired when the acknowledgePurchase attempt was successful
+	 * 		PURCHASE_ACKNOWLEDGE_FAILURE: Fired when the acknowledgePurchase attempt failed
+	 */
+
+	public static function acknowledgePurchase (purchase:Purchase):Void {
+
+		if (funcAcknowledgePurchase == null) {
+			funcAcknowledgePurchase = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "acknowledgePurchase", "(Ljava/lang/String;Ljava/lang/String;)V");
+		}
+		funcAcknowledgePurchase (purchase.originalJson, purchase.signature);
+
+	}
+
+	public static function queryInventory (queryItemDetails:Bool = false, moreItems:Array<String> = null):Void {
+		try {
+		
+			if (funcQueryInventory == null) {
+				funcQueryInventory = JNI.createStaticMethod ("org/haxe/extension/iap/InAppPurchase", "queryInventory", "()V");
+			}
+
+			funcQueryInventory();
+		}
+		catch (err : Error)
+		{
+			trace(err.getStackTrace());
+		}
+	}
+
+	/*public static function queryInventory ():Void {
+		
+	}*/
 
 	// Getter & Setter Methods
 
@@ -220,20 +282,19 @@ import lime.system.JNI;
 
 	}
 
-
 	// Native Methods
 	private static var funcInit:Dynamic;
 	private static var funcBuy:Dynamic;
 	private static var funcConsume:Dynamic;
+	private static var funcAcknowledgePurchase:Dynamic;
 	private static var funcRestore:Dynamic;
 	private static var funcQueryInventory:Dynamic;
 	private static var funcQuerySkuDetails:Dynamic;
 	private static var funcTest:Dynamic;
-
 }
 
 
-#if (android && !display)
+#if (!display)
 
 
 private class IAPHandler {
@@ -269,6 +330,29 @@ private class IAPHandler {
 
 		var dynResp:Dynamic = Json.parse(response);
 		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_CONSUME_SUCCESS);
+		evt.productID = Reflect.field(dynResp, "productId");		
+		IAP.dispatchEvent(evt);
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////
+
+	public function onFailedAcknowledgePurchase (response:String):Void {
+		var dynResp:Dynamic = Json.parse(response);
+		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_ACKNOWLEDGE_FAILURE);
+		evt.productID = Reflect.field(Reflect.field(dynResp, "product"), "productId");
+		evt.message = Reflect.field(Reflect.field(dynResp, "result"), "message");
+		IAP.dispatchEvent (evt);
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////
+
+	public function onAcknowledgePurchase (response:String):Void {
+		trace('onAcknowledgePurchase: $response');
+
+		var dynResp:Dynamic = Json.parse(response);
+		var evt:IAPEvent = new IAPEvent (IAPEvent.PURCHASE_ACKNOWLEDGE_SUCCESS);
 		evt.productID = Reflect.field(dynResp, "productId");		
 		IAP.dispatchEvent(evt);
 	}
@@ -337,6 +421,9 @@ private class IAPHandler {
 
 		var dynResp:Dynamic = Json.parse(response);
 		IAP.inventory = new Inventory(dynResp);
+
+		var evt:IAPEvent = new IAPEvent (IAPEvent.QUERY_INVENTORY_COMPLETE);		
+		IAP.dispatchEvent(evt);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,8 @@
 package extension.iap.ios;
 
+#if ios
 import cpp.Lib;
+#end
 import extension.iap.IAP;
 import flash.errors.Error;
 import flash.events.Event;
@@ -46,7 +48,9 @@ import haxe.Json;
  *
  */
 
-@:allow(extension.iap) class IAP {
+@:keep
+@:allow(extension.iap) 
+class IAP {
 
 	public static var available (get, null):Bool;
 	public static var manualTransactionMode (get, set):Bool;
@@ -86,10 +90,16 @@ import haxe.Json;
 
 		}
 
-		purchases_initialize();
+		purchases_initialize(publicKey);
 
 	}
 
+	public static function checkQueue ():Void {
+
+		purchases_queue();
+	
+	}
+	
 	public static function cleanup ():Void {
 		if (initialized) {
 
@@ -103,9 +113,8 @@ import haxe.Json;
 	 * Sends a purchase intent for a given product.
 	 *
 	 * @param productID (iOS & Android). The unique Id for the desired product (Android Sku).
-	 * @param devPayload (Android). Extra data (developer payload), which will be returned with the purchase data
-	 *     when the purchase completes. This extra data will be permanently bound to that purchase
-	 *     and will always be returned when the purchase is queried.
+	 * @param loginId (IOS). polzva se za podaryk - ako e podaryk podavame id-to za kogoto e podaruka
+	 *
 	 *
 	 * Related Events (IAPEvent):
 	 * 		PURCHASE_SUCCESS: Fired when the purchase attempt was successful
@@ -113,9 +122,9 @@ import haxe.Json;
 	 * 		PURCHASE_CANCEL: Fired when the purchase attempt was cancelled by the user
 	 */
 
-	public static function purchase (productID:String, devPayload:String = ""):Void {
+	public static function purchase (productID:String, loginID:String = ""):Void {
 
-		purchases_buy (productID);
+		purchases_buy (productID, loginID);
 
 	}
 
@@ -136,9 +145,9 @@ import haxe.Json;
 
 		tempProductsData.splice(0, tempProductsData.length);
 
-		if (Std.is(inArg, String))
+		if (Std.isOfType(inArg, String))
 			purchases_get_data (cast(inArg, String));
-		else if (Std.is(inArg, Array))
+		else if (Std.isOfType(inArg, Array))
 			purchases_get_data (cast(inArg, Array<Dynamic>).join(","));
 		else
 			throw new flash.errors.Error("Invalid parameter type: " + Type.typeof(inArg) + ". Valid types are String and Array<String>.");
@@ -171,6 +180,21 @@ import haxe.Json;
 
 	public static function consume (purchase:Purchase) : Void {
 		purchases_finish_transaction (purchase.transactionID);
+	}
+
+	/**
+	 * Sends a acknowledgePurchase intent for a given product.
+	 *
+	 * @param purchase. The previously purchased product.
+	 *
+	 * Related Events (IAPEvent):
+	 * 		PURCHASE_ACKNOWLEDGE_SUCCESS: Fired when the acknowledgePurchase attempt was successful
+	 * 		PURCHASE_ACKNOWLEDGE_FAILURE: Fired when the acknowledgePurchase attempt failed
+	 */
+
+	 public static function acknowledgePurchase (purchase:Purchase):Void {
+
+		//TODO
 	}
 
 	/**
@@ -268,7 +292,7 @@ import haxe.Json;
 
 			case "productData":
 				var price = Reflect.field(inEvent, "priceAmountMicros");
-				var prod:IAProduct = { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), localizedPrice: Reflect.field (inEvent, "localizedPrice"), priceAmountMicros: price * 10000, price: price / 100, priceCurrencyCode: Reflect.field (inEvent, "priceCurrencyCode")};
+				var prod:IAProduct = { productID: Reflect.field (inEvent, "productID"), localizedTitle: Reflect.field (inEvent, "localizedTitle"), localizedDescription: Reflect.field (inEvent, "localizedDescription"), localizedPrice: Reflect.field (inEvent, "localizedPrice"), priceAmountMicros: price * 10000, price: price / 100, priceCurrencyCode: Reflect.field (inEvent, "priceCurrencyCode"), priceCountryCode: Reflect.field (inEvent, "priceCountryCode")};
 				tempProductsData.push( prod );
 				inventory.productDetailsMap.set(prod.productID, new ProductDetails(prod));
 
@@ -299,6 +323,10 @@ import haxe.Json;
 		// return purchases_canbuy ();
 
 	}
+	
+	public static function get_receipt ():String {
+        return purchases_getreceipt ();
+    }
 
 	private static function get_manualTransactionMode ():Bool {
 
@@ -342,16 +370,31 @@ import haxe.Json;
 	}
 
 	// Native Methods
-
-	private static var purchases_initialize = Lib.load ("iap", "iap_initialize", 0);
+	#if ios
+	private static var purchases_initialize = Lib.load ("iap", "iap_initialize", 1);
+	private static var purchases_queue = Lib.load ("iap", "iap_queue", 0);
 	private static var purchases_restore = Lib.load ("iap", "iap_restore", 0);
-	private static var purchases_buy = Lib.load ("iap", "iap_buy", 1);
+	private static var purchases_buy = Lib.load ("iap", "iap_buy", 2);
 	private static var purchases_get_data = Lib.load ("iap", "iap_get_data", 1);
 	private static var purchases_finish_transaction = Lib.load ("iap", "iap_finish_transaction", 1);
 	private static var purchases_canbuy = Lib.load ("iap", "iap_canbuy", 0);
+	private static var purchases_getreceipt = Lib.load ("iap", "iap_getreceipt", 0);
 	private static var purchases_get_manualtransactionmode = Lib.load ("iap", "iap_get_manualtransactionmode", 0);
 	private static var purchases_set_manualtransactionmode = Lib.load ("iap", "iap_set_manualtransactionmode", 1);
 	private static var purchases_release = Lib.load ("iap", "iap_release", 0);
 	private static var set_event_handle = Lib.load ("iap", "iap_set_event_handle", 1);
-
+	#else
+	private static var purchases_initialize = null;
+	private static var purchases_queue = null;
+	private static var purchases_restore = null;
+	private static var purchases_buy = null;
+	private static var purchases_get_data = null;
+	private static var purchases_finish_transaction = null;
+	private static var purchases_canbuy = null;
+	private static var purchases_getreceipt = null;
+	private static var purchases_get_manualtransactionmode = null;
+	private static var purchases_set_manualtransactionmode = null;
+	private static var purchases_release = null;
+	private static var set_event_handle = null;
+	#end
 }

@@ -32,6 +32,7 @@ class Inventory
 				
 				for (dynItm in dynPurchases) {
 					var p = new Purchase(Reflect.field(dynItm, "value"), Reflect.field(dynItm, "itemType"), Reflect.field(dynItm, "signature"));
+					p.originalJsonB64 = Reflect.field(dynItm, "valueB64");
 					purchaseMap.set(cast Reflect.field(dynItm, "key"), p);
 				}
 				
