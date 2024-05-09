@@ -228,10 +228,6 @@ import openfl.utils.JNI;
 		}
 	}
 
-	/*public static function queryInventory ():Void {
-		
-	}*/
-
 	// Getter & Setter Methods
 
 

@@ -44,7 +44,7 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 - (void)initInAppPurchase;
 - (void)restorePurchases;
 - (BOOL)canMakePurchases;
-- (void)purchaseProduct:(NSString*)productIdentifiers lid:(NSString*)loginId;
+- (void)purchaseProduct:(NSString*)productIdentifiers;
 - (void)requestProductData:(NSString*)productIdentifiers;
 - (BOOL)finishTransactionManually:(NSString *)transactionID;
 - (SKProduct*)findProduct:(NSString*)productIdentifier;
@@ -52,14 +52,12 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 @property bool manualTransactionMode;
 @property bool inited;
 @property (nonatomic, copy) NSString* dbgData;
-@property (nonatomic, copy) NSString* loginID;
 @end
 
 @implementation InAppPurchase
 @synthesize manualTransactionMode;
 @synthesize inited;
 @synthesize dbgData;
-@synthesize loginID;
 
 #pragma Public methods 
 
@@ -81,10 +79,6 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 		[self updateAllTransactionsManually];
 	}
 	sendPurchaseEventWrap("started", @"");
-    
-    //NSString *post_data = @"username=kosio&game_id=nBelote&game_data=Test Error Message";
-	//NSString *post_data = [NSString stringWithFormat:@"%@&game_data=%@",dbgData, @"Test Error Message 123"]; 
-    //[self sendDebugData:[NSString stringWithFormat:@"%@&game_data=%@",dbgData, @"Test Error Message 123"]];
     
     //[self checkQueue];
     //inited = true;
@@ -109,12 +103,8 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
     return [SKPaymentQueue canMakePayments];
 } 
 
-- (void)purchaseProduct:(NSString*)productIdentifiers lid:(NSString*)loginId
+- (void)purchaseProduct:(NSString*)productIdentifiers
 {
-	loginID = loginId;
-
-	//NSLog(@"purchaseProduct attempt for loginId: %@",loginID);
-
 	SKProduct* product = [self findProduct:productIdentifiers];//findProduct(productIdentifiers);
 	if (product != nil)
 	{
@@ -122,8 +112,6 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 		SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:product];
         	payment.quantity = 1;
 		[[SKPaymentQueue defaultQueue] addPayment:payment];
-
-		[self sendDebugData:[NSString stringWithFormat:@"%@&game_data=purchaseProduct:%@",dbgData, productIdentifiers]];
 	}
 	else
 	{
@@ -246,58 +234,38 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
             NSLog(@"Successful Purchase");
             NSString* receiptString = [[NSString alloc] initWithString:transaction.payment.productIdentifier];
 
-            [self sendDebugData:[NSString stringWithFormat:@"%@&game_data=finishTransactionOK:%@",dbgData, receiptString]];
-
             NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
             if(receiptURL==NULL)
             {
-                [self sendDebugData:[NSString stringWithFormat:@"%@&game_data=finishTransactionOKErr:%@",dbgData, @"receiptURL is null"]];
                 return;
             }
             
             NSData *receipt = [NSData dataWithContentsOfURL:receiptURL];
             if(receipt==NULL)
             {
-                [self sendDebugData:[NSString stringWithFormat:@"%@&game_data=finishTransactionOKErr:%@",dbgData, @"receipt is null"]];
                 return;
             }
             
             NSString *jsonObjectString = [receipt base64EncodedStringWithOptions:0];
             if(jsonObjectString==NULL)
             {
-                [self sendDebugData:[NSString stringWithFormat:@"%@&game_data=finishTransactionOKErr:%@",dbgData, @"jsonObjectString is null"]];
                 return;
             }
 
             jsonObjectString=[jsonObjectString stringByReplacingOccurrencesOfString:@"+" withString:@"%2B"];
             jsonObjectString=[jsonObjectString stringByReplacingOccurrencesOfString:@"\n" withString:@""];
             jsonObjectString=[jsonObjectString stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-     
-            //NSLog(@"jsonObjectString:%@", jsonObjectString);
-
-            //sendPurchaseFinishEventWrap("success", transaction.payment.productIdentifier, transaction.transactionIdentifier, [transaction.transactionDate timeIntervalSince1970], jsonObjectString);
-            
-            [self sendDebugData:[NSString stringWithFormat:@"%@&game_data=finishTransactionOK1&p1=%s&p2=%s&p3=%f&p4=%s&p5=%s",
-				dbgData,
-                [transaction.payment.productIdentifier UTF8String],
-                [transaction.transactionIdentifier UTF8String],
-                ([transaction.transactionDate timeIntervalSince1970] * 1000),
-                [jsonObjectString UTF8String],
-				[loginID UTF8String]]];
 
             sendPurchaseFinishEvent("success", [transaction.payment.productIdentifier UTF8String], [transaction.transactionIdentifier UTF8String], ([transaction.transactionDate timeIntervalSince1970] * 1000), [jsonObjectString UTF8String]);
 		}
 		@catch (NSException *exception) {
 			NSLog(@"%@", exception.reason);
-			[self sendDebugData:[NSString stringWithFormat:@"%@&game_data=finishTransactionOK CATCH:%@",dbgData, exception.reason]];
 		}
 	}
     
     else
     {
     	NSLog(@"Failed Purchase");
-
-		[self sendDebugData:[NSString stringWithFormat:@"%@&game_data=%@",dbgData, @"finishTransactionKO"]];
 
         [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
         if (transaction.error.code != SKErrorPaymentCancelled)
@@ -322,15 +290,6 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 	}
 }
 
-/*
-- (void)restoreTransaction:(SKPaymentTransaction*)transaction
-{
-	NSLog(@"Restoring Transaction");
-	sendPurchaseEvent("restore", [transaction.payment.productIdentifier UTF8String]);
-    [self finishTransaction:transaction wasSuccessful:YES];
-}
- */
-
 - (void)failedTransaction:(SKPaymentTransaction*)transaction
 {
     if(transaction.error.code != SKErrorPaymentCancelled)
@@ -349,8 +308,6 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 {
     NSArray * transactions = [[SKPaymentQueue defaultQueue] transactions];
     NSLog(@"manual updatedTransactions count %lu", (unsigned long)[transactions count]);
-
-	//[self sendDebugData:[NSString stringWithFormat:@"%@&game_data=%@",dbgData, @"updateAllTransactionsManually"]];
     
     for(SKPaymentTransaction *transaction in transactions)
     {
@@ -432,36 +389,6 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 	
 }
 
--(void) sendDebugData:(NSString*)post_data {
-    
-	//NSLog(@"sendDebugData:%@", post_data);
-
-    NSData *postData = [post_data dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-    NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
-    
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-    [request setURL:[NSURL URLWithString:@"https://forte.games/reportError_ipay.php"]];
-    [request setHTTPMethod:@"POST"];
-    [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:postData];
-    
-    NSURLSession *session = [NSURLSession sharedSession];
-    NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data,
-                                                                                          NSURLResponse * _Nullable response,
-                                                                                          NSError * _Nullable error) {
-        
-        NSMutableDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
-        
-        NSLog(@"%@", json);
-      
-        }
-        
-    ];
-    
-    [task resume];
-}
-
 - (void)dealloc
 {
     NSLog(@"dealloc inapppurchase");
@@ -517,11 +444,10 @@ extern "C"
             return [[receipt base64EncodedStringWithOptions:0] UTF8String];
 	}
     
-	void purchaseProduct(const char *inProductID, const char *inLoginId)
+	void purchaseProduct(const char *inProductID)
     {
 		NSString *productID = [[NSString alloc] initWithUTF8String:inProductID];
-		NSString *loginID = [[NSString alloc] initWithUTF8String:inLoginId];
-		[inAppPurchase purchaseProduct:productID lid:loginID];
+		[inAppPurchase purchaseProduct:productID];
 	}
     
 	void requestProductData(const char *inProductID)

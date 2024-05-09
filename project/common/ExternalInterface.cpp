@@ -62,12 +62,12 @@ static value iap_restore()
 DEFINE_PRIM (iap_restore, 0);
 
 
-static value iap_buy(value productID, value loginID)
+static value iap_buy(value productID)
 {
-	purchaseProduct(val_string(productID), val_string(loginID));
+	purchaseProduct(val_string(productID));
 	return alloc_null();
 }
-DEFINE_PRIM(iap_buy, 2);
+DEFINE_PRIM(iap_buy, 1);
 
 
 static value iap_get_data(value productID)

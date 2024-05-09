@@ -11,7 +11,7 @@ namespace iap
 		void initInAppPurchase(const char* dbgData);
 		void checkQueue();
 		const char* getReceipt();
-		void purchaseProduct(const char* productID, const char* loginID);
+		void purchaseProduct(const char* productID);
 		void releaseInAppPurchase();
 		void requestProductData(const char *productID);
 		void restorePurchases();

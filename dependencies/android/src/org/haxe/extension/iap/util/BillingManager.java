@@ -158,44 +158,6 @@ public class BillingManager implements PurchasesUpdatedListener {
     /**
      * Start a purchase or subscription replace flow
      */
-    ////Billing 4
-    /*public void initiatePurchaseFlow(final String skuId) {
-        
-        final SkuDetails skuDetail = mSkuDetailsMap.get(skuId);
-
-        if(skuDetail == null)
-        {
-            Log.e(TAG, "skuDetail == null:" + skuId);
-
-            ArrayList<String> ids = new ArrayList<String>();
-            ids.add(skuId);
-            querySkuDetailsAsync(SkuType.INAPP, ids);
-        }
-        else
-        {
-            Runnable purchaseFlowRequest = new Runnable() {
-                @Override
-                public void run() {
-                    Log.e(TAG, "Launching in-app purchase flow.");
-                    if(skuDetail != null) {
-                        BillingFlowParams purchaseParams = BillingFlowParams.newBuilder()
-                                .setSkuDetails(skuDetail).build();
-                        mBillingClient.launchBillingFlow(mActivity, purchaseParams);
-                    }
-                }
-            };
-    
-            Runnable onError = new Runnable() {
-                @Override
-                public void run() {
-                    mBillingUpdatesListener.onPurchasesUpdated(null, errorResult);
-                };
-            };
-    
-            executeServiceRequest(purchaseFlowRequest, onError);
-        }
-    }*/
-
     public void initiatePurchaseFlow(final String skuId) {
         
         final ProductDetails skuDetail = mSkuDetailsMap.get(skuId);
@@ -216,13 +178,6 @@ public class BillingManager implements PurchasesUpdatedListener {
                 public void run() {
                     Log.e(TAG, "Launching in-app purchase flow.");
                     if(skuDetail != null) {
-
-                        /*ImmutableList<ProductDetailsParams> productDetailsParamsList =
-                                ImmutableList.of(
-                                        ProductDetailsParams.newBuilder()
-                                            .setProductDetails(skuDetail)
-                                            .build()
-                                );*/
 
                         List<ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
 
@@ -267,48 +222,6 @@ public class BillingManager implements PurchasesUpdatedListener {
             mBillingClient = null;
         }
     }
-
-    /*Billing 4
-    public void querySkuDetailsAsync(@SkuType final String itemType, final List<String> skuList) {
-        // Creating a runnable from the request to use it inside our connection retry policy below
-        Log.e(TAG, "Quering skuDetails:" + skuList);
-        Runnable queryRequest = new Runnable() {
-            @Override
-            public void run() {
-                // Query the purchase async
-                
-                SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
-                
-                params.setSkusList(skuList).setType(itemType).build();
-
-                mBillingClient.querySkuDetailsAsync(params,
-                        new SkuDetailsResponseListener() {
-                            @Override
-                            public void onSkuDetailsResponse(BillingResult billingResult,
-                                                             List<SkuDetails> skuDetailsList) {
-                                Log.e(TAG, "onSkuDetailsResponse code:" + billingResult.getResponseCode());
-                                mBillingUpdatesListener.onQuerySkuDetailsFinished(skuDetailsList, billingResult);
-                                if (billingResult.getResponseCode() == BillingResponseCode.OK) {
-                                    for (SkuDetails skuDetails : skuDetailsList) {
-                                        mSkuDetailsMap.put(skuDetails.getSku(), skuDetails);
-                                        initiatePurchaseFlow(skuDetails.getSku());
-                                        break;
-                                    }
-                                }
-                            }
-                        });
-            }
-        };
-
-        Runnable onError = new Runnable() {
-            @Override
-            public void run() {
-                mBillingUpdatesListener.onQuerySkuDetailsFinished(null, errorResult);
-            }
-        };
-
-        executeServiceRequest(queryRequest, onError);
-    }*/
      
     public void querySkuDetailsAsync(final String itemType, final List<String> skuList) {
 
@@ -488,21 +401,6 @@ public class BillingManager implements PurchasesUpdatedListener {
     /**
      * Handle a result from querying of purchases and report an updated list to the listener
      */
-    /*Billing 4
-    private void onQueryPurchasesFinished(PurchasesResult result) {
-        // Have we been disposed of in the meantime? If so, or bad result code, then quit
-        if (mBillingClient == null || result.getResponseCode() != BillingResponseCode.OK) {
-            Log.e(TAG, "Billing client was null or result code (" + result.getResponseCode()
-                    + ") was bad - quitting");
-            mBillingUpdatesListener.onBillingClientSetupFinished(false);
-            return;
-        }
-
-        Log.e(TAG, "Query inventory was successful.");
-        mBillingUpdatesListener.onQueryPurchasesFinished(result.getPurchasesList());
-        mBillingUpdatesListener.onBillingClientSetupFinished(true);
-    }*/
-
     private void onQueryPurchasesFinished(BillingResult result, List<Purchase> purchases ) {
         // Have we been disposed of in the meantime? If so, or bad result code, then quit
         if (mBillingClient == null || result.getResponseCode() != BillingResponseCode.OK) {
@@ -536,30 +434,6 @@ public class BillingManager implements PurchasesUpdatedListener {
      * Query purchases across various use cases and deliver the result in a formalized way through
      * a listener
      */
-    /*Billing 4
-    public void queryPurchases() {
-        Runnable queryToExecute = new Runnable() {
-            @Override
-            public void run() {
-                long time = System.currentTimeMillis();
-                PurchasesResult purchasesResult = mBillingClient.queryPurchases(SkuType.INAPP);
-                Log.i(TAG, "Querying purchases elapsed time: " + (System.currentTimeMillis() - time)
-                        + "ms");
-                Log.i(TAG, "purchasesResult:" + purchasesResult);
-                
-                onQueryPurchasesFinished(purchasesResult);
-            }
-        };
-
-        Runnable onError = new Runnable() {
-            @Override
-            public void run() {
-                mBillingUpdatesListener.onBillingClientSetupFinished(false);
-            }
-        };
-        executeServiceRequest(queryToExecute, onError);
-    } */
-
     public void queryPurchases() {
         Runnable queryToExecute = new Runnable() {
             @Override
