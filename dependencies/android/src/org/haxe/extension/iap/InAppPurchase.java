@@ -129,8 +129,7 @@ public class InAppPurchase extends Extension {
 					for(String sku : purchase.getSkus()){
 						jsonResp += "{" +
 								"\"key\":\"" + sku +"\", " +
-								"\"value\":" + purchase.getOriginalJson() + "," +
-								"\"valueB64\":\"" + Base64.encodeToString(purchase.getOriginalJson().getBytes(StandardCharsets.UTF_8), Base64.DEFAULT) + "\", " + 
+								"\"value\":" + purchase.getOriginalJson() + "," + 
 								"\"itemType\":\"\"," +
 								"\"signature\":\"" + purchase.getSignature() + "\"},";
 					}

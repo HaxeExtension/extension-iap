@@ -18,9 +18,6 @@ class Purchase
 	public var signature(default, null):String;
 	public var originalJson(default, null):String;
 	public var json(default, null):String;
-	
-	//And only for restore
-	public var originalJsonB64:String = "";
 
 	// iOS Properties
 	public var transactionID(default, null):String;
