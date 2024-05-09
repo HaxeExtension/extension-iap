@@ -104,8 +104,8 @@ import openfl.utils.JNI;
 			job();
 		}
 		cleanupJobs = [];
-		//tova predi ne beshe kometirano i syotvetno se syzdavashe vsi4ko na novo vseki pyt
-		//uj ba4kashe ako v novoto neshto ne ba4ka da se probva da se razkometira tuk
+		//If initialized = false, everything is recreated when cleanup() is called
+		// This should work fine in the new implementation. If have a problem , uncomment it
 		//initialized = false;
 	}
 
