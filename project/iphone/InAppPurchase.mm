@@ -51,13 +51,11 @@ void sendPurchaseProductDataEventWrap(const char* type, NSString* productID, NSS
 
 @property bool manualTransactionMode;
 @property bool inited;
-@property (nonatomic, copy) NSString* dbgData;
 @end
 
 @implementation InAppPurchase
 @synthesize manualTransactionMode;
 @synthesize inited;
-@synthesize dbgData;
 
 #pragma Public methods 
 
@@ -408,12 +406,9 @@ extern "C"
 {
 	static InAppPurchase* inAppPurchase = [[InAppPurchase alloc] init];
     
-	void initInAppPurchase(const char *dbgData)
+	void initInAppPurchase()
     {
-    	printf("init inapppurchase --------------------------------------------------- xx\n");
-	
-		inAppPurchase.dbgData = [[NSString alloc] initWithUTF8String:dbgData];
-		
+    	printf("init inapppurchase --------------------------------------------------- xx\n");	
 		[inAppPurchase initInAppPurchase];
 	}
 	

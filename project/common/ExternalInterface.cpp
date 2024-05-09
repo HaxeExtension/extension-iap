@@ -38,12 +38,12 @@ DEFINE_PRIM (iap_initialize, 1);
 
 #else
 
-static value iap_initialize(value dbgData) 
+static value iap_initialize() 
 {
-	initInAppPurchase(val_string(dbgData));
+	initInAppPurchase();
 	return alloc_null();
 }
-DEFINE_PRIM (iap_initialize, 1);
+DEFINE_PRIM (iap_initialize, 0);
 
 #endif
 
