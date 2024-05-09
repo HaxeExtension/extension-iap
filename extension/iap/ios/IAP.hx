@@ -113,8 +113,9 @@ class IAP {
 	 * Sends a purchase intent for a given product.
 	 *
 	 * @param productID (iOS & Android). The unique Id for the desired product (Android Sku).
-	 * @param loginId (IOS). polzva se za podaryk - ako e podaryk podavame id-to za kogoto e podaruka
-	 *
+	 * @param devPayload (Android). Extra data (developer payload), which will be returned with the purchase data
+	 *     when the purchase completes. This extra data will be permanently bound to that purchase
+	 *     and will always be returned when the purchase is queried.
 	 *
 	 * Related Events (IAPEvent):
 	 * 		PURCHASE_SUCCESS: Fired when the purchase attempt was successful
@@ -122,9 +123,9 @@ class IAP {
 	 * 		PURCHASE_CANCEL: Fired when the purchase attempt was cancelled by the user
 	 */
 
-	public static function purchase (productID:String, loginID:String = ""):Void {
+	public static function purchase (productID:String, devPayload:String = ""):Void {
 
-		purchases_buy (productID, loginID);
+		purchases_buy (productID);
 
 	}
 
@@ -374,7 +375,7 @@ class IAP {
 	private static var purchases_initialize = Lib.load ("iap", "iap_initialize", 1);
 	private static var purchases_queue = Lib.load ("iap", "iap_queue", 0);
 	private static var purchases_restore = Lib.load ("iap", "iap_restore", 0);
-	private static var purchases_buy = Lib.load ("iap", "iap_buy", 2);
+	private static var purchases_buy = Lib.load ("iap", "iap_buy", 1);
 	private static var purchases_get_data = Lib.load ("iap", "iap_get_data", 1);
 	private static var purchases_finish_transaction = Lib.load ("iap", "iap_finish_transaction", 1);
 	private static var purchases_canbuy = Lib.load ("iap", "iap_canbuy", 0);
