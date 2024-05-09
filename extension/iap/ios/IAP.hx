@@ -90,7 +90,7 @@ class IAP {
 
 		}
 
-		purchases_initialize(publicKey);
+		purchases_initialize();
 
 	}
 
@@ -372,7 +372,7 @@ class IAP {
 
 	// Native Methods
 	#if ios
-	private static var purchases_initialize = Lib.load ("iap", "iap_initialize", 1);
+	private static var purchases_initialize = Lib.load ("iap", "iap_initialize", 0);
 	private static var purchases_queue = Lib.load ("iap", "iap_queue", 0);
 	private static var purchases_restore = Lib.load ("iap", "iap_restore", 0);
 	private static var purchases_buy = Lib.load ("iap", "iap_buy", 1);
