@@ -125,6 +125,20 @@ import haxe.Json;
 
 	}
 
+	/**
+	 * Sends a acknowledgePurchase intent for a given product.
+	 *
+	 * @param purchase. The previously purchased product.
+	 *
+	 * Related Events (IAPEvent):
+	 * 		PURCHASE_ACKNOWLEDGE_SUCCESS: Fired when the acknowledgePurchase attempt was successful
+	 * 		PURCHASE_ACKNOWLEDGE_FAILURE: Fired when the acknowledgePurchase attempt failed
+	 */
+
+	public static function acknowledgePurchase (purchase:Purchase):Void {
+
+	}
+
 
 	/**
      * Queries the inventory. This will query all owned items from the server, as well as

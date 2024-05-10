@@ -47,6 +47,13 @@ DEFINE_PRIM (iap_initialize, 0);
 
 #endif
 
+static value iap_queue() 
+{
+	checkQueue();
+	return alloc_null();
+}
+DEFINE_PRIM (iap_queue, 0);
+
 static value iap_restore() 
 {
 	restorePurchases();
@@ -84,6 +91,11 @@ static value iap_canbuy()
 }
 DEFINE_PRIM (iap_canbuy, 0);
 
+static value iap_getreceipt() 
+{
+	return alloc_string(getReceipt());
+}
+DEFINE_PRIM (iap_getreceipt, 0);
 
 static value iap_get_manualtransactionmode() 
 {
@@ -179,7 +191,7 @@ extern "C" void sendPurchaseDownloadEvent(const char* type, const char* productI
 }
 
 
-extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, int priceAmountMicros, const char* localizedPrice, const char* priceCurrencyCode)
+extern "C" void sendPurchaseProductDataEvent(const char* type, const char* productID, const char* localizedTitle, const char* localizedDescription, int priceAmountMicros, const char* localizedPrice, const char* priceCurrencyCode, const char* priceCountryCode)
 {
 	value o = alloc_empty_object();
 	alloc_field(o,val_id("type"),safe_alloc_string(type));
@@ -189,6 +201,7 @@ extern "C" void sendPurchaseProductDataEvent(const char* type, const char* produ
 	alloc_field(o,val_id("priceAmountMicros"),alloc_int(priceAmountMicros));
 	alloc_field(o,val_id("localizedPrice"),safe_alloc_string(localizedPrice));
 	alloc_field(o,val_id("priceCurrencyCode"),safe_alloc_string(priceCurrencyCode));
+	alloc_field(o,val_id("priceCountryCode"),safe_alloc_string(priceCountryCode));
 	val_call1(purchaseEventHandle->get(), o);
 }
 

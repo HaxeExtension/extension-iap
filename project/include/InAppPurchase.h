@@ -9,6 +9,8 @@ namespace iap
 		bool getManualTransactionMode();
 		bool finishTransactionManually(const char *transactionID);
 		void initInAppPurchase();
+		void checkQueue();
+		const char* getReceipt();
 		void purchaseProduct(const char* productID);
 		void releaseInAppPurchase();
 		void requestProductData(const char *productID);

@@ -7,6 +7,7 @@
 	<files id="common">
 
 		<compilerflag value="-Iinclude"/>
+		<compilerflag value="-DHXCPP_GC_CHECK_POINTER"/>
 
 		<file name="common/ExternalInterface.cpp"/>
 
@@ -16,6 +17,7 @@
 
 		<compilerflag value="-IiPhone/include"/>
 		<compilerflag value="-Iinclude"/>
+		<compilerflag value="-DHXCPP_GC_CHECK_POINTER"/>
 
 		<file name="iphone/InAppPurchase.mm"/>
 
