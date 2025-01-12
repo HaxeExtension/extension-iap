@@ -9,7 +9,7 @@ class Inventory
 {
 
 	public var productDetailsMap(default, null): Map<String, ProductDetails>;
-	public var purchaseMap(default, null): Map<String, Purchase>;
+	public var purchaseMap(default, null): Map<String, Array<Purchase>>;
 	
 	public function new(?dynObj:Dynamic) 
 	{
@@ -32,7 +32,10 @@ class Inventory
 				
 				for (dynItm in dynPurchases) {
 					var p = new Purchase(Reflect.field(dynItm, "value"), Reflect.field(dynItm, "itemType"), Reflect.field(dynItm, "signature"));
-					purchaseMap.set(cast Reflect.field(dynItm, "key"), p);
+					var key = cast Reflect.field(dynItm, "key");
+					if(!purchaseMap.exists(key))
+						purchaseMap.set(key, []);
+					purchaseMap.get(key).push(p);
 				}
 				
 			}
@@ -47,8 +50,13 @@ class Inventory
 	}
 	
 	/** Returns purchase information for a given product, or null if there is no purchase. */
-    public function getPurchase(productId:String) :Purchase {
-        return purchaseMap.get(productId);
+    public function getPurchase(productId:String) :Array<Purchase> {
+		var p = purchaseMap.get(productId);
+		if(p == null) {
+			return p;
+		} else {
+			return [];
+		}
     }
 
     /** Returns whether or not there exists a purchase of the given product. */
