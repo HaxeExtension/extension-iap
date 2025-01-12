@@ -1,4 +1,4 @@
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/extension-iap.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/extension-iap) [![Build Status](https://img.shields.io/travis/openfl/extension-iap.svg?style=flat)](https://travis-ci.org/openfl/extension-iap)
+![](https://img.shields.io/github/repo-size/HaxeExtension/extension-iap) ![](https://badgen.net/github/open-issues/HaxeExtension/extension-iap) ![](https://badgen.net/badge/license/MIT/green)
 
 # ATTENTION
 This extension needs your love and commits.
